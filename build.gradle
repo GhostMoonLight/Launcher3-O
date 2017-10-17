@@ -1,0 +1,88 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.3.3'
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.0'
+    }
+}
+
+apply plugin: 'com.android.application'
+apply plugin: 'com.google.protobuf'
+
+android {
+    compileSdkVersion 26
+    buildToolsVersion '26.0.1'
+
+    defaultConfig {
+        applicationId 'com.zues.launcher'
+        minSdkVersion 21
+        targetSdkVersion 26
+        versionCode 1
+        versionName "2.1"
+
+    }
+    buildTypes {
+        debug {
+            buildConfigField "boolean", "LOG_DEBUG", "true"
+        }
+
+        release {
+            buildConfigField "boolean", "LOG_DEBUG", "true"
+        }
+    }
+
+    lintOptions {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+
+    productFlavors {
+
+    }
+    sourceSets {
+        main {
+            res.srcDirs = ['res']
+            java.srcDirs = ['src', 'src_config']
+            manifest.srcFile 'AndroidManifest.xml'
+            proto.srcDirs 'protos/'
+        }
+
+
+    }
+}
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+final String SUPPORT_LIBS_VERSION = '26.+'
+dependencies {
+    compile "com.android.support:support-v4:${SUPPORT_LIBS_VERSION}"
+    compile "com.android.support:recyclerview-v7:${SUPPORT_LIBS_VERSION}"
+    compile "com.android.support:palette-v7:${SUPPORT_LIBS_VERSION}"
+    compile 'com.google.protobuf.nano:protobuf-javanano:3.0.0-alpha-2'
+
+}
+
+protobuf {
+    // Configure the protoc executable
+    protoc {
+        artifact = 'com.google.protobuf:protoc:3.0.0-alpha-3'
+
+        generateProtoTasks {
+            all().each { task ->
+                task.builtins {
+                    remove java
+                    javanano {
+                        option "java_package=launcher_log.proto|com.android.launcher3.userevent.nano"
+                        option "enum_style=java"
+                    }
+                }
+            }
+        }
+    }
+}
