@@ -83,7 +83,7 @@ public class AutoInstallsLayout {
 
         // Try with grid size and hotseat count
         String layoutName = String.format(Locale.ENGLISH, FORMATTED_LAYOUT_RES_WITH_HOSTEAT,
-                (int) grid.numColumns, (int) grid.numRows, (int) grid.numHotseatIcons);
+                grid.numColumns, grid.numRows, grid.numHotseatIcons);
         int layoutId = targetRes.getIdentifier(layoutName, "xml", pkg);
 
         // Try with only grid size
@@ -312,7 +312,7 @@ public class AutoInstallsLayout {
     }
 
     protected HashMap<String, TagParser> getLayoutElementsMap() {
-        HashMap<String, TagParser> parsers = new HashMap<String, TagParser>();
+        HashMap<String, TagParser> parsers = new HashMap<>();
         parsers.put(TAG_APP_ICON, new AppShortcutParser());
         parsers.put(TAG_AUTO_INSTALL, new AutoInstallParser());
         parsers.put(TAG_FOLDER, new FolderParser());

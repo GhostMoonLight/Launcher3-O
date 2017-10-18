@@ -187,6 +187,11 @@ public class InvariantDeviceProfile {
         }
     }
 
+    /**
+     * 从配置文件device_profiles.xml中加载设备配置数据
+     * @param context
+     * @return
+     */
     ArrayList<InvariantDeviceProfile> getPredefinedDeviceProfiles(Context context) {
         ArrayList<InvariantDeviceProfile> profiles = new ArrayList<>();
         try (XmlResourceParser parser = context.getResources().getXml(R.xml.device_profiles)) {
@@ -266,6 +271,7 @@ public class InvariantDeviceProfile {
 
     /**
      * Returns the closest device profiles ordered by closeness to the specified width and height
+     * 返回最接近于指定宽度和高度排列的设备配置文件
      */
     // Package private visibility for testing.
     ArrayList<InvariantDeviceProfile> findClosestDeviceProfiles(

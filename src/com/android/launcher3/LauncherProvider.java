@@ -112,6 +112,8 @@ public class LauncherProvider extends ContentProvider {
         appState.getModel().dumpState("", fd, writer, args);
     }
 
+
+    //LauncherProvider的onCreate方法
     @Override
     public boolean onCreate() {
         if (ProviderConfig.IS_DOGFOOD_BUILD) {
@@ -500,34 +502,34 @@ public class LauncherProvider extends ContentProvider {
             Log.d(TAG, "loading default workspace");
 
             AppWidgetHost widgetHost = mOpenHelper.newLauncherWidgetHost();
-            AutoInstallsLayout loader = createWorkspaceLoaderFromAppRestriction(widgetHost);
-            if (loader == null) {
-                loader = AutoInstallsLayout.get(getContext(),widgetHost, mOpenHelper);
-            }
-            if (loader == null) {
-                final Partner partner = Partner.get(getContext().getPackageManager());
-                if (partner != null && partner.hasDefaultLayout()) {
-                    final Resources partnerRes = partner.getResources();
-                    int workspaceResId = partnerRes.getIdentifier(Partner.RES_DEFAULT_LAYOUT,
-                            "xml", partner.getPackageName());
-                    if (workspaceResId != 0) {
-                        loader = new DefaultLayoutParser(getContext(), widgetHost,
-                                mOpenHelper, partnerRes, workspaceResId);
-                    }
-                }
-            }
-
-            final boolean usingExternallyProvidedLayout = loader != null;
-            if (loader == null) {
-                loader = getDefaultLayoutParser(widgetHost);
-            }
+            // 从限制的App中加载xml资源
+//            AutoInstallsLayout loader = createWorkspaceLoaderFromAppRestriction(widgetHost);
+//            if (loader == null) {
+//                //从第三方App中加载xml资源
+//                loader = AutoInstallsLayout.get(getContext(),widgetHost, mOpenHelper);
+//            }
+//            if (loader == null) {
+//                //从第三方App中加载xml资源
+//                final Partner partner = Partner.get(getContext().getPackageManager());
+//                if (partner != null && partner.hasDefaultLayout()) {
+//                    final Resources partnerRes = partner.getResources();
+//                    int workspaceResId = partnerRes.getIdentifier(Partner.RES_DEFAULT_LAYOUT,
+//                            "xml", partner.getPackageName());
+//                    if (workspaceResId != 0) {
+//                        loader = new DefaultLayoutParser(getContext(), widgetHost,
+//                                mOpenHelper, partnerRes, workspaceResId);
+//                    }
+//                }
+//            }
+//            final boolean usingExternallyProvidedLayout = loader != null;
+            AutoInstallsLayout  loader = getDefaultLayoutParser(widgetHost);
 
             // There might be some partially restored DB items, due to buggy restore logic in
             // previous versions of launcher.
             mOpenHelper.createEmptyDB(mOpenHelper.getWritableDatabase());
             // Populate favorites table with initial favorites
             if ((mOpenHelper.loadFavorites(mOpenHelper.getWritableDatabase(), loader) <= 0)
-                    && usingExternallyProvidedLayout) {
+                    /*&& usingExternallyProvidedLayout*/) {
                 // Unable to load external layout. Cleanup and load the internal layout.
                 mOpenHelper.createEmptyDB(mOpenHelper.getWritableDatabase());
                 mOpenHelper.loadFavorites(mOpenHelper.getWritableDatabase(),
@@ -539,6 +541,7 @@ public class LauncherProvider extends ContentProvider {
 
     /**
      * Creates workspace loader from an XML resource listed in the app restrictions.
+     * 从限制的App中加载xml
      *
      * @return the loader if the restrictions are set and the resource exists; null otherwise.
      */
@@ -628,6 +631,7 @@ public class LauncherProvider extends ContentProvider {
             }
         }
 
+        //DatabaseHelper的onCreate, 该方法只在数据库第一次创建时才执行
         @Override
         public void onCreate(SQLiteDatabase db) {
             if (LOGD) Log.d(TAG, "creating new launcher database");
@@ -653,7 +657,7 @@ public class LauncherProvider extends ContentProvider {
                 mWidgetHostResetHandler.sendEmptyMessage(
                         ChangeListenerWrapper.MSG_APP_WIDGET_HOST_RESET);
             }
-
+            // 只在数据库创建的时候把该字段标识为true，用于标识当前数据库是空的
             // Set the flag for empty DB
             Utilities.getPrefs(mContext).edit().putBoolean(EMPTY_DATABASE_CREATED, true).commit();
 
@@ -1146,7 +1150,7 @@ public class LauncherProvider extends ContentProvider {
         }
 
         @Thunk int loadFavorites(SQLiteDatabase db, AutoInstallsLayout loader) {
-            ArrayList<Long> screenIds = new ArrayList<Long>();
+            ArrayList<Long> screenIds = new ArrayList<>();
             // TODO: Use multiple loaders with fall-back and transaction.
             int count = loader.loadLayout(db, screenIds);
 

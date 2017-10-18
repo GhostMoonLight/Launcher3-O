@@ -510,9 +510,9 @@ public final class Utilities {
         return "1".equals(getSystemProperty("sys.boot_completed", "1"));
     }
 
-    public static String getSystemProperty(String property, String defaultValue) {
+    private static String getSystemProperty(String property, String defaultValue) {
         try {
-            Class clazz = Class.forName("android.os.SystemProperties");
+            Class<?> clazz = Class.forName("android.os.SystemProperties");
             Method getter = clazz.getDeclaredMethod("get", String.class);
             String value = (String) getter.invoke(null, property);
             if (!TextUtils.isEmpty(value)) {

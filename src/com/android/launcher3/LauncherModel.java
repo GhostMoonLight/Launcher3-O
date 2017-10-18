@@ -317,6 +317,7 @@ public class LauncherModel extends BroadcastReceiver
         final StackTraceElement[] stackTrace = new Throwable().getStackTrace();
         final long itemId = item.id;
         Runnable r = new Runnable() {
+            @Override
             public void run() {
                 synchronized (sBgDataModel) {
                     checkItemInfoLocked(itemId, item, stackTrace);
@@ -453,7 +454,9 @@ public class LauncherModel extends BroadcastReceiver
      */
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (DEBUG_RECEIVER) Log.d(TAG, "onReceive intent=" + intent);
+        if (DEBUG_RECEIVER) {
+            Log.d(TAG, "onReceive intent=" + intent);
+        }
 
         final String action = intent.getAction();
         if (Intent.ACTION_LOCALE_CHANGED.equals(action)) {
@@ -546,6 +549,7 @@ public class LauncherModel extends BroadcastReceiver
                 final Callbacks oldCallbacks = mCallbacks.get();
                 // Clear any pending bind-runnables from the synchronized load process.
                 runOnMainThread(new Runnable() {
+                    @Override
                     public void run() {
                         oldCallbacks.clearPendingBinds();
                     }
@@ -615,6 +619,7 @@ public class LauncherModel extends BroadcastReceiver
                 final long workspaceWaitTime = DEBUG_LOADERS ? SystemClock.uptimeMillis() : 0;
 
                 mHandler.postIdle(new Runnable() {
+                        @Override
                         public void run() {
                             synchronized (LoaderTask.this) {
                                 mLoadAndBindStepFinished = true;
@@ -689,6 +694,7 @@ public class LauncherModel extends BroadcastReceiver
             }
         }
 
+        @Override
         public void run() {
             synchronized (mLock) {
                 if (mStopped) {
@@ -698,48 +704,69 @@ public class LauncherModel extends BroadcastReceiver
             }
 
             try {
-                if (DEBUG_LOADERS) Log.d(TAG, "step 1.1: loading workspace");
+                if (DEBUG_LOADERS) {
+                    Log.d(TAG, "step 1.1: loading workspace");
+                }
                 // Set to false in bindWorkspace()
                 mIsLoadingAndBindingWorkspace = true;
+                //从数据库中加载数据
                 loadWorkspace();
 
                 verifyNotStopped();
-                if (DEBUG_LOADERS) Log.d(TAG, "step 1.2: bind workspace workspace");
+                if (DEBUG_LOADERS) {
+                    Log.d(TAG, "step 1.2: bind workspace workspace");
+                }
                 bindWorkspace(mPageToBindFirst);
 
                 // Take a break
-                if (DEBUG_LOADERS) Log.d(TAG, "step 1 completed, wait for idle");
+                if (DEBUG_LOADERS) {
+                    Log.d(TAG, "step 1 completed, wait for idle");
+                }
                 waitForIdle();
                 verifyNotStopped();
 
                 // second step
-                if (DEBUG_LOADERS) Log.d(TAG, "step 2.1: loading all apps");
+                if (DEBUG_LOADERS) {
+                    Log.d(TAG, "step 2.1: loading all apps");
+                }
                 loadAllApps();
 
                 verifyNotStopped();
-                if (DEBUG_LOADERS) Log.d(TAG, "step 2.2: Update icon cache");
+                if (DEBUG_LOADERS) {
+                    Log.d(TAG, "step 2.2: Update icon cache");
+                }
                 updateIconCache();
 
                 // Take a break
-                if (DEBUG_LOADERS) Log.d(TAG, "step 2 completed, wait for idle");
+                if (DEBUG_LOADERS) {
+                    Log.d(TAG, "step 2 completed, wait for idle");
+                }
                 waitForIdle();
                 verifyNotStopped();
 
                 // third step
-                if (DEBUG_LOADERS) Log.d(TAG, "step 3.1: loading deep shortcuts");
+                if (DEBUG_LOADERS) {
+                    Log.d(TAG, "step 3.1: loading deep shortcuts");
+                }
                 loadDeepShortcuts();
 
                 verifyNotStopped();
-                if (DEBUG_LOADERS) Log.d(TAG, "step 3.2: bind deep shortcuts");
+                if (DEBUG_LOADERS) {
+                    Log.d(TAG, "step 3.2: bind deep shortcuts");
+                }
                 bindDeepShortcuts();
 
                 // Take a break
-                if (DEBUG_LOADERS) Log.d(TAG, "step 3 completed, wait for idle");
+                if (DEBUG_LOADERS) {
+                    Log.d(TAG, "step 3 completed, wait for idle");
+                }
                 waitForIdle();
                 verifyNotStopped();
 
                 // fourth step
-                if (DEBUG_LOADERS) Log.d(TAG, "step 4.1: loading widgets");
+                if (DEBUG_LOADERS) {
+                    Log.d(TAG, "step 4.1: loading widgets");
+                }
                 refreshAndBindWidgetsAndShortcuts(getCallback(), false /* bindFirst */,
                         null /* packageUser */);
 
@@ -802,6 +829,10 @@ public class LauncherModel extends BroadcastReceiver
             }
         }
 
+        /**
+         * 如果是第一次加载，先加载default_workspace.xml到数据库，
+         * 然后再从数据库中加载数
+         */
         private void loadWorkspace() {
             if (LauncherAppState.PROFILE_STARTUP) {
                 Trace.beginSection("Loading Workspace");
@@ -837,7 +868,10 @@ public class LauncherModel extends BroadcastReceiver
             }
 
             Log.d(TAG, "loadWorkspace: loading default favorites");
-            // 加载default_workspace.xml
+            /**
+             * 通过ContentResolver的call方法访问指定的ContentProvider，与之进行交互
+             */
+            // 加载default_workspace.xml导数据库
             LauncherSettings.Settings.call(contentResolver,
                     LauncherSettings.Settings.METHOD_LOAD_DEFAULT_FAVORITES);
 
@@ -1058,8 +1092,9 @@ public class LauncherModel extends BroadcastReceiver
                                     } else {
                                         // Create a shortcut info in disabled mode for now.
                                         info = c.loadSimpleShortcut();
-                                        if (Utilities.ATLEAST_NOUGAT_MR1)
+                                        if (Utilities.ATLEAST_NOUGAT_MR1) {
                                             info.isDisabled |= ShortcutInfo.FLAG_DISABLED_LOCKED_USER;
+                                        }
                                     }
                                 } else { // item type == ITEM_TYPE_SHORTCUT
                                     info = c.loadSimpleShortcut();
@@ -1382,7 +1417,9 @@ public class LauncherModel extends BroadcastReceiver
                 ArrayList<LauncherAppWidgetInfo> otherScreenWidgets) {
 
             for (LauncherAppWidgetInfo widget : appWidgets) {
-                if (widget == null) continue;
+                if (widget == null) {
+                    continue;
+                }
                 if (widget.container == LauncherSettings.Favorites.CONTAINER_DESKTOP &&
                         widget.screenId == currentScreenId) {
                     currentScreenWidgets.add(widget);
@@ -1472,6 +1509,7 @@ public class LauncherModel extends BroadcastReceiver
             for (int i = 0; i < N; i++) {
                 final LauncherAppWidgetInfo widget = appWidgets.get(i);
                 final Runnable r = new Runnable() {
+                    @Override
                     public void run() {
                         Callbacks callbacks = tryGetCallbacks(oldCallbacks);
                         if (callbacks != null) {
@@ -1539,6 +1577,7 @@ public class LauncherModel extends BroadcastReceiver
 
             // Tell the workspace that we're about to start binding items
             r = new Runnable() {
+                @Override
                 public void run() {
                     Callbacks callbacks = tryGetCallbacks(oldCallbacks);
                     if (callbacks != null) {
@@ -1578,6 +1617,7 @@ public class LauncherModel extends BroadcastReceiver
 
             // Tell the workspace that we're done binding items
             r = new Runnable() {
+                @Override
                 public void run() {
                     Callbacks callbacks = tryGetCallbacks(oldCallbacks);
                     if (callbacks != null) {
@@ -1608,6 +1648,7 @@ public class LauncherModel extends BroadcastReceiver
 
             if (validFirstPage) {
                 r = new Runnable() {
+                    @Override
                     public void run() {
                         Callbacks callbacks = tryGetCallbacks(oldCallbacks);
                         if (callbacks != null) {
@@ -1659,6 +1700,7 @@ public class LauncherModel extends BroadcastReceiver
             final ArrayList<AppInfo> list
                     = (ArrayList<AppInfo>) mBgAllAppsList.data.clone();
             Runnable r = new Runnable() {
+                @Override
                 public void run() {
                     final long t = SystemClock.uptimeMillis();
                     final Callbacks callbacks = tryGetCallbacks(oldCallbacks);
@@ -1686,6 +1728,7 @@ public class LauncherModel extends BroadcastReceiver
                             // If app list is updated, we need to reschedule it otherwise old app
                             // list will override everything in processUserApps().
                             sWorker.post(new Runnable() {
+                                @Override
                                 public void run() {
                                     final List<LauncherActivityInfo> updatedApps =
                                             mLauncherApps.getActivityList(null, user);
@@ -1748,8 +1791,9 @@ public class LauncherModel extends BroadcastReceiver
                 for (int i = 0; i < apps.size(); i++) {
                     LauncherActivityInfo app = apps.get(i);
                     //过滤自身
-                    if (mApp.getContext().getPackageName().equals(app.getApplicationInfo().packageName))
+                    if (mApp.getContext().getPackageName().equals(app.getApplicationInfo().packageName)) {
                         continue;
+                    }
                     // This builds the icon bitmaps.
                     mBgAllAppsList.add(new AppInfo(app, user, quietMode), app);
                 }
@@ -1764,6 +1808,7 @@ public class LauncherModel extends BroadcastReceiver
 
             // Post callback on main thread
             mHandler.post(new Runnable() {
+                @Override
                 public void run() {
 
                     final long bindTime = SystemClock.uptimeMillis();
@@ -1895,6 +1940,7 @@ public class LauncherModel extends BroadcastReceiver
         public final void scheduleCallbackTask(final CallbackTask task) {
             final Callbacks callbacks = mModel.getCallback();
             mUiHandler.post(new Runnable() {
+                @Override
                 public void run() {
                     Callbacks cb = mModel.getCallback();
                     if (callbacks == cb && cb != null) {

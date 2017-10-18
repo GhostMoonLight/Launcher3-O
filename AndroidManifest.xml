@@ -33,18 +33,18 @@
     name in the permissions. eq com.mypackage.permission.READ_SETTINGS
     -->
     <permission
-        android:name="com.google.android.apps.nexuslauncher.permission.READ_SETTINGS"
+        android:name="com.zues.launcher.permission.READ_SETTINGS"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
         android:protectionLevel="normal"
         android:label="@string/permlab_read_settings"
         android:description="@string/permdesc_read_settings"/>
     <permission
-        android:name="com.google.android.apps.nexuslauncher.permission.WRITE_SETTINGS"
+        android:name="com.zues.launcher.permission.WRITE_SETTINGS"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
         android:protectionLevel="signatureOrSystem"
         android:label="@string/permlab_write_settings"
         android:description="@string/permdesc_write_settings"/>
-    <permission android:name="com.google.android.apps.nexuslauncher.permission.QSB"
+    <permission android:name="com.zues.launcher.permission.QSB"
         android:protectionLevel="normal"
         android:label="QSB" />
 
@@ -57,9 +57,9 @@
 
     <uses-permission android:name="com.android.launcher.permission.READ_SETTINGS" />
     <uses-permission android:name="com.android.launcher.permission.WRITE_SETTINGS" />
-    <uses-permission android:name="com.google.android.apps.nexuslauncher.permission.READ_SETTINGS" />
-    <uses-permission android:name="com.google.android.apps.nexuslauncher.permission.WRITE_SETTINGS" />
-    <uses-permission android:name="com.google.android.apps.nexuslauncher.permission.QSB" />
+    <uses-permission android:name="com.zues.launcher.permission.READ_SETTINGS" />
+    <uses-permission android:name="com.zues.launcher.permission.WRITE_SETTINGS" />
+    <uses-permission android:name="com.zues.launcher.permission.QSB" />
     <uses-permission android:name="android.permission.SET_WALLPAPER_HINTS" />
 
     <application
@@ -77,7 +77,7 @@
         <receiver android:name="com.android.launcher3.pixel.WeatherUpdateReceiver"
                   android:permission="android.permission.CAPTURE_AUDIO_HOTWORD">
             <intent-filter>
-                <action android:name="com.google.android.apps.nexuslauncher.updateweather"/>
+                <action android:name="com.zues.launcher.updateweather"/>
             </intent-filter>
         </receiver>
 
@@ -129,8 +129,8 @@
             android:name="com.android.launcher3.LauncherProvider"
             android:authorities="com.zeus.launcher.settings"
             android:exported="true"
-            android:writePermission="com.google.android.apps.nexuslauncher.permission.WRITE_SETTINGS"
-            android:readPermission="com.google.android.apps.nexuslauncher.permission.READ_SETTINGS" />
+            android:writePermission="com.zues.launcher.permission.WRITE_SETTINGS"
+            android:readPermission="com.zues.launcher.permission.READ_SETTINGS" />
 
         <!-- Intent received used to install shortcuts from other applications -->
         <receiver

@@ -297,6 +297,7 @@ public class Launcher extends BaseActivity
     private Runnable mExitSpringLoadedModeRunnable;
 
     @Thunk Runnable mBuildLayersRunnable = new Runnable() {
+        @Override
         public void run() {
             if (mWorkspace != null) {
                 mWorkspace.buildPageHardwareLayers();
@@ -431,8 +432,9 @@ public class Launcher extends BaseActivity
         mDefaultKeySsb = new SpannableStringBuilder();
         Selection.setSelection(mDefaultKeySsb, 0);
 
-        if (PackageManagerHelper.isAppEnabled(getPackageManager(), "com.google.android.googlequicksearchbox"))
+        if (PackageManagerHelper.isAppEnabled(getPackageManager(), "com.google.android.googlequicksearchbox")) {
             mLauncherTab = new LauncherTab(this);
+        }
 
         mRotationEnabled = getResources().getBoolean(R.bool.allow_rotation);
         // In case we are on a device with locked rotation, we should look at preferences to check
@@ -526,6 +528,7 @@ public class Launcher extends BaseActivity
 
     private LauncherCallbacks mLauncherCallbacks;
 
+    @Override
     public void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         if (mLauncherCallbacks != null) {
@@ -541,6 +544,7 @@ public class Launcher extends BaseActivity
     /**
      * Call this after onCreate to set or clear overlay.
      */
+    @Override
     public void setLauncherOverlay(LauncherOverlay overlay) {
         if (overlay != null) {
             overlay.setOverlayCallbacks(new LauncherOverlayCallbacksImpl());
@@ -548,6 +552,7 @@ public class Launcher extends BaseActivity
         mWorkspace.setLauncherOverlay(overlay);
     }
 
+    @Override
     public boolean setLauncherCallbacks(LauncherCallbacks callbacks) {
         mLauncherCallbacks = callbacks;
         mLauncherCallbacks.setLauncherSearchCallback(new Launcher.LauncherSearchCallbacks() {
@@ -840,8 +845,9 @@ public class Launcher extends BaseActivity
     }
 
     /** @Override for MNC */
+    @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            int[] grantResults) {
+                                           int[] grantResults) {
         PendingRequestArgs pendingArgs = mPendingRequestArgs;
         if (requestCode == REQUEST_PERMISSION_CALL_PHONE && pendingArgs != null
                 && pendingArgs.getRequestCode() == REQUEST_PERMISSION_CALL_PHONE) {
@@ -1065,8 +1071,9 @@ public class Launcher extends BaseActivity
         }
         mIsResumeFromActionScreenOff = false;
 
-        if (mLauncherTab != null)
+        if (mLauncherTab != null) {
             mLauncherTab.getClient().onResume();
+        }
 
         if (mLauncherCallbacks != null) {
             mLauncherCallbacks.onResume();
@@ -1091,8 +1098,9 @@ public class Launcher extends BaseActivity
             mWorkspace.getCustomContentCallbacks().onHide();
         }
 
-        if (mLauncherTab != null)
+        if (mLauncherTab != null) {
             mLauncherTab.getClient().onPause();
+        }
 
         if (mLauncherCallbacks != null) {
             mLauncherCallbacks.onPause();
@@ -1157,6 +1165,7 @@ public class Launcher extends BaseActivity
 
     class LauncherOverlayCallbacksImpl implements LauncherOverlayCallbacks {
 
+        @Override
         public void onScrollChanged(float progress) {
             if (mWorkspace != null) {
                 mWorkspace.onOverlayScrollChanged(progress);
@@ -1608,8 +1617,9 @@ public class Launcher extends BaseActivity
         FirstFrameAnimatorHelper.initializeDrawListener(getWindow().getDecorView());
         mAttached = true;
 
-        if (mLauncherTab != null)
+        if (mLauncherTab != null) {
             mLauncherTab.getClient().onAttachedToWindow();
+        }
 
         if (mLauncherCallbacks != null) {
             mLauncherCallbacks.onAttachedToWindow();
@@ -1624,8 +1634,9 @@ public class Launcher extends BaseActivity
             mAttached = false;
         }
 
-        if (mLauncherTab != null)
+        if (mLauncherTab != null) {
             mLauncherTab.getClient().onDetachedFromWindow();
+        }
 
         if (mLauncherCallbacks != null) {
             mLauncherCallbacks.onDetachedFromWindow();
@@ -1644,8 +1655,11 @@ public class Launcher extends BaseActivity
                 // apps is nice and speedy.
                 observer.addOnDrawListener(new ViewTreeObserver.OnDrawListener() {
                     private boolean mStarted = false;
+                    @Override
                     public void onDraw() {
-                        if (mStarted) return;
+                        if (mStarted) {
+                            return;
+                        }
                         mStarted = true;
                         // We delay the layer building a bit in order to give
                         // other message processing a time to run.  In particular
@@ -1655,6 +1669,7 @@ public class Launcher extends BaseActivity
                         mWorkspace.postDelayed(mBuildLayersRunnable, 500);
                         final ViewTreeObserver.OnDrawListener listener = this;
                         mWorkspace.post(new Runnable() {
+                            @Override
                             public void run() {
                                 if (mWorkspace != null &&
                                         mWorkspace.getViewTreeObserver() != null) {
@@ -1715,6 +1730,7 @@ public class Launcher extends BaseActivity
         return mModelWriter;
     }
 
+    @Override
     public SharedPreferences getSharedPrefs() {
         return mSharedPrefs;
     }
@@ -1790,8 +1806,9 @@ public class Launcher extends BaseActivity
                 mWidgetsView.scrollToTop();
             }
 
-            if (mLauncherTab != null)
+            if (mLauncherTab != null) {
                 mLauncherTab.getClient().hideOverlay(true);
+            }
 
             if (mLauncherCallbacks != null) {
                 mLauncherCallbacks.onHomeIntent();
@@ -1898,14 +1915,16 @@ public class Launcher extends BaseActivity
 
         LauncherAnimUtils.onDestroyActivity();
 
-        if (mLauncherTab != null)
+        if (mLauncherTab != null) {
             mLauncherTab.getClient().onDestroy();
+        }
 
         if (mLauncherCallbacks != null) {
             mLauncherCallbacks.onDestroy();
         }
     }
 
+    @Override
     public LauncherAccessibilityDelegate getAccessibilityDelegate() {
         return mAccessibilityDelegate;
     }
@@ -2233,6 +2252,7 @@ public class Launcher extends BaseActivity
             // Deleting an app widget ID is a void call but writes to disk before returning
             // to the caller...
             new AsyncTask<Void, Void, Void>() {
+                @Override
                 public Void doInBackground(Void ... args) {
                     appWidgetHost.deleteAppWidgetId(widgetInfo.appWidgetId);
                     return null;
@@ -2298,6 +2318,7 @@ public class Launcher extends BaseActivity
      *
      * @param v The view representing the clicked shortcut.
      */
+    @Override
     public void onClick(View v) {
         // Make sure that rogue clicks don't get through while allapps is launching, or after the
         // view has detached (it's possible for this to happen if the view is removed mid touch).
@@ -2350,6 +2371,7 @@ public class Launcher extends BaseActivity
         }
     }
 
+    @Override
     @SuppressLint("ClickableViewAccessibility")
     public boolean onTouch(View v, MotionEvent event) {
         return false;
@@ -2396,7 +2418,9 @@ public class Launcher extends BaseActivity
      * @param v The view that was clicked.
      */
     protected void onClickAllAppsButton(View v) {
-        if (LOGD) Log.d(TAG, "onClickAllAppsButton");
+        if (LOGD) {
+            Log.d(TAG, "onClickAllAppsButton");
+        }
         if (!isAppsViewVisible()) {
             getUserEventDispatcher().logActionOnControl(Action.Touch.TAP,
                     ControlType.ALL_APPS_BUTTON);
@@ -2406,7 +2430,9 @@ public class Launcher extends BaseActivity
     }
 
     protected void onLongClickAllAppsButton(View v) {
-        if (LOGD) Log.d(TAG, "onLongClickAllAppsButton");
+        if (LOGD) {
+            Log.d(TAG, "onLongClickAllAppsButton");
+        }
         if (!isAppsViewVisible()) {
             getUserEventDispatcher().logActionOnControl(Action.Touch.LONGPRESS,
                     ControlType.ALL_APPS_BUTTON);
@@ -2433,6 +2459,7 @@ public class Launcher extends BaseActivity
             })
             .setNeutralButton(R.string.abandoned_clean_this,
                 new DialogInterface.OnClickListener() {
+                    @Override
                     public void onClick(DialogInterface dialog, int id) {
                         final UserHandle user = Process.myUserHandle();
                         mWorkspace.removeAbandonedPromise(packageName, user);
@@ -2457,7 +2484,9 @@ public class Launcher extends BaseActivity
      * @param v The view that was clicked. Must be a tagged with a {@link ShortcutInfo}.
      */
     protected void onClickAppShortcut(final View v) {
-        if (LOGD) Log.d(TAG, "onClickAppShortcut");
+        if (LOGD) {
+            Log.d(TAG, "onClickAppShortcut");
+        }
         Object tag = v.getTag();
         if (!(tag instanceof ShortcutInfo)) {
             throw new IllegalArgumentException("Input must be a Shortcut");
@@ -2527,7 +2556,9 @@ public class Launcher extends BaseActivity
      * @param v The view that was clicked. Must be an instance of {@link FolderIcon}.
      */
     protected void onClickFolderIcon(View v) {
-        if (LOGD) Log.d(TAG, "onClickFolder");
+        if (LOGD) {
+            Log.d(TAG, "onClickFolder");
+        }
         if (!(v instanceof FolderIcon)){
             throw new IllegalArgumentException("Input must be a FolderIcon");
         }
@@ -2544,7 +2575,9 @@ public class Launcher extends BaseActivity
      * on the home screen.
      */
     public void onClickAddWidgetButton(View view) {
-        if (LOGD) Log.d(TAG, "onClickAddWidgetButton");
+        if (LOGD) {
+            Log.d(TAG, "onClickAddWidgetButton");
+        }
         if (mIsSafeModeEnabled) {
             Toast.makeText(this, R.string.safemode_widget_error, Toast.LENGTH_SHORT).show();
         } else {
@@ -2570,8 +2603,9 @@ public class Launcher extends BaseActivity
 
         String pickerPackage = getString(R.string.wallpaper_picker_package);
         boolean hasTargetPackage = TextUtils.isEmpty(pickerPackage);
-        if (!hasTargetPackage && PackageManagerHelper.isAppEnabled(getPackageManager(), pickerPackage))
+        if (!hasTargetPackage && PackageManagerHelper.isAppEnabled(getPackageManager(), pickerPackage)) {
             intent.setPackage(pickerPackage);
+        }
 
         intent.setSourceBounds(getViewBounds(v));
         try {
@@ -2589,7 +2623,9 @@ public class Launcher extends BaseActivity
      * on the home screen.
      */
     public void onClickSettingsButton(View v) {
-        if (LOGD) Log.d(TAG, "onClickSettingsButton");
+        if (LOGD) {
+            Log.d(TAG, "onClickSettingsButton");
+        }
         Intent intent = new Intent(Intent.ACTION_APPLICATION_PREFERENCES)
                 .setPackage(getPackageName());
         intent.setSourceBounds(getViewBounds(v));
@@ -2769,8 +2805,9 @@ public class Launcher extends BaseActivity
                 // Could be launching some bookkeeping activity
                 startActivity(intent, optsBundle);
 
-                if (isAllAppsVisible())
+                if (isAllAppsVisible()) {
                     predictiveAppsProvider.updateComponentCount(intent.getComponent());
+                }
             } else {
                 LauncherAppsCompat.getInstance(this).startActivityForProfile(
                         intent.getComponent(), user, intent.getSourceBounds(), optsBundle);
@@ -2791,9 +2828,15 @@ public class Launcher extends BaseActivity
 
     @Override
     public boolean onLongClick(View v) {
-        if (!isDraggingEnabled()) return false;
-        if (isWorkspaceLocked()) return false;
-        if (mState != State.WORKSPACE) return false;
+        if (!isDraggingEnabled()) {
+            return false;
+        }
+        if (isWorkspaceLocked()) {
+            return false;
+        }
+        if (mState != State.WORKSPACE) {
+            return false;
+        }
 
         if ((FeatureFlags.LAUNCHER3_ALL_APPS_PULL_UP && v instanceof PageIndicator) ||
                 (v == mAllAppsButton && mAllAppsButton != null)) {
@@ -3014,7 +3057,9 @@ public class Launcher extends BaseActivity
      * Shows the widgets view.
      */
     void showWidgetsView(boolean animated, boolean resetPageToZero) {
-        if (LOGD) Log.d(TAG, "showWidgetsView:" + animated + " resetPageToZero:" + resetPageToZero);
+        if (LOGD) {
+            Log.d(TAG, "showWidgetsView:" + animated + " resetPageToZero:" + resetPageToZero);
+        }
         if (resetPageToZero) {
             mWidgetsView.scrollToTop();
         }
@@ -3081,7 +3126,9 @@ public class Launcher extends BaseActivity
     }
 
     public void enterSpringLoadedDragMode() {
-        if (LOGD) Log.d(TAG, String.format("enterSpringLoadedDragMode [mState=%s", mState.name()));
+        if (LOGD) {
+            Log.d(TAG, String.format("enterSpringLoadedDragMode [mState=%s", mState.name()));
+        }
         if (isStateSpringLoaded()) {
             return;
         }
@@ -3094,7 +3141,9 @@ public class Launcher extends BaseActivity
 
     public void exitSpringLoadedDragModeDelayed(final boolean successfulDrop, int delay,
             final Runnable onCompleteRunnable) {
-        if (!isStateSpringLoaded()) return;
+        if (!isStateSpringLoaded()) {
+            return;
+        }
 
         if (mExitSpringLoadedModeRunnable != null) {
             mHandler.removeCallbacks(mExitSpringLoadedModeRunnable);
@@ -3189,7 +3238,9 @@ public class Launcher extends BaseActivity
      */
     @Thunk boolean waitUntilResume(Runnable run, boolean deletePreviousRunnables) {
         if (mPaused) {
-            if (LOGD) Log.d(TAG, "Deferring update until onResume");
+            if (LOGD) {
+                Log.d(TAG, "Deferring update until onResume");
+            }
             if (deletePreviousRunnables) {
                 while (mBindOnResumeCallbacks.remove(run)) {
                 }
@@ -3228,7 +3279,9 @@ public class Launcher extends BaseActivity
     @Override
     public boolean setLoadOnResume() {
         if (mPaused) {
-            if (LOGD) Log.d(TAG, "setLoadOnResume");
+            if (LOGD) {
+                Log.d(TAG, "setLoadOnResume");
+            }
             mOnResumeNeedsLoad = true;   //设置标记，resume时需要重新运行加载程序
             return true;
         } else {
@@ -3266,6 +3319,7 @@ public class Launcher extends BaseActivity
      *
      * Implementation of the method from LauncherModel.Callbacks.
      */
+    @Override
     public void startBinding() {
         if (LauncherAppState.PROFILE_STARTUP) {
             Trace.beginSection("Starting page bind");
@@ -3294,7 +3348,7 @@ public class Launcher extends BaseActivity
                 orderedScreenIds.indexOf(Workspace.FIRST_SCREEN_ID) != 0) {
             orderedScreenIds.remove(Workspace.FIRST_SCREEN_ID);
             orderedScreenIds.add(0, Workspace.FIRST_SCREEN_ID);
-            mModel.updateWorkspaceScreenOrder(this, orderedScreenIds);
+            LauncherModel.updateWorkspaceScreenOrder(this, orderedScreenIds);
         } else if (!FeatureFlags.QSB_ON_FIRST_SCREEN && orderedScreenIds.isEmpty()) {
             // If there are no screens, we need to have an empty screen
             mWorkspace.addExtraEmptyScreen();
@@ -3325,11 +3379,13 @@ public class Launcher extends BaseActivity
         }
     }
 
+    @Override
     public void bindAppsAdded(final ArrayList<Long> newScreens,
                               final ArrayList<ItemInfo> addNotAnimated,
                               final ArrayList<ItemInfo> addAnimated,
                               final ArrayList<AppInfo> addedApps) {
         Runnable r = new Runnable() {
+            @Override
             public void run() {
                 bindAppsAdded(newScreens, addNotAnimated, addAnimated, addedApps);
             }
@@ -3371,6 +3427,7 @@ public class Launcher extends BaseActivity
     public void bindItems(final ArrayList<ItemInfo> items, final int start, final int end,
                           final boolean forceAnimateIcons) {
         Runnable r = new Runnable() {
+            @Override
             public void run() {
                 bindItems(items, start, end, forceAnimateIcons);
             }
@@ -3465,6 +3522,7 @@ public class Launcher extends BaseActivity
                 long currentScreenId = mWorkspace.getScreenIdForPageIndex(mWorkspace.getNextPage());
                 final int newScreenIndex = mWorkspace.getPageIndexForScreenId(newItemsScreenId);
                 final Runnable startBounceAnimRunnable = new Runnable() {
+                    @Override
                     public void run() {
                         anim.playTogether(bounceAnims);
                         anim.start();
@@ -3475,6 +3533,7 @@ public class Launcher extends BaseActivity
                     // when we are loading right after we return to launcher.
                     int NEW_APPS_PAGE_MOVE_DELAY = 500;
                     mWorkspace.postDelayed(new Runnable() {
+                        @Override
                         public void run() {
                             if (mWorkspace != null) {
                                 mWorkspace.snapToPage(newScreenIndex);
@@ -3496,8 +3555,10 @@ public class Launcher extends BaseActivity
      *
      * Implementation of the method from LauncherModel.Callbacks.
      */
+    @Override
     public void bindAppWidget(final LauncherAppWidgetInfo item) {
         Runnable r = new Runnable() {
+            @Override
             public void run() {
                 bindAppWidget(item);
             }
@@ -3649,6 +3710,7 @@ public class Launcher extends BaseActivity
         return info;
     }
 
+    @Override
     public void onPageBoundSynchronously(int page) {
         mSynchronouslyBoundPages.add(page);
     }
@@ -3671,6 +3733,7 @@ public class Launcher extends BaseActivity
     @Override
     public void finishFirstPageBind(final ViewOnDrawExecutor executor) {
         Runnable r = new Runnable() {
+            @Override
             public void run() {
                 finishFirstPageBind(executor);
             }
@@ -3702,6 +3765,7 @@ public class Launcher extends BaseActivity
     @Override
     public void finishBindingItems() {
         Runnable r = new Runnable() {
+            @Override
             public void run() {
                 finishBindingItems();
             }
@@ -3730,8 +3794,9 @@ public class Launcher extends BaseActivity
             for (String packageName : NotificationManagerCompat.getEnabledListenerPackages(this)) {
                 hasNotificationAccess |= packageName.equals(getApplicationContext().getPackageName());
             }
-            if (!hasNotificationAccess)
+            if (!hasNotificationAccess) {
                 startActivity(new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"));
+            }
         }
 
         NotificationListener.setNotificationsChangedListener(mPopupDataProvider);
@@ -3775,6 +3840,7 @@ public class Launcher extends BaseActivity
      */
     @Thunk ArrayList<AppInfo> mTmpAppsList;
     private Runnable mBindAllApplicationsRunnable = new Runnable() {
+        @Override
         public void run() {
             bindAllApplications(mTmpAppsList);
             mTmpAppsList = null;
@@ -3786,6 +3852,7 @@ public class Launcher extends BaseActivity
      *
      * Implementation of the method from LauncherModel.Callbacks.
      */
+    @Override
     public void bindAllApplications(final ArrayList<AppInfo> apps) {
         if (waitUntilResume(mBindAllApplicationsRunnable, true)) {
             mTmpAppsList = apps;
@@ -3814,8 +3881,10 @@ public class Launcher extends BaseActivity
      *
      * Implementation of the method from LauncherModel.Callbacks.
      */
+    @Override
     public void bindAppsUpdated(final ArrayList<AppInfo> apps) {
         Runnable r = new Runnable() {
+            @Override
             public void run() {
                 bindAppsUpdated(apps);
             }
@@ -3832,6 +3901,7 @@ public class Launcher extends BaseActivity
     @Override
     public void bindWidgetsRestored(final ArrayList<LauncherAppWidgetInfo> widgets) {
         Runnable r = new Runnable() {
+            @Override
             public void run() {
                 bindWidgetsRestored(widgets);
             }
@@ -3855,6 +3925,7 @@ public class Launcher extends BaseActivity
     public void bindShortcutsChanged(final ArrayList<ShortcutInfo> updated,
             final ArrayList<ShortcutInfo> removed, final UserHandle user) {
         Runnable r = new Runnable() {
+            @Override
             public void run() {
                 bindShortcutsChanged(updated, removed, user);
             }
@@ -3901,6 +3972,7 @@ public class Launcher extends BaseActivity
     @Override
     public void bindRestoreItemsChange(final HashSet<ItemInfo> updates) {
         Runnable r = new Runnable() {
+            @Override
             public void run() {
                 bindRestoreItemsChange(updates);
             }
@@ -3924,6 +3996,7 @@ public class Launcher extends BaseActivity
             final HashSet<String> packageNames, final HashSet<ComponentName> components,
             final UserHandle user) {
         Runnable r = new Runnable() {
+            @Override
             public void run() {
                 bindWorkspaceComponentsRemoved(packageNames, components, user);
             }
@@ -3947,6 +4020,7 @@ public class Launcher extends BaseActivity
     @Override
     public void bindAppInfosRemoved(final ArrayList<AppInfo> appInfos) {
         Runnable r = new Runnable() {
+            @Override
             public void run() {
                 bindAppInfosRemoved(appInfos);
             }
@@ -3963,6 +4037,7 @@ public class Launcher extends BaseActivity
     }
 
     private Runnable mBindAllWidgetsRunnable = new Runnable() {
+            @Override
             public void run() {
                 bindAllWidgets(mAllWidgets);
             }
@@ -4017,6 +4092,7 @@ public class Launcher extends BaseActivity
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
             } else {
                 mHandler.postDelayed(new Runnable() {
+                    @Override
                     public void run() {
                         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
                     }
@@ -4033,7 +4109,7 @@ public class Launcher extends BaseActivity
     }
 
     private boolean shouldShowDiscoveryBounce() {
-        if (mState != mState.WORKSPACE) {
+        if (mState != State.WORKSPACE) {
             return false;
         }
         if (mLauncherCallbacks != null && mLauncherCallbacks.shouldShowDiscoveryBounce()) {
