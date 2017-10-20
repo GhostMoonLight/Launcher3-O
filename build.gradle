@@ -2,6 +2,10 @@ buildscript {
     repositories {
         mavenCentral()
         jcenter()
+        maven {
+            url 'https://maven.google.com/'
+            name 'Google'
+        }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:2.3.3'
@@ -14,7 +18,7 @@ apply plugin: 'com.google.protobuf'
 
 android {
     compileSdkVersion 26
-    buildToolsVersion '26.0.1'
+    buildToolsVersion '26.0.2'
 
     defaultConfig {
         applicationId 'com.zues.launcher'
@@ -48,6 +52,7 @@ android {
             java.srcDirs = ['src', 'src_config']
             manifest.srcFile 'AndroidManifest.xml'
             proto.srcDirs 'protos/'
+//            jinLibs.scrDir 'libs'
         }
 
 
@@ -57,9 +62,13 @@ android {
 repositories {
     mavenCentral()
     jcenter()
+    maven {
+        url 'https://maven.google.com/'
+        name 'Google'
+    }
 }
 
-final String SUPPORT_LIBS_VERSION = '26.+'
+final String SUPPORT_LIBS_VERSION = '26.1.0'
 dependencies {
     compile "com.android.support:support-v4:${SUPPORT_LIBS_VERSION}"
     compile "com.android.support:recyclerview-v7:${SUPPORT_LIBS_VERSION}"

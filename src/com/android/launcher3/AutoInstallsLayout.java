@@ -304,7 +304,7 @@ public class AutoInstallsLayout {
     }
 
     protected HashMap<String, TagParser> getFolderElementsMap() {
-        HashMap<String, TagParser> parsers = new HashMap<String, TagParser>();
+        HashMap<String, TagParser> parsers = new HashMap<>();
         parsers.put(TAG_APP_ICON, new AppShortcutParser());
         parsers.put(TAG_AUTO_INSTALL, new AutoInstallParser());
         parsers.put(TAG_SHORTCUT, new ShortcutParser(mSourceRes));

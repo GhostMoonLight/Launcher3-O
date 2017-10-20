@@ -45,6 +45,7 @@ import com.android.launcher3.compat.LauncherAppsCompat;
 import com.android.launcher3.compat.PackageInstallerCompat;
 import com.android.launcher3.compat.PackageInstallerCompat.PackageInstallInfo;
 import com.android.launcher3.compat.UserManagerCompat;
+import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.config.ProviderConfig;
 import com.android.launcher3.dynamicui.ExtractionUtils;
 import com.android.launcher3.folder.Folder;
@@ -140,7 +141,7 @@ public class LauncherModel extends BroadcastReceiver
      * Set of runnables to be called on the background thread after the workspace binding
      * is complete.
      */
-    static final ArrayList<Runnable> mBindCompleteRunnables = new ArrayList<Runnable>();
+    static final ArrayList<Runnable> mBindCompleteRunnables = new ArrayList<>();
 
     @Thunk WeakReference<Callbacks> mCallbacks;
 
@@ -542,6 +543,7 @@ public class LauncherModel extends BroadcastReceiver
      */
     public boolean startLoader(int synchronousBindPage) {
         // Enable queue before starting loader. It will get disabled in Launcher#finishBindingItems
+        // 开启延迟安装快捷方式，在加载数据的过程中先不安装快捷方式，等到加载数据完成后才安装快捷方式
         InstallShortcutReceiver.enableInstallQueue();
         synchronized (mLock) {
             // Don't bother to start the thread if we know it's not going to do anything
@@ -600,9 +602,9 @@ public class LauncherModel extends BroadcastReceiver
      */
     private class LoaderTask implements Runnable {
         private Context mContext;
-        private int mPageToBindFirst;
+        private int mPageToBindFirst;   // 从第几屏开始绑定数据
 
-        @Thunk boolean mIsLoadingAndBindingWorkspace;
+        @Thunk boolean mIsLoadingAndBindingWorkspace;      // 是否正在加载和绑定workspace
         private boolean mStopped;
         @Thunk boolean mLoadAndBindStepFinished;
 
@@ -615,6 +617,7 @@ public class LauncherModel extends BroadcastReceiver
             // Wait until the either we're stopped or the other threads are done.
             // This way we don't start loading all apps until the workspace has settled
             // down.
+            // 等待，只到我们停止或其他线程完成。这样，在工作区安顿下来之前，我们不会开始加载所有应用程序。
             synchronized (LoaderTask.this) {
                 final long workspaceWaitTime = DEBUG_LOADERS ? SystemClock.uptimeMillis() : 0;
 
@@ -686,6 +689,10 @@ public class LauncherModel extends BroadcastReceiver
             bindDeepShortcuts();
         }
 
+        /**
+         * 查证是否Stoped
+         * @throws CancellationException
+         */
         private void verifyNotStopped() throws CancellationException {
             synchronized (LoaderTask.this) {
                 if (mStopped) {
@@ -716,7 +723,10 @@ public class LauncherModel extends BroadcastReceiver
                 if (DEBUG_LOADERS) {
                     Log.d(TAG, "step 1.2: bind workspace workspace");
                 }
+
+                // 显示数据(这些数据是从数据库中获取的)
                 bindWorkspace(mPageToBindFirst);
+                // 到这之后数据加载完成，mIsLoadingAndBindingWorkspace变为false
 
                 // Take a break
                 if (DEBUG_LOADERS) {
@@ -729,6 +739,8 @@ public class LauncherModel extends BroadcastReceiver
                 if (DEBUG_LOADERS) {
                     Log.d(TAG, "step 2.1: loading all apps");
                 }
+
+                // 加载手机中安装的软件
                 loadAllApps();
 
                 verifyNotStopped();
@@ -736,6 +748,15 @@ public class LauncherModel extends BroadcastReceiver
                     Log.d(TAG, "step 2.2: Update icon cache");
                 }
                 updateIconCache();
+
+                if (DEBUG_LOADERS) {
+                    Log.d(TAG, "step 2.3: loading all apps to workspace");
+                }
+
+                if (FeatureFlags.DISABLE_ALL_APPS) {
+                    // 在workspace上显示安装软件的数据(也就是第一屏中)
+                    verifyApplications();
+                }
 
                 // Take a break
                 if (DEBUG_LOADERS) {
@@ -831,7 +852,7 @@ public class LauncherModel extends BroadcastReceiver
 
         /**
          * 如果是第一次加载，先加载default_workspace.xml到数据库，
-         * 然后再从数据库中加载数
+         * 然后再从数据库中加载数据
          */
         private void loadWorkspace() {
             if (LauncherAppState.PROFILE_STARTUP) {
@@ -1363,8 +1384,11 @@ public class LauncherModel extends BroadcastReceiver
             }
         }
 
-        /** Filters the set of items who are directly or indirectly (via another container) on the
-         * specified screen. */
+        /** Filters the set of items who are directly or indirectly (via another container) on the specified screen.
+         *
+         * 筛选出属于currentScreenId这个屏幕id的数据，放到currentScreenItems中，优先加载这个数据
+         * 把其他的数据放到otherScreenItems
+         */
         private void filterCurrentWorkspaceItems(long currentScreenId,
                 ArrayList<ItemInfo> allWorkspaceItems,
                 ArrayList<ItemInfo> currentScreenItems,
@@ -1381,7 +1405,7 @@ public class LauncherModel extends BroadcastReceiver
             // Order the set of items by their containers first, this allows use to walk through the
             // list sequentially, build up a list of containers that are in the specified screen,
             // as well as all items in those containers.
-            Set<Long> itemsOnScreen = new HashSet<Long>();
+            Set<Long> itemsOnScreen = new HashSet<>();
             Collections.sort(allWorkspaceItems, new Comparator<ItemInfo>() {
                 @Override
                 public int compare(ItemInfo lhs, ItemInfo rhs) {
@@ -1389,17 +1413,17 @@ public class LauncherModel extends BroadcastReceiver
                 }
             });
             for (ItemInfo info : allWorkspaceItems) {
-                if (info.container == LauncherSettings.Favorites.CONTAINER_DESKTOP) {
+                if (info.container == LauncherSettings.Favorites.CONTAINER_DESKTOP) { // 如果是放置到桌面上的
                     if (info.screenId == currentScreenId) {
                         currentScreenItems.add(info);
                         itemsOnScreen.add(info.id);
                     } else {
                         otherScreenItems.add(info);
                     }
-                } else if (info.container == LauncherSettings.Favorites.CONTAINER_HOTSEAT) {
+                } else if (info.container == LauncherSettings.Favorites.CONTAINER_HOTSEAT) { // 如果是放置到Hotseat
                     currentScreenItems.add(info);
                     itemsOnScreen.add(info.id);
-                } else {
+                } else {  // 这种情况就是放置到文件夹中的，这个数据所在的文件夹id在itemsOnScreen中，这个数据就放到currentScreenItems中
                     if (itemsOnScreen.contains(info.container)) {
                         currentScreenItems.add(info);
                         itemsOnScreen.add(info.id);
@@ -1410,7 +1434,9 @@ public class LauncherModel extends BroadcastReceiver
             }
         }
 
-        /** Filters the set of widgets which are on the specified screen. */
+        /** Filters the set of widgets which are on the specified screen.
+         * 筛选出属于currentScreenId这个屏幕的AppWidget
+         * */
         private void filterCurrentAppWidgets(long currentScreenId,
                 ArrayList<LauncherAppWidgetInfo> appWidgets,
                 ArrayList<LauncherAppWidgetInfo> currentScreenWidgets,
@@ -1430,26 +1456,30 @@ public class LauncherModel extends BroadcastReceiver
         }
 
         /** Sorts the set of items by hotseat, workspace (spatially from top to bottom, left to
+         * 给Item按照位置排序
          * right) */
         private void sortWorkspaceItemsSpatially(ArrayList<ItemInfo> workspaceItems) {
             final InvariantDeviceProfile profile = mApp.getInvariantDeviceProfile();
-            final int screenCols = profile.numColumns;
-            final int screenCellCount = profile.numColumns * profile.numRows;
+            final int screenCols = profile.numColumns;                          // 屏幕有几列
+            final int screenCellCount = profile.numColumns * profile.numRows;   // 屏幕上总共能显示数据的个数
             Collections.sort(workspaceItems, new Comparator<ItemInfo>() {
                 @Override
                 public int compare(ItemInfo lhs, ItemInfo rhs) {
+                    // 两个Item的container相同, 两个Item都在同一个屏幕中
                     if (lhs.container == rhs.container) {
                         // Within containers, order by their spatial position in that container
                         switch ((int) lhs.container) {
                             case LauncherSettings.Favorites.CONTAINER_DESKTOP: {
+                                // 计算这两个Item在当前屏幕的位置（在哪一个方格）
                                 long lr = (lhs.screenId * screenCellCount +
                                         lhs.cellY * screenCols + lhs.cellX);
                                 long rr = (rhs.screenId * screenCellCount +
                                         rhs.cellY * screenCols + rhs.cellX);
-                                return Utilities.longCompare(lr, rr);
+                                return Utilities.longCompare(lr, rr);   //  按方格位置排序(升序)
                             }
                             case LauncherSettings.Favorites.CONTAINER_HOTSEAT: {
                                 // We currently use the screen id as the rank
+                                // 在HotSeat中Item的screenId就是这个Item在HotSeat中的位置, 按照位置排序(升序)
                                 return Utilities.longCompare(lhs.screenId, rhs.screenId);
                             }
                             default:
@@ -1461,12 +1491,18 @@ public class LauncherModel extends BroadcastReceiver
                         }
                     } else {
                         // Between containers, order by hotseat, desktop
+                        // 按照container排序，升序, container表明了该item所在的区域，可以使destop，Hotseat，Folder
                         return Utilities.longCompare(lhs.container, rhs.container);
                     }
                 }
             });
         }
 
+        /**
+         * 绑定屏幕，加载屏幕数据
+         * @param oldCallbacks     回调
+         * @param orderedScreens   屏幕的集合
+         */
         private void bindWorkspaceScreens(final Callbacks oldCallbacks,
                 final ArrayList<Long> orderedScreens) {
             final Runnable r = new Runnable() {
@@ -1488,6 +1524,7 @@ public class LauncherModel extends BroadcastReceiver
 
             // Bind the workspace items
             int N = workspaceItems.size();
+            // 分批加载workspaceItems中的数据，每次加载ITEMS_CHUNK个
             for (int i = 0; i < N; i += ITEMS_CHUNK) {
                 final int start = i;
                 final int chunkSize = (i+ITEMS_CHUNK <= N) ? ITEMS_CHUNK : (N-i);
@@ -1505,6 +1542,7 @@ public class LauncherModel extends BroadcastReceiver
             }
 
             // Bind the widgets, one at a time
+            // 绑定widget，每次一个
             N = appWidgets.size();
             for (int i = 0; i < N; i++) {
                 final LauncherAppWidgetInfo widget = appWidgets.get(i);
@@ -1523,6 +1561,7 @@ public class LauncherModel extends BroadcastReceiver
 
         /**
          * Binds all loaded data to actual views on the main thread.
+         * 在主线程上将所有加载的数据绑定到的实际视图。
          */
         private void bindWorkspace(int synchronizeBindPage) {
             final long t = SystemClock.uptimeMillis();
@@ -1558,6 +1597,8 @@ public class LauncherModel extends BroadcastReceiver
                 }
                 currentScreen = currScreen;
             }
+
+            // 当前屏幕是否有效
             final boolean validFirstPage = currentScreen >= 0;
             final long currentScreenId =
                     validFirstPage ? orderedScreenIds.get(currentScreen) : INVALID_SCREEN_ID;
@@ -1568,10 +1609,14 @@ public class LauncherModel extends BroadcastReceiver
             ArrayList<LauncherAppWidgetInfo> currentAppWidgets = new ArrayList<>();
             ArrayList<LauncherAppWidgetInfo> otherAppWidgets = new ArrayList<>();
 
+            // 筛选出属于这个currentScreenId屏幕id的数据，放到currentWorkspaceItems中，
+            // 其他屏幕的数据放到otherWorkspaceItems中，优先加载currentScreenId这个屏幕的数据
             filterCurrentWorkspaceItems(currentScreenId, workspaceItems, currentWorkspaceItems,
                     otherWorkspaceItems);
+            // 筛选出属于这个currentScreenId屏幕id的数据
             filterCurrentAppWidgets(currentScreenId, appWidgets, currentAppWidgets,
                     otherAppWidgets);
+            // 给Item按照位置排序
             sortWorkspaceItemsSpatially(currentWorkspaceItems);
             sortWorkspaceItemsSpatially(otherWorkspaceItems);
 
@@ -1588,17 +1633,23 @@ public class LauncherModel extends BroadcastReceiver
             };
             runOnMainThread(r);
 
+            // 加载屏幕
             bindWorkspaceScreens(oldCallbacks, orderedScreenIds);
 
+            // 主线程中执行Runnable
             Executor mainExecutor = new DeferredMainThreadExecutor();
             // Load items on the current page.
+            // 加载当前屏幕的Item和AppWidget
             bindWorkspaceItems(oldCallbacks, currentWorkspaceItems, currentAppWidgets, mainExecutor);
 
             // In case of validFirstPage, only bind the first screen, and defer binding the
             // remaining screens after first onDraw (and an optional the fade animation whichever
             // happens later).
+            // 在第一屏有效的情况下只加载第一个屏幕, 并在第一个onDraw之后延迟绑定剩余的屏幕（以及可选的褪色动画，以后再发生）
+
             // This ensures that the first screen is immediately visible (eg. during rotation)
             // In case of !validFirstPage, bind all pages one after other.
+            // 这确保了第一个屏幕立即可见,在!validFirstPage的情况下，一个接一个地绑定所有页面。
             final Executor deferredExecutor =
                     validFirstPage ? new ViewOnDrawExecutor(mHandler) : mainExecutor;
 
@@ -1613,9 +1664,12 @@ public class LauncherModel extends BroadcastReceiver
                 }
             });
 
+            // 加载其他屏的Item和Widget数据
             bindWorkspaceItems(oldCallbacks, otherWorkspaceItems, otherAppWidgets, deferredExecutor);
 
             // Tell the workspace that we're done binding items
+            // 到这里数据库中的数据已经被加载完毕了！
+
             r = new Runnable() {
                 @Override
                 public void run() {
@@ -1655,6 +1709,7 @@ public class LauncherModel extends BroadcastReceiver
                             // We are loading synchronously, which means, some of the pages will be
                             // bound after first draw. Inform the callbacks that page binding is
                             // not complete, and schedule the remaining pages.
+                            // 我们正在同步加载，这意味着一些页面在第一次绘制后将被绑定。通知回调页面绑定是不完整的，并安排其余页。
                             if (currentScreen != PagedView.INVALID_RESTORE_PAGE) {
                                 callbacks.onPageBoundSynchronously(currentScreen);
                             }
@@ -1775,6 +1830,7 @@ public class LauncherModel extends BroadcastReceiver
             for (UserHandle user : profiles) {
                 // Query for the set of apps
                 final long qiaTime = DEBUG_LOADERS ? SystemClock.uptimeMillis() : 0;
+                // 获取安装的软件信息
                 final List<LauncherActivityInfo> apps = mLauncherApps.getActivityList(null, user);
                 if (DEBUG_LOADERS) {
                     Log.d(TAG, "getActivityList took "
@@ -1830,6 +1886,11 @@ public class LauncherModel extends BroadcastReceiver
                 Log.d(TAG, "Icons processed in "
                         + (SystemClock.uptimeMillis() - loadTime) + "ms");
             }
+        }
+
+        //在workspace上显示安装软件的数据(也就是第一屏中)
+        private void verifyApplications(){
+            // 还未实现该逻辑
         }
 
         private void loadDeepShortcuts() {
@@ -2043,6 +2104,7 @@ public class LauncherModel extends BroadcastReceiver
         }
     }
 
+    // 在主线程中执行Runnable
     @Thunk class DeferredMainThreadExecutor implements Executor {
 
         @Override

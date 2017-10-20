@@ -138,14 +138,15 @@ public class LauncherSettings {
         /**
          * The container holding the favorite
          * <P>Type: INTEGER</P>
+         * 容纳该Item容器的ID。表示该Item所在的区域，可以是Destop，Hoseat，Holder
          */
         public static final String CONTAINER = "container";
 
         /**
          * The icon is a resource identified by a package name and an integer id.
          */
-        public static final int CONTAINER_DESKTOP = -100;
-        public static final int CONTAINER_HOTSEAT = -101;
+        public static final int CONTAINER_DESKTOP = -100;    // 屏幕上显示
+        public static final int CONTAINER_HOTSEAT = -101;    // Hotseat中显示
 
         static final String containerToString(int container) {
             switch (container) {

@@ -49,6 +49,10 @@ public class ItemInfo {
      * {@link LauncherSettings.Favorites#CONTAINER_DESKTOP}. For the all applications folder it
      * will be {@link #NO_ID} (since it is not stored in the settings DB). For user folders
      * it will be the id of the folder.
+     * 容纳该Item容器的ID。表示该Item所在的区域，可以是Destop，Hoseat，Holder
+     * Destop： -100
+     * Hotseat：-101
+     * Folder： the id of the folder，文件夹这个Item的id
      */
     public long container = NO_ID;
 

@@ -555,6 +555,7 @@ public final class Utilities {
 
     /**
      * Replacement for Long.compare() which was added in API level 19.
+     * 升序排列
      */
     public static int longCompare(long lhs, long rhs) {
         return lhs < rhs ? -1 : (lhs == rhs ? 0 : 1);

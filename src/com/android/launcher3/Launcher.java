@@ -424,7 +424,6 @@ public class Launcher extends BaseActivity
         } else {
             // Pages bound synchronously.
             mWorkspace.setCurrentPage(currentScreen);
-
             setWorkspaceLoading(true);
         }
 
@@ -462,11 +461,14 @@ public class Launcher extends BaseActivity
 
     @Override
     public View findViewById(int id) {
+
         return mLauncherView.findViewById(id);
+
     }
 
     @Override
     public void onExtractedColorsChanged() {
+
         loadExtractedColorsAndColorItems();
     }
 
@@ -3420,6 +3422,7 @@ public class Launcher extends BaseActivity
 
     /**
      * Bind the items start-end from the list.
+     * 加载list中的从start到end之间的数据(包括start不包括end)
      *
      * Implementation of the method from LauncherModel.Callbacks.
      */
@@ -3851,6 +3854,8 @@ public class Launcher extends BaseActivity
      * Add the icons for all apps.
      *
      * Implementation of the method from LauncherModel.Callbacks.
+     *
+     * 在抽屉页中显示数据
      */
     @Override
     public void bindAllApplications(final ArrayList<AppInfo> apps) {
@@ -3859,11 +3864,14 @@ public class Launcher extends BaseActivity
             return;
         }
 
-        if (mAppsView != null) {
-            mAppsView.setApps(apps);
-        }
-        if (mLauncherCallbacks != null) {
-            mLauncherCallbacks.bindAllApplications(apps);
+        // 如果没有禁用抽屉页，则在抽屉页中显示数据
+        if (!FeatureFlags.DISABLE_ALL_APPS) {
+            if (mAppsView != null) {
+                mAppsView.setApps(apps);
+            }
+            if (mLauncherCallbacks != null) {
+                mLauncherCallbacks.bindAllApplications(apps);
+            }
         }
     }
 

@@ -732,6 +732,9 @@ public class Workspace extends PagedView
         return newScreen;
     }
 
+    /**
+     * 创建左屏
+     */
     public void createCustomContentContainer() {
         CellLayout customScreen = (CellLayout)
                 mLauncher.getLayoutInflater().inflate(R.layout.workspace_screen, this, false);

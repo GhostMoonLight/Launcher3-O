@@ -84,6 +84,11 @@ public class InstallShortcutReceiver extends BroadcastReceiver {
 
     private static final Object sLock = new Object();
 
+    /**
+     * 把快捷方式信息添加到安装队列中，这里是把信息保存到sp中
+     * @param sharedPrefs    sp
+     * @param info           快捷方式信息
+     */
     private static void addToInstallQueue(
             SharedPreferences sharedPrefs, PendingInstallShortcutInfo info) {
         synchronized(sLock) {
@@ -97,6 +102,12 @@ public class InstallShortcutReceiver extends BroadcastReceiver {
         }
     }
 
+    /**
+     *  从队列中移除要安装的快捷方式
+     * @param context        Context
+     * @param packageNames   要移除快捷方式的pkgNmae
+     * @param user           所属用户
+     */
     public static void removeFromInstallQueue(Context context, HashSet<String> packageNames,
             UserHandle user) {
         if (packageNames.isEmpty()) {
@@ -131,6 +142,11 @@ public class InstallShortcutReceiver extends BroadcastReceiver {
         }
     }
 
+    /**
+     * 获取队列所有的快捷方式信息，然后清楚sp中的信息
+     * @param context   Context
+     * @return
+     */
     private static ArrayList<PendingInstallShortcutInfo> getAndClearInstallQueue(Context context) {
         SharedPreferences sharedPrefs = Utilities.getPrefs(context);
         synchronized(sLock) {
@@ -153,6 +169,7 @@ public class InstallShortcutReceiver extends BroadcastReceiver {
 
     // Determines whether to defer installing shortcuts immediately until
     // processAllPendingInstalls() is called.
+    // 确定是否延迟安装快捷方式直到processAllPendingInstalls()被调用。
     private static boolean mUseInstallQueue = false;
 
     public void onReceive(Context context, Intent data) {
@@ -248,15 +265,24 @@ public class InstallShortcutReceiver extends BroadcastReceiver {
         LauncherAppState app = LauncherAppState.getInstance(context);
         boolean launcherNotLoaded = app.getModel().getCallback() == null;
 
+        // 把快捷方式信息添加到安装队列中
         addToInstallQueue(Utilities.getPrefs(context), info);
         if (!mUseInstallQueue && !launcherNotLoaded) {
             flushInstallQueue(context);
         }
     }
 
+    /**
+     * 开启延迟安装快捷方式
+     */
     static void enableInstallQueue() {
         mUseInstallQueue = true;
     }
+
+    /**
+     * 关闭延迟安装快捷方式
+     * @param context
+     */
     static void disableAndFlushInstallQueue(Context context) {
         mUseInstallQueue = false;
         flushInstallQueue(context);

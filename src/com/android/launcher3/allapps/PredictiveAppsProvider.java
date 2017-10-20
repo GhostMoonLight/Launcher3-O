@@ -27,10 +27,8 @@ public class PredictiveAppsProvider {
     private static final String TOP_PREDICTIVE_APPS_KEY = "top_predictive_apps";
 
     private SharedPreferences sharedPreferences;
-    private Context context;
 
     public PredictiveAppsProvider(Context context) {
-        this.context = context;
         this.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
     }
 

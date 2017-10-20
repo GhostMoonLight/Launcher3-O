@@ -58,4 +58,7 @@ public final class FeatureFlags {
     // 是否使用通知栏权限
     public static final boolean NOTIFICATION_LISTENER_ENABLED = false;
 
+    // 是否禁用抽屉页   true禁用  false不禁用    禁用抽屉页之后就在Destop中显示数据(该逻辑还没有实现)
+    public static final boolean DISABLE_ALL_APPS = false;
+
 }
