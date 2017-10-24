@@ -41,6 +41,7 @@ import java.util.TreeMap;
 
 /**
  * The alphabetically sorted list of applications.
+ * 按字母顺序排列的List
  */
 public class AlphabeticalAppsList {
 
