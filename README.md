@@ -1,3 +1,4 @@
+git学习：http://blog.csdn.net/u011116672/article/details/51233837
 ##github 上传项目
     1. 在GitHub上新建仓库
     2. 把github上面的仓库克隆到本地   git clone github项目地址
