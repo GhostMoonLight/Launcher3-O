@@ -494,11 +494,11 @@ public final class Utilities {
         return (size / densityRatio);
     }
     public static int pxFromDp(float size, DisplayMetrics metrics) {
-        return (int) Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+        return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                 size, metrics));
     }
     public static int pxFromSp(float size, DisplayMetrics metrics) {
-        return (int) Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP,
+        return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP,
                 size, metrics));
     }
 

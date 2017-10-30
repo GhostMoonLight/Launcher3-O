@@ -538,7 +538,9 @@ public class Launcher extends BaseActivity
         }
     }
 
+    // 在LauncherRootViewz.fitSystemWindows中被调用
     public void onInsetsChanged(Rect insets) {
+        // 重新布局
         mDeviceProfile.updateInsets(insets);
         mDeviceProfile.layout(this, true /* notifyListeners */);
     }

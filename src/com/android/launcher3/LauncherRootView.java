@@ -11,6 +11,8 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewDebug;
 
+import com.android.launcher3.logging.LogUtils;
+
 public class LauncherRootView extends InsettableFrameLayout {
 
     private final Paint mOpaquePaint;
@@ -44,6 +46,7 @@ public class LauncherRootView extends InsettableFrameLayout {
     @TargetApi(23)
     @Override
     protected boolean fitSystemWindows(Rect insets) {
+        LogUtils.eTag("insets:"+insets);
         boolean rawInsetsChanged = !mInsets.equals(insets);
         mDrawSideInsetBar = (insets.right > 0 || insets.left > 0) &&
                 (!Utilities.ATLEAST_MARSHMALLOW ||
@@ -76,6 +79,7 @@ public class LauncherRootView extends InsettableFrameLayout {
         super.dispatchDraw(canvas);
 
         // If the right inset is opaque, draw a black rectangle to ensure that is stays opaque.
+        // 如果右边的插图是不透明的，画一个黑色的矩形以确保它保持不透明。
         if (mDrawSideInsetBar) {
             if (mRightInsetBarWidth > 0) {
                 int width = getWidth();

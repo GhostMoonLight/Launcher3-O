@@ -68,7 +68,7 @@ public class LogUtils {
     public static void eTag(String msg){
         if (mLogEnable) {
             String[] content = getMsgAndTagWithLineNumber(msg);
-            Log.e(TAG, content[1]);
+            Log.e(TAG, content[0]+"."+content[1]);
         }
     }
 

@@ -33,6 +33,7 @@ import android.widget.FrameLayout;
 import com.android.launcher3.CellLayout.ContainerType;
 import com.android.launcher3.badge.BadgeRenderer;
 import com.android.launcher3.config.FeatureFlags;
+import com.android.launcher3.logging.LogUtils;
 
 import java.util.ArrayList;
 
@@ -40,7 +41,7 @@ public class DeviceProfile {
 
     public interface LauncherLayoutChangeListener {
         void onLauncherLayoutChanged();
-    }
+}
 
     public final InvariantDeviceProfile inv;
 
@@ -72,7 +73,7 @@ public class DeviceProfile {
 
     // Workspace
     private int desiredWorkspaceLeftRightMarginPx;
-    public final int edgeMarginPx;
+    public final int edgeMarginPx;      // 边缘像素
     public final Rect defaultWidgetPadding;
     private final int defaultPageSpacingPx;
     private final int topWorkspacePadding;
@@ -129,7 +130,7 @@ public class DeviceProfile {
     public final PointF appWidgetScale = new PointF(1.0f, 1.0f);
 
     // Drop Target
-    public int dropTargetBarSizePx;
+    public int dropTargetBarSizePx;   //
 
     // Insets
     private Rect mInsets = new Rect();
@@ -407,7 +408,7 @@ public class DeviceProfile {
      */
     public Rect getWorkspacePadding(Rect recycle) {
         Rect padding = recycle == null ? new Rect() : recycle;
-        if (isVerticalBarLayout()) {
+        if (isVerticalBarLayout()) {   // 如果是水平
             if (mInsets.left > 0) {
                 padding.set(mInsets.left + pageIndicatorLandGutterLeftNavBarPx, 0,
                         hotseatBarHeightPx + hotseatLandGutterPx - mInsets.left, 2 * edgeMarginPx);
@@ -415,7 +416,7 @@ public class DeviceProfile {
                 padding.set(pageIndicatorLandGutterRightNavBarPx, 0,
                         hotseatBarHeightPx + hotseatLandGutterPx, 2 * edgeMarginPx);
             }
-        } else {
+        } else {  // 如果是垂直
             int paddingBottom = hotseatBarHeightPx + pageIndicatorHeightPx;
             if (isTablet) {
                 // Pad the left and right of the workspace to ensure consistent spacing
@@ -514,8 +515,13 @@ public class DeviceProfile {
         return visibleChildren;
     }
 
+    /**
+     * 布局，Launcher中各个组件的显示位置
+     */
     public void layout(Launcher launcher, boolean notifyListeners) {
+        LogUtils.eTag("*****************************");
         FrameLayout.LayoutParams lp;
+        // false纵向模式    true水平模式
         boolean hasVerticalBarLayout = isVerticalBarLayout();
 
         // Layout the search bar space
@@ -526,13 +532,16 @@ public class DeviceProfile {
         lp.height = searchBarBounds.y;
         lp.topMargin = mInsets.top + edgeMarginPx;
         searchBar.setLayoutParams(lp);
+        LogUtils.eTag("Search Bar width:"+lp.width+" height:"+lp.height+" top:"+lp.topMargin);
 
         // Layout the workspace
+        // WorkSapce充满全屏，通过设置padding来给Hoseat显示预留空间
         PagedView workspace = (PagedView) launcher.findViewById(R.id.workspace);
         Rect workspacePadding = getWorkspacePadding(null);
         workspace.setPadding(workspacePadding.left, workspacePadding.top, workspacePadding.right,
                 workspacePadding.bottom);
         workspace.setPageSpacing(getWorkspacePageSpacing());
+        LogUtils.eTag("workspace PaddingRect:"+workspacePadding);
 
         // Only display when enabled
         if (FeatureFlags.QSB_ON_FIRST_SCREEN) {
@@ -552,7 +561,7 @@ public class DeviceProfile {
         float workspaceCellWidth = (float) getCurrentWidth() / inv.numColumns;
         float hotseatCellWidth = (float) getCurrentWidth() / inv.numHotseatIcons;
         int hotseatAdjustment = Math.round((workspaceCellWidth - hotseatCellWidth) / 2);
-        if (hasVerticalBarLayout) {
+        if (hasVerticalBarLayout) {   // 水平
             // Vertical hotseat -- The hotseat is fixed in the layout to be on the right of the
             //                     screen regardless of RTL
             lp.gravity = Gravity.RIGHT;
@@ -560,7 +569,7 @@ public class DeviceProfile {
             lp.height = LayoutParams.MATCH_PARENT;
             hotseat.getLayout().setPadding(mInsets.left, mInsets.top, mInsets.right,
                     workspacePadding.bottom);
-        } else if (isTablet) {
+        } else if (isTablet) {  // 平板
             // Pad the hotseat with the workspace padding calculated above
             lp.gravity = Gravity.BOTTOM;
             lp.width = LayoutParams.MATCH_PARENT;
@@ -568,7 +577,7 @@ public class DeviceProfile {
             hotseat.getLayout().setPadding(hotseatAdjustment + workspacePadding.left,
                     hotseatBarTopPaddingPx, hotseatAdjustment + workspacePadding.right,
                     hotseatBarBottomPaddingPx + mInsets.bottom);
-        } else {
+        } else {   // 垂直
             // For phones, layout the hotseat without any bottom margin
             // to ensure that we have space for the folders
             if (mInsets.bottom < hotseatBarTopPaddingPx)
@@ -586,7 +595,7 @@ public class DeviceProfile {
         View pageIndicator = launcher.findViewById(R.id.page_indicator);
         if (pageIndicator != null) {
             lp = (FrameLayout.LayoutParams) pageIndicator.getLayoutParams();
-            if (isVerticalBarLayout()) {
+            if (isVerticalBarLayout()) {   //  水平
                 if (mInsets.left > 0) {
                     lp.leftMargin = mInsets.left + pageIndicatorLandGutterLeftNavBarPx -
                             lp.width - pageIndicatorLandWorkspaceOffsetPx;
@@ -595,7 +604,7 @@ public class DeviceProfile {
                             pageIndicatorLandWorkspaceOffsetPx;
                 }
                 lp.bottomMargin = workspacePadding.bottom;
-            } else {
+            } else {  // 竖屏
                 // Put the page indicators above the hotseat
                 lp.gravity = Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
                 lp.height = pageIndicatorHeightPx;

@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
+// 不变的设备信息
 public class InvariantDeviceProfile {
 
     // This is a static that we use for the default icon size on a 4/5-inch phone
@@ -62,8 +63,8 @@ public class InvariantDeviceProfile {
     /**
      * Number of icons per row and column in the workspace.
      */
-    public int numRows;
-    public int numColumns;
+    public int numRows;            // 行数
+    public int numColumns;         // 列数
 
     /**
      * The minimum number of predicted apps in all apps.
@@ -74,18 +75,18 @@ public class InvariantDeviceProfile {
     /**
      * Number of icons per row and column in the folder.
      */
-    public int numFolderRows;
-    public int numFolderColumns;
-    public float iconSize;
-    public int iconBitmapSize;
+    public int numFolderRows;              // 文件夹中的行数
+    public int numFolderColumns;           // 文件夹中的列数
+    public float iconSize;                 // 图标的大小
+    public int iconBitmapSize;             // 图表中图片的大小
     public int fillResIconDpi;
-    public float iconTextSize;
+    public float iconTextSize;              // 图表中文字的大小
 
     /**
      * Number of icons inside the hotseat area.
      */
-    public int numHotseatIcons;
-    float hotseatIconSize;
+    public int numHotseatIcons;     // Hotseat中图标的个数
+    float hotseatIconSize;          // Hotseat中图标的大小
     public float hotseatScale;
     int defaultLayoutId;
 
@@ -138,11 +139,14 @@ public class InvariantDeviceProfile {
         minWidthDps = Utilities.dpiFromPx(Math.min(smallestSize.x, smallestSize.y), dm);
         minHeightDps = Utilities.dpiFromPx(Math.min(largestSize.x, largestSize.y), dm);
 
+        // getPredefinedDeviceProfiles 从配置文件中加载预置的设备数据信息，
+        // findClosestDeviceProfiles 对该List进行排序
         ArrayList<InvariantDeviceProfile> closestProfiles = findClosestDeviceProfiles(
                 minWidthDps, minHeightDps, getPredefinedDeviceProfiles(context));
         InvariantDeviceProfile interpolatedDeviceProfileOut =
                 invDistWeightedInterpolate(minWidthDps,  minHeightDps, closestProfiles);
 
+        // closestProfiles该List中的第一个就是最接近宿主设备的配置信息
         InvariantDeviceProfile closestProfile = closestProfiles.get(0);
         numRows = closestProfile.numRows;
         numColumns = closestProfile.numColumns;
@@ -189,8 +193,6 @@ public class InvariantDeviceProfile {
 
     /**
      * 从配置文件device_profiles.xml中加载设备配置数据
-     * @param context
-     * @return
      */
     ArrayList<InvariantDeviceProfile> getPredefinedDeviceProfiles(Context context) {
         ArrayList<InvariantDeviceProfile> profiles = new ArrayList<>();
@@ -271,7 +273,7 @@ public class InvariantDeviceProfile {
 
     /**
      * Returns the closest device profiles ordered by closeness to the specified width and height
-     * 返回最接近于指定宽度和高度排列的设备配置文件
+     * 设备配置文件按照接近程度排序,返回排序后的List
      */
     // Package private visibility for testing.
     ArrayList<InvariantDeviceProfile> findClosestDeviceProfiles(
@@ -333,6 +335,7 @@ public class InvariantDeviceProfile {
         return rank == getAllAppsButtonRank();
     }
 
+    // 根据手机处于水平方法还是竖直方向，返回相应的DeviceProfile
     public DeviceProfile getDeviceProfile(Context context) {
         return context.getResources().getConfiguration().orientation
                 == Configuration.ORIENTATION_LANDSCAPE ? landscapeProfile : portraitProfile;
