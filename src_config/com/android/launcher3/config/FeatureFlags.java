@@ -27,7 +27,10 @@ public final class FeatureFlags {
     public static boolean LAUNCHER3_LEGACY_FOLDER_ICON = false;
     public static boolean LAUNCHER3_USE_SYSTEM_DRAG_DRIVER = true;
     public static boolean LAUNCHER3_DISABLE_PINCH_TO_OVERVIEW = false;
+    // 是否允许向上滑动显示All-APPS    true允许   false不允许
     public static boolean LAUNCHER3_ALL_APPS_PULL_UP = true;
+    // All-APPS 是否添加到Hotseat中 true不添加，false添加
+    public static final boolean NO_ALL_APPS_ICON = true;
     public static boolean LAUNCHER3_NEW_FOLDER_ANIMATION = false;
     // When enabled allows to use any point on the fast scrollbar to start dragging.
     public static boolean LAUNCHER3_DIRECT_SCROLL = true;
@@ -38,8 +41,6 @@ public final class FeatureFlags {
     // Feature flag to enable moving the QSB on the 0th screen of the workspace.
     public static final boolean QSB_ON_FIRST_SCREEN = true;
     // When enabled the all-apps icon is not added to the hotseat.
-    // All-APPS 是否添加到Hotseat中 true不添加，false添加
-    public static final boolean NO_ALL_APPS_ICON = true;
     // When enabled fling down gesture on the first workspace triggers search.
     public static final boolean PULLDOWN_SEARCH = false;
     // When enabled fling down gesture opens the notifications.

@@ -90,7 +90,7 @@
         launcher:numFolderRows="3"
         launcher:numFolderColumns="4"
         launcher:minAllAppsPredictionColumns="4"
-        launcher:numHotseatIcons="4"
+        launcher:numHotseatIcons="5"
         launcher:iconSize="58.0"
         launcher:iconTextSize="13.0"
         launcher:hotseatIconSize="58.0"

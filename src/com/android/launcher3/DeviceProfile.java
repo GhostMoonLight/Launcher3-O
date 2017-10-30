@@ -519,7 +519,7 @@ public class DeviceProfile {
      * 布局，Launcher中各个组件的显示位置
      */
     public void layout(Launcher launcher, boolean notifyListeners) {
-        LogUtils.eTag("*****************************");
+        LogUtils.eTag("************layout start*****************");
         FrameLayout.LayoutParams lp;
         // false纵向模式    true水平模式
         boolean hasVerticalBarLayout = isVerticalBarLayout();
@@ -631,6 +631,7 @@ public class DeviceProfile {
                 mListeners.get(i).onLauncherLayoutChanged();
             }
         }
+        LogUtils.eTag("************layout end*****************");
     }
 
     private int getCurrentWidth() {

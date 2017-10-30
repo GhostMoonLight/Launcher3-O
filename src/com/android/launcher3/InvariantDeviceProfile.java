@@ -56,7 +56,7 @@ public class InvariantDeviceProfile {
     private static float WEIGHT_EFFICIENT = 100000f;
 
     // Profile-defining invariant properties
-    String name;
+    public String name;
     float minWidthDps;
     float minHeightDps;
 
@@ -148,6 +148,7 @@ public class InvariantDeviceProfile {
 
         // closestProfiles该List中的第一个就是最接近宿主设备的配置信息
         InvariantDeviceProfile closestProfile = closestProfiles.get(0);
+        name = closestProfile.name;
         numRows = closestProfile.numRows;
         numColumns = closestProfile.numColumns;
         numHotseatIcons = closestProfile.numHotseatIcons;
