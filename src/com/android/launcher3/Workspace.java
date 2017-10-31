@@ -540,23 +540,34 @@ public class Workspace extends PagedView
         mQsbAlphaController = new MultiStateAlphaController(mLauncher.getQsbContainer(), 4);
     }
 
+    // 获取默认屏幕页
     private int getDefaultPage() {
         return numCustomPages();
     }
 
+    // 设置布局容器动画
     private void setupLayoutTransition() {
+        /**
+         * 1.LayoutTransition.APPEARING：当View出现或者添加的时候View出现的动画。
+         * 2.LayoutTransition.CHANGE_APPEARING：当添加View导致布局容器改变的时候整个布局容器的动画。
+         * 3.LayoutTransition.DISAPPEARING：当View消失或者隐藏的时候View消失的动画。
+         * 4.LayoutTransition.CHANGE_DISAPPEARING：当删除或者隐藏View导致布局容器改变的时候整个布局容器的动画。
+         * 5.LayoutTransition.CHANGE：当不是由于View出现或消失造成对其他View位置造成改变的时候整个布局容器的动画。
+         */
         // We want to show layout transitions when pages are deleted, to close the gap.
         mLayoutTransition = new LayoutTransition();
-        mLayoutTransition.enableTransitionType(LayoutTransition.DISAPPEARING);
-        mLayoutTransition.enableTransitionType(LayoutTransition.CHANGE_DISAPPEARING);
-        mLayoutTransition.disableTransitionType(LayoutTransition.APPEARING);
-        mLayoutTransition.disableTransitionType(LayoutTransition.CHANGE_APPEARING);
+        mLayoutTransition.enableTransitionType(LayoutTransition.DISAPPEARING);        // 当View消失或者隐藏的时候View消失的动画
+        mLayoutTransition.enableTransitionType(LayoutTransition.CHANGE_DISAPPEARING); // 当添加View导致布局容器改变的时候整个布局容器的动画
+        mLayoutTransition.disableTransitionType(LayoutTransition.APPEARING);          // 当View出现或者添加的时候View出现的动画
+        mLayoutTransition.disableTransitionType(LayoutTransition.CHANGE_APPEARING);   // 当添加View导致布局容器改变的时候整个布局容器的动画
         setLayoutTransition(mLayoutTransition);
     }
 
+    // 启用布局容器动画
     void enableLayoutTransitions() {
         setLayoutTransition(mLayoutTransition);
     }
+    // 禁用布局容器动画
     void disableLayoutTransitions() {
         setLayoutTransition(null);
     }

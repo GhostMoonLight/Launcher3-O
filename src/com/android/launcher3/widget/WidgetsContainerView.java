@@ -90,6 +90,7 @@ public class WidgetsContainerView extends BaseContainerView
         super.onFinishInflate();
         mRecyclerView = (WidgetsRecyclerView) getContentView().findViewById(R.id.widgets_list_view);
         mRecyclerView.setAdapter(mAdapter);
+        // 默认的垂直布局
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
     }
 
