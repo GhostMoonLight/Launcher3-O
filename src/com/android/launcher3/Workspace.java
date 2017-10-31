@@ -584,6 +584,10 @@ public class Workspace extends PagedView
         super.onChildViewAdded(parent, child);
     }
 
+    /**
+     * Workspace是否处于触摸活动(也就是是否处于空闲状态)
+     * mTouchState不为0都是处于触摸活动
+     */
     boolean isTouchActive() {
         return mTouchState != TOUCH_STATE_REST;
     }
@@ -2026,6 +2030,9 @@ public class Workspace extends PagedView
         enableLayoutTransitions();
     }
 
+    /**
+     * 是否在编辑模式
+     */
     public boolean isInOverviewMode() {
         return mState == State.OVERVIEW;
     }
@@ -2308,6 +2315,7 @@ public class Workspace extends PagedView
         }
 
         if (child instanceof BubbleTextView && !dragOptions.isAccessibleDrag) {
+            // 长按显示该图标的shortcuts
             PopupContainerWithArrow popupContainer = PopupContainerWithArrow
                     .showForIcon((BubbleTextView) child);
             if (popupContainer != null) {

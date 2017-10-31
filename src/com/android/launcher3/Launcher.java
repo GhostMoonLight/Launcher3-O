@@ -192,8 +192,13 @@ public class Launcher extends BaseActivity
     static final String APPS_VIEW_SHOWN = "launcher.apps_view_shown";
 
     /** The different states that Launcher can be in. */
-    enum State { NONE, WORKSPACE, WORKSPACE_SPRING_LOADED, APPS, APPS_SPRING_LOADED,
-        WIDGETS, WIDGETS_SPRING_LOADED }
+    enum State { NONE,
+        WORKSPACE,                        // Workspace显示状态
+        WORKSPACE_SPRING_LOADED,          //
+        APPS,                             // APPS（所有Apps界面）显示状态
+        APPS_SPRING_LOADED,               //
+        WIDGETS,                          // 桌面小部件界面显示状态
+        WIDGETS_SPRING_LOADED }           //
 
     @Thunk State mState = State.WORKSPACE;
     @Thunk LauncherStateTransitionAnimation mStateTransitionAnimation;
@@ -649,6 +654,9 @@ public class Launcher extends BaseActivity
         }
     }
 
+    /**s
+     * 拖拽是否可用  当Launcher数据正在加载的时候拖拽不能使用
+     */
     public boolean isDraggingEnabled() {
         // We prevent dragging when we are loading the workspace as it is possible to pick up a view
         // that is subsequently removed from the workspace in startBinding().
@@ -2058,6 +2066,9 @@ public class Launcher extends BaseActivity
         return true;
     }
 
+    /**
+     * Workspace是否锁定  当Launcher正在加载或者等待其他的结果响应时，Workspace处于锁定状态
+     */
     public boolean isWorkspaceLocked() {
         return mWorkspaceLoading || mPendingRequestArgs != null;
     }
@@ -2074,6 +2085,9 @@ public class Launcher extends BaseActivity
         }
     }
 
+    /**
+     * 设置等待其他的结果响应
+     */
     public void setWaitingForResult(PendingRequestArgs args) {
         boolean isLocked = isWorkspaceLocked();
         mPendingRequestArgs = args;
@@ -2832,33 +2846,43 @@ public class Launcher extends BaseActivity
 
     @Override
     public boolean onLongClick(View v) {
+        // 拖拽是否可用
         if (!isDraggingEnabled()) {
             return false;
         }
+
+        // Workspace是否处于锁定状态
         if (isWorkspaceLocked()) {
             return false;
         }
+
+        // 当前是Workspace显示状态，如果不是直接返回
         if (mState != State.WORKSPACE) {
             return false;
         }
 
+        // 如果长按的是PageIndicator中的箭头或者是AllAppsButton 则显示APPS界面
         if ((FeatureFlags.LAUNCHER3_ALL_APPS_PULL_UP && v instanceof PageIndicator) ||
                 (v == mAllAppsButton && mAllAppsButton != null)) {
             onLongClickAllAppsButton(v);
             return true;
         }
 
-
+        // 该长按是否忽略
         boolean ignoreLongPressToOverview =
                 mDeviceProfile.shouldIgnoreLongPressToOverview(mLastDispatchTouchEventX);
 
-        if (v instanceof Workspace) {
+        if (v instanceof Workspace) { // 长按的是Workspace
+            // Workspace不在编辑模式
             if (!mWorkspace.isInOverviewMode()) {
+                // Workspace不处于触摸活动 并且 该长按不忽略
                 if (!mWorkspace.isTouchActive() && !ignoreLongPressToOverview) {
                     getUserEventDispatcher().logActionOnContainer(Action.Touch.LONGPRESS,
                             Action.Direction.NONE, ContainerType.WORKSPACE,
                             mWorkspace.getCurrentPage());
+                    // Workspace进入编辑模式
                     showOverviewMode(true);
+                    // 执行触觉反馈
                     mWorkspace.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS,
                             HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
                     return true;
@@ -3047,11 +3071,13 @@ public class Launcher extends BaseActivity
 
     /**
      * Shows the apps view.
+     * 显示APPS界面
      */
     public void showAppsView(boolean animated, boolean updatePredictedApps,
             boolean focusSearchBar) {
         markAppsViewShown();
         if (updatePredictedApps) {
+            // 更新最近打开应用的布局
             tryAndUpdatePredictedApps();
         }
         showAppsOrWidgets(State.APPS, animated, focusSearchBar);
@@ -3191,6 +3217,7 @@ public class Launcher extends BaseActivity
     /**
      * Updates the set of predicted apps if it hasn't been updated since the last time Launcher was
      * resumed.
+     * 更新最近打开的应用布局
      */
    public void tryAndUpdatePredictedApps() {
        if (getSharedPrefs().getBoolean("pref_show_predictions", true)) {
@@ -4111,6 +4138,9 @@ public class Launcher extends BaseActivity
         }
     }
 
+    /**
+     *  标记APPS界面的显示状态
+     */
     private void markAppsViewShown() {
         if (mSharedPrefs.getBoolean(APPS_VIEW_SHOWN, false)) {
             return;

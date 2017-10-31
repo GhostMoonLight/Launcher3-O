@@ -92,13 +92,14 @@ public class LauncherAppState {
             TestingUtils.startTrackingMemory(mContext);
         }
 
+        // 创建InvariantDeviceProfile对象的过程中会创建DeviceProfile对象，
+        // 该DeviceProfile对象保存加载的设备配置信息几行几列，icon大小等等
         mInvariantDeviceProfile = new InvariantDeviceProfile(mContext);
         LogUtils.eTag("Profile:"+mInvariantDeviceProfile.name);
         mIconCache = new IconCache(mContext, mInvariantDeviceProfile);
         mWidgetCache = new WidgetPreviewLoader(mContext, mIconCache);
 
-        mModel = new LauncherModel(this, mIconCache,
-                new NexusAppFilter());
+        mModel = new LauncherModel(this, mIconCache, new NexusAppFilter());
 
         LauncherAppsCompat.getInstance(mContext).addOnAppsChangedCallback(mModel);
 

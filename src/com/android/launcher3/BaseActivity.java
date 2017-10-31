@@ -25,7 +25,7 @@ import com.android.launcher3.logging.UserEventDispatcher;
 
 public abstract class BaseActivity extends Activity {
 
-    protected DeviceProfile mDeviceProfile;
+    protected DeviceProfile mDeviceProfile;      // Launcher加载的设备配置信息
     protected UserEventDispatcher mUserEventDispatcher;
 
     public DeviceProfile getDeviceProfile() {

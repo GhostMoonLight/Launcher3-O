@@ -83,6 +83,7 @@ import static com.android.launcher3.userevent.nano.LauncherLogProto.Target;
 
 /**
  * A container for shortcuts to deep links within apps.
+ * 用于应用程序内部深层链接的快捷方式的容器。长按icon弹出的shortcuts界面
  */
 @TargetApi(Build.VERSION_CODES.N)
 public class PopupContainerWithArrow extends AbstractFloatingView implements DragSource,

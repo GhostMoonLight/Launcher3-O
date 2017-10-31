@@ -675,9 +675,15 @@ public class DeviceProfile {
         return new int[]{ padding, padding };
     }
 
+    /**
+     * 是否忽略长按跳转到视图模式  true表示忽略   false表示不忽略
+     */
     public boolean shouldIgnoreLongPressToOverview(float touchX) {
+        // 多窗口模式
         boolean inMultiWindowMode = this != inv.landscapeProfile && this != inv.portraitProfile;
+        // 触摸左边缘
         boolean touchedLhsEdge = mInsets.left == 0 && touchX < edgeMarginPx;
+        // 触摸右边缘
         boolean touchedRhsEdge = mInsets.right == 0 && touchX > (widthPx - edgeMarginPx);
         return !inMultiWindowMode && (touchedLhsEdge || touchedRhsEdge);
     }

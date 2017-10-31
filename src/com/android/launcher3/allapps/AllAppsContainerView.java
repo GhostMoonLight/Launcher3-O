@@ -72,6 +72,12 @@ public class AllAppsContainerView extends BaseContainerView implements DragSourc
 
     private final Launcher mLauncher;
     private final AlphabeticalAppsList mApps;
+
+    @Override
+    public void onLauncherLayoutChanged() {
+        super.onLauncherLayoutChanged();
+    }
+
     private final AllAppsGridAdapter mAdapter;
     private final RecyclerView.LayoutManager mLayoutManager;
 
