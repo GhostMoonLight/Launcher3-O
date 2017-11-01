@@ -405,8 +405,10 @@ public class Launcher extends BaseActivity
 
         mPopupDataProvider = new PopupDataProvider(this);
 
-        ((AccessibilityManager) getSystemService(ACCESSIBILITY_SERVICE))
-                .addAccessibilityStateChangeListener(this);
+        AccessibilityManager accessibilityManager = ((AccessibilityManager) getSystemService(ACCESSIBILITY_SERVICE));
+        if (accessibilityManager != null) {
+            accessibilityManager.addAccessibilityStateChangeListener(this);
+        }
 
         lockAllApps();
 
@@ -2893,6 +2895,8 @@ public class Launcher extends BaseActivity
                 return false;
             }
         }
+
+        // 长按的不是Workspace
 
         CellLayout.CellInfo longClickCellInfo = null;
         View itemUnderLongClick = null;
