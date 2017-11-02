@@ -26,6 +26,10 @@ import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
 
+/**
+ * 点击view产生的阴影效果
+ * 该View在点击View的下面
+ */
 public class ClickShadowView extends View {
 
     private static final int SHADOW_SIZE_FACTOR = 3;

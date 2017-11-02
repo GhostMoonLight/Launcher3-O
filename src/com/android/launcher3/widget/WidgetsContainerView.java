@@ -47,6 +47,7 @@ import java.util.List;
 
 /**
  * The widgets list view container.
+ * 桌面小部件容器
  */
 public class WidgetsContainerView extends BaseContainerView
         implements View.OnLongClickListener, View.OnClickListener, DragSource {

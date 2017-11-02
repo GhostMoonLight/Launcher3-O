@@ -42,17 +42,22 @@ public class FastBitmapDrawable extends Drawable {
     private static final float DISABLED_DESATURATION = 1f;
     private static final float DISABLED_BRIGHTNESS = 0.5f;
 
+    /**
+     * 插值器，变化：0-->1-->0
+     */
     public static final TimeInterpolator CLICK_FEEDBACK_INTERPOLATOR = new TimeInterpolator() {
 
         @Override
         public float getInterpolation(float input) {
+            float f;
             if (input < 0.05f) {
-                return input / 0.05f;
+                f = input / 0.05f;
             } else if (input < 0.3f){
-                return 1;
+                f = 1;
             } else {
-                return (1 - input) / 0.7f;
+                f = (1 - input) / 0.7f;
             }
+            return f;
         }
     };
     public static final int CLICK_FEEDBACK_DURATION = 2000;
@@ -184,6 +189,11 @@ public class FastBitmapDrawable extends Drawable {
         return true;
     }
 
+    /**
+     * View的refreshDrawableState的过程中会调用drawableStateChanged方法，该方法中调用onCreateDrawableState方法，获取当前States的数组
+     * 然后调用Drawable的setState方法设置Drawable的状态，这个setState方法中会调用Drawable的onStateChange方法
+     * 所以只要重写Drawable的onStateChange方法，就能根据不同的状态对图片做相应的处理
+     */
     @Override
     protected boolean onStateChange(int[] state) {
         boolean isPressed = false;
@@ -193,6 +203,7 @@ public class FastBitmapDrawable extends Drawable {
                 break;
             }
         }
+
         if (mIsPressed != isPressed) {
             mIsPressed = isPressed;
 

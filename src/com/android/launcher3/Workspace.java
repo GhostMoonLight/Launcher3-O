@@ -1121,6 +1121,7 @@ public class Workspace extends PagedView
     /**
      * Adds the specified child in the specified screen. The position and dimension of
      * the child are defined by x, y, spanX and spanY.
+     * 往Workspace中添加Icon，并设置长按事件
      *
      * @param child The child to add in one of the workspace's screens.
      * @param screenId The screen in which to add the child.
@@ -4184,6 +4185,15 @@ public class Workspace extends PagedView
             }
          }
         exitWidgetResizeMode();
+    }
+
+    /**
+     * 当前页是否是左屏
+     * true 是左屏
+     * false 不是左屏
+     */
+    public boolean currentIsCustomContentPage(){
+        return (getScreenIdForPageIndex(getCurrentPage()) == CUSTOM_CONTENT_SCREEN_ID);
     }
 
     @Override

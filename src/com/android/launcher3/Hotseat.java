@@ -72,6 +72,7 @@ public class Hotseat extends FrameLayout
         mBackgroundColor = ColorUtils.setAlphaComponent(
                 Themes.getAttrColor(context, android.R.attr.colorPrimary), 0);
         mBackground = new ColorDrawable(mBackgroundColor);
+        // 设置Hotseat的背景
         setBackground(mBackground);
     }
 

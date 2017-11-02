@@ -264,7 +264,9 @@ public class AllAppsTransitionController implements TouchController, VerticalPul
             // Initialize values that should not change until #onDragEnd
             mStatusBarHeight = mLauncher.getDragLayer().getInsets().top;
             mHotseat.setVisibility(View.VISIBLE);
-            mHotseatBackgroundColor = mHotseat.getBackgroundDrawableColor();
+            // 如果在左屏 AllAppViews的背景颜色渐变初始值为透明色，不在左屏初始值为Hotseat的背景色
+            mHotseatBackgroundColor = mLauncher.getWorkspace().currentIsCustomContentPage()?
+                    Color.parseColor("#00000000") : mHotseat.getBackgroundDrawableColor();
             mHotseat.setBackgroundTransparent(true /* transparent */);
             if (!mLauncher.isAllAppsVisible()) {
                 mLauncher.tryAndUpdatePredictedApps();
@@ -514,10 +516,15 @@ public class AllAppsTransitionController implements TouchController, VerticalPul
                 mWorkspace.getPageIndicator().getCaretDrawable(), mLauncher);
     }
 
+    /**
+     * 这个onLayoutChange是有mHotseat触发的
+     */
     @Override
     public void onLayoutChange(View v, int left, int top, int right, int bottom,
             int oldLeft, int oldTop, int oldRight, int oldBottom) {
+        // 竖屏模式
         if (!mLauncher.getDeviceProfile().isVerticalBarLayout()) {
+            // AllAppViews的初始界面位置的TranslationY值为Hotseat的top值，这样他俩的初始位置就相同的了
             mShiftRange = top;
         } else {
             mShiftRange = bottom;

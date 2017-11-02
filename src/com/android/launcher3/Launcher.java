@@ -1039,6 +1039,7 @@ public class Launcher extends BaseActivity
         // were launching
         if (mWaitingForResume != null) {
             // Resets the previous workspace icon press state
+            // 重置View的按压状态
             mWaitingForResume.setStayPressed(false);
         }
 
@@ -2566,6 +2567,7 @@ public class Launcher extends BaseActivity
 
         if (success && v instanceof BubbleTextView) {
             mWaitingForResume = (BubbleTextView) v;
+            // 设置当前View按压状态，显示按压的阴影效果和变亮的效果
             mWaitingForResume.setStayPressed(true);
         }
     }
@@ -2811,6 +2813,7 @@ public class Launcher extends BaseActivity
         // Prepare intent
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         if (v != null) {
+            //  传入该图标的坐标
             intent.setSourceBounds(getViewBounds(v));
         }
         try {

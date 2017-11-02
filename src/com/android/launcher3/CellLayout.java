@@ -291,6 +291,7 @@ public class CellLayout extends ViewGroup implements BubbleTextShadowHandler {
         mStylusEventHelper = new StylusEventHelper(new SimpleOnStylusPressListener(this), this);
 
         mTouchFeedbackView = new ClickShadowView(context);
+        // View点击之后显示的阴影效果的View先添加，这样阴影View就在Icon的下面
         addView(mTouchFeedbackView);
         addView(mShortcutsAndWidgets);
     }

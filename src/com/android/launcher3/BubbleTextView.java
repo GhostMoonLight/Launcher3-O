@@ -56,6 +56,7 @@ import java.text.NumberFormat;
  * TextView that draws a bubble behind the text. We cannot use a LineBackgroundSpan
  * because we want to make the bubble taller than the text and TextView's clip is
  * too aggressive.
+ * 桌面图标的View
  */
 public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver {
 
@@ -258,6 +259,11 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver {
         super.setTag(tag);
     }
 
+    /**
+     * refreshDrawableState的过程中会调用drawableStateChanged方法，该方法中调用onCreateDrawableState方法，获取当前States的数组
+     * 然后调用Drawable的setState方法设置Drawable的状态，这个setState方法中会调用Drawable的onStateChange方法
+     * 所以只要重写Drawable的onStateChange方法，就能根据不同的状态对图片做相应的处理
+     */
     @Override
     public void refreshDrawableState() {
         if (!mIgnorePressedStateChange) {
@@ -268,6 +274,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver {
     @Override
     protected int[] onCreateDrawableState(int extraSpace) {
         final int[] drawableState = super.onCreateDrawableState(extraSpace + 1);
+        // 当按压的时候添加按压的状态, 这样只要mStayPressed的值不为false该view就一直有该按压State的状态值
         if (mStayPressed) {
             mergeDrawableStates(drawableState, STATE_PRESSED);
         }
@@ -339,6 +346,12 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver {
         return result;
     }
 
+    /**
+     * 设置当前View按压状态，显示按压的阴影效果和变亮的效果
+     * 这个两个效果是独立实现
+     * 变亮效果：根据View的状态变化回调FastBitmapDrawable中的onStateChange方法，在这个方法里面做相应的处理
+     * 阴影效果：回调父布局的setPressedIcon方法，让父布局来实现
+     */
     void setStayPressed(boolean stayPressed) {
         mStayPressed = stayPressed;
         if (!stayPressed) {
@@ -668,6 +681,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver {
 
     /**
      * Interface to be implemented by the grand parent to allow click shadow effect.
+     * 由父布局实现，允许单击显示阴影效果。
      */
     public interface BubbleTextShadowHandler {
         void setPressedIcon(BubbleTextView icon, Bitmap background);
