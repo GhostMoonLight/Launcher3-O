@@ -77,6 +77,10 @@ import com.android.launcher3.widget.WidgetsContainerView;
  *          - From the center workspace
  *          - From another workspace
  */
+
+/**
+ * Launcher状态变换动画
+ */
 public class LauncherStateTransitionAnimation {
 
     /**

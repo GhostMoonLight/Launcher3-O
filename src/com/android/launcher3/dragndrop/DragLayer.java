@@ -83,7 +83,7 @@ public class DragLayer extends InsettableFrameLayout {
 
     // Variables relating to resizing widgets
     private final boolean mIsRtl;
-    private AppWidgetResizeFrame mCurrentResizeFrame;
+    private AppWidgetResizeFrame mCurrentResizeFrame;     // 控制Widget布局大小的改变
 
     // Variables relating to animation of views after drop
     private ValueAnimator mDropAnim = null;
@@ -112,9 +112,9 @@ public class DragLayer extends InsettableFrameLayout {
     private PinchToOverviewListener mPinchListener = null;
 
     // Handles all apps pull up interaction
-    private AllAppsTransitionController mAllAppsController;
+    private AllAppsTransitionController mAllAppsController;  // 控制AllApps界面的滑动
 
-    private TouchController mActiveController;
+    private TouchController mActiveController;   // 当前激活的滑动控制器
     /**
      * Used to create a new DragLayer from XML.
      *

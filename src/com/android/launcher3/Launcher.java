@@ -194,7 +194,7 @@ public class Launcher extends BaseActivity
     /** The different states that Launcher can be in. */
     enum State { NONE,
         WORKSPACE,                        // Workspace显示状态
-        WORKSPACE_SPRING_LOADED,          //
+        WORKSPACE_SPRING_LOADED,          // 拖拽模式
         APPS,                             // APPS（所有Apps界面）显示状态
         APPS_SPRING_LOADED,               //
         WIDGETS,                          // 桌面小部件界面显示状态
@@ -2944,6 +2944,9 @@ public class Launcher extends BaseActivity
         return true;
     }
 
+    /**
+     * 该view是否是Hotseat中的CellLayout
+     */
     boolean isHotseatLayout(View layout) {
         // TODO: Remove this method
         return mHotseat != null && layout != null &&
@@ -2952,6 +2955,7 @@ public class Launcher extends BaseActivity
 
     /**
      * Returns the CellLayout of the specified container at the specified screen.
+     * 返回指定屏幕的CellLayout
      */
     public CellLayout getCellLayout(long container, long screenId) {
         if (container == LauncherSettings.Favorites.CONTAINER_HOTSEAT) {
@@ -2972,10 +2976,16 @@ public class Launcher extends BaseActivity
         return isAppsViewVisible();
     }
 
+    /**
+     * 是否是AllApps界面显示状态
+     */
     public boolean isAppsViewVisible() {
         return (mState == State.APPS) || (mOnResumeState == State.APPS);
     }
 
+    /**
+     * 是否是WidgetsView显示状态
+     */
     public boolean isWidgetsViewVisible() {
         return (mState == State.WIDGETS) || (mOnResumeState == State.WIDGETS);
     }

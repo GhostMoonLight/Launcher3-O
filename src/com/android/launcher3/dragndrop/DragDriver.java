@@ -27,7 +27,7 @@ import com.android.launcher3.Utilities;
  * Base class for driving a drag/drop operation.
  */
 public abstract class DragDriver {
-    protected final EventListener mEventListener;
+    protected final EventListener mEventListener;    //该对象的实现为DragController
 
     public interface EventListener {
         void onDriverDragMove(float x, float y);

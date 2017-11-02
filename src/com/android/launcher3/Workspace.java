@@ -192,11 +192,11 @@ public class Workspace extends PagedView
     // in all apps or customize mode)
 
     public enum State {
-        NORMAL          (false, false, ContainerType.WORKSPACE),
-        NORMAL_HIDDEN   (false, false, ContainerType.ALLAPPS),
-        SPRING_LOADED   (false, true, ContainerType.WORKSPACE),
-        OVERVIEW        (true, true, ContainerType.OVERVIEW),
-        OVERVIEW_HIDDEN (true, false, ContainerType.WIDGETS);
+        NORMAL          (false, false, ContainerType.WORKSPACE),     // 正常状态
+        NORMAL_HIDDEN   (false, false, ContainerType.ALLAPPS),       // ALLAPPS显示状态
+        SPRING_LOADED   (false, true, ContainerType.WORKSPACE),      // 拖拽模式
+        OVERVIEW        (true, true, ContainerType.OVERVIEW),        // 编辑模式
+        OVERVIEW_HIDDEN (true, false, ContainerType.WIDGETS);        // Widgets显示状态
 
         public final boolean shouldUpdateWidget;
         public final boolean hasMultipleVisiblePages;
@@ -430,6 +430,9 @@ public class Workspace extends PagedView
         return r;
     }
 
+    /**
+     * DragController中handleMoveEvent方法中回调此方法，Workspace进入退拽滑动模式
+     */
     @Override
     public void onDragStart(DropTarget.DragObject dragObject, DragOptions options) {
         if (ENFORCE_DRAG_EVENT_ORDER) {
@@ -483,6 +486,7 @@ public class Workspace extends PagedView
         }
 
         // Always enter the spring loaded mode
+        // Workspace进入退拽滑动模式
         mLauncher.enterSpringLoadedDragMode();
     }
 
@@ -2308,6 +2312,7 @@ public class Workspace extends PagedView
         // Clear the pressed state if necessary
         if (child instanceof BubbleTextView) {
             BubbleTextView icon = (BubbleTextView) child;
+            // 长按时清除view的按压状态
             icon.clearPressedBackground();
         }
 

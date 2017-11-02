@@ -30,6 +30,7 @@ import com.android.launcher3.util.TouchController;
 
 /**
  * Handles AllApps view transition.
+ * 处理AllApps界面的滑动
  * 1) Slides all apps view using direct manipulation
  * 2) When finger is released, animate to either top or bottom accordingly.
  * <p/>
@@ -105,6 +106,9 @@ public class AllAppsTransitionController implements TouchController, VerticalPul
         mAllAppsBackgroundColor = Themes.getAttrColor(l, android.R.attr.colorPrimary);
     }
 
+    /**
+     * DragLayer的onInterceptTouchEvent方法中会调用这个方法，判断是否拦截本次触摸操作
+     */
     @Override
     public boolean onControllerInterceptTouchEvent(MotionEvent ev) {
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {

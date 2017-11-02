@@ -159,6 +159,10 @@ public class DragController implements DragDriver.EventListener, TouchController
 
         mDragObject = new DropTarget.DragObject();
 
+        /**
+         * 从Launcher中的onLongClick事件执行到这里时，mOptions的值是直接new的,
+         * 所以preDragCondition的值为空，mIsInPreDrag这里肯定为false
+         */
         mIsInPreDrag = mOptions.preDragCondition != null
                 && !mOptions.preDragCondition.shouldStartDrag(0);
 
