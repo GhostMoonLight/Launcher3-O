@@ -17,8 +17,6 @@
 package com.android.launcher3.dragndrop;
 
 import android.graphics.Point;
-import android.support.annotation.CallSuper;
-import android.view.View;
 
 import com.android.launcher3.DropTarget;
 
@@ -27,7 +25,10 @@ import com.android.launcher3.DropTarget;
  */
 public class DragOptions {
 
-    /** Whether or not an accessible drag operation is in progress. */
+    /**
+     * Whether or not an accessible drag operation is in progress.
+     * 是否可以进行拖放操作
+     */
     public boolean isAccessibleDrag = false;
 
     /** Specifies the start location for the system DnD, null when using internal DnD */

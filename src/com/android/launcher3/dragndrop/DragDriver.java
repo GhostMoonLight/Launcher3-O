@@ -25,6 +25,10 @@ import com.android.launcher3.Utilities;
 
 /**
  * Base class for driving a drag/drop operation.
+ * 用于拖动拖放操作的基类。
+ * 拖拽操作的驱动类，用来判断是否拦截本次拖拽的触摸事件，并驱动其他类进行相应的处理
+ * 通过EventListener回调驱动其他的类进行相应的操作
+ * DragController是EventListener的唯一实现类，这里就是驱动DragController。
  */
 public abstract class DragDriver {
     protected final EventListener mEventListener;    //该对象的实现为DragController
@@ -67,6 +71,12 @@ public abstract class DragDriver {
     public abstract boolean onDragEvent (DragEvent event);
 
 
+    /**
+     * 是否拦截本次触摸事件
+     * 这个方法直接返回true，既默认是拦截触摸事件的
+     * @return true  拦截
+     *         false 不拦截
+     */
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         final int action = ev.getAction();
 
@@ -94,6 +104,7 @@ public abstract class DragDriver {
 
 /**
  * Class for driving a system (i.e. framework) drag/drop operation.
+ * 该类不拦截触摸操作,因为重写了父类的onInterceptTouchEvent方法，并直接放回false
  */
 class SystemDragDriver extends DragDriver {
 
@@ -160,6 +171,7 @@ class SystemDragDriver extends DragDriver {
 
 /**
  * Class for driving an internal (i.e. not using framework) drag/drop operation.
+ * 该类因为没有重写父类的onInterceptTouchEvent方法，所以是拦截触摸操作的
  */
 class InternalDragDriver extends DragDriver {
     public InternalDragDriver(DragController dragController) {
@@ -167,5 +179,7 @@ class InternalDragDriver extends DragDriver {
     }
 
     @Override
-    public boolean onDragEvent (DragEvent event) { return false; }
+    public boolean onDragEvent (DragEvent event) {
+        return false;
+    }
 };

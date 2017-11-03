@@ -31,6 +31,7 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * Base class for a View which shows a floating UI on top of the launcher UI.
+ * 视图的基类，它在启动器UI顶部显示一个浮动的UI。
  */
 public abstract class AbstractFloatingView extends LinearLayout {
 

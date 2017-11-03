@@ -54,6 +54,7 @@ import java.util.List;
 
 /**
  * Bottom sheet for the "Widgets" system shortcut in the long-press popup.
+ * 点击长按图标显示的Shortcuts中的微件后显示的该图标的桌面小部件视图。
  */
 public class WidgetsBottomSheet extends AbstractFloatingView implements Insettable, TouchController,
         VerticalPullDetector.Listener, View.OnClickListener, View.OnLongClickListener,

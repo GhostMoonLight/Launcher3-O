@@ -136,12 +136,14 @@ public class PopupContainerWithArrow extends AbstractFloatingView implements Dra
      */
     public static PopupContainerWithArrow showForIcon(BubbleTextView icon) {
         Launcher launcher = Launcher.getLauncher(icon.getContext());
+        // getOpen不为null说明已经显示了一个container就不能在显示另一个了
         if (getOpen(launcher) != null) {
             // There is already an items container open, so don't open this one.
             icon.clearFocus();
             return null;
         }
         ItemInfo itemInfo = (ItemInfo) icon.getTag();
+        // 判断该Item是否支持显示Shortcuts
         if (!DeepShortcutManager.supportsShortcuts(itemInfo)) {
             return null;
         }
@@ -844,6 +846,7 @@ public class PopupContainerWithArrow extends AbstractFloatingView implements Dra
 
     /**
      * Returns a DeepShortcutsContainer which is already open or null
+     * 返回一个已经打开了的ShortcutsContainer视图，没有打开返回null
      */
     public static PopupContainerWithArrow getOpen(Launcher launcher) {
         return getOpenView(launcher, TYPE_POPUP_CONTAINER_WITH_ARROW);

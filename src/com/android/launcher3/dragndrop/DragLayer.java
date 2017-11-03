@@ -57,6 +57,7 @@ import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.folder.Folder;
 import com.android.launcher3.folder.FolderIcon;
 import com.android.launcher3.keyboard.ViewGroupFocusHelper;
+import com.android.launcher3.logging.LogUtils;
 import com.android.launcher3.logging.LoggerUtils;
 import com.android.launcher3.util.Thunk;
 import com.android.launcher3.util.TouchController;
@@ -211,7 +212,6 @@ public class DragLayer extends InsettableFrameLayout {
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         int action = ev.getAction();
-
         if (action == MotionEvent.ACTION_DOWN) {
             // Cancel discovery bounce animation when a user start interacting on anywhere on
             // dray layer even if mAllAppsController is NOT the active controller.
@@ -257,6 +257,7 @@ public class DragLayer extends InsettableFrameLayout {
             mActiveController = mPinchListener;
             return true;
         }
+
         return false;
     }
 
@@ -365,6 +366,32 @@ public class DragLayer extends InsettableFrameLayout {
                 mTouchCompleteListener.onTouchComplete();
             }
             mTouchCompleteListener = null;
+        }
+
+        /**
+         * 当拖拽WidgetsBottomSheet中的Widget时，有可能会出现拖拽的Widget卡主不动的情况
+         * 根据Log：
+         *      DragLayer.onInterceptTouchEvent():216->onInterceptTouchEvent action:0
+         *      DragLayer.onInterceptTouchEvent():252->widgetsBottomSheet:com.android.launcher3.widget.WidgetsBottomSheet
+         *      DragLayer.onInterceptTouchEvent():263->不拦截..
+         *      DragController.startDrag():142->startDrag
+         *      DragController.startDrag():195->mDragDriver:InternalDragDriver
+         *      DragLayer.onTouchEvent():362->onTouchEvent action:2  mActiveController:null
+         *      DragLayer.onTouchEvent():362->onTouchEvent action:2  mActiveController:null
+         *
+         *      当startDrag执行的时候mDragController.onControllerInterceptTouchEvent(ev)肯定返回true
+         *      正常情况startDrag执行之后，DragLayer的onInterceptTouchEvent还回被调用一次，但是有时候不会被调用
+         *      导致mActiveController的值为空，因此执行onTouchEvent的时候就不会执行mActiveController.onControllerTouchEvent(ev)
+         *      造成拖拽的View卡主的情况，这种Bug不容易发生。
+         *
+         * 修复：
+         *      当为空的时候再次调用mDragController.onControllerInterceptTouchEvent(ev)进行判断
+         */
+        if (mActiveController == null){
+            if (mDragController.onControllerInterceptTouchEvent(ev)) {
+                LogUtils.eTag("修补此时mActiveController为null的Bug");
+                mActiveController = mDragController;
+            }
         }
 
         if (mActiveController != null) {

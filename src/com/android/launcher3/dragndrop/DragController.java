@@ -44,6 +44,10 @@ import java.util.ArrayList;
 
 /**
  * Class for initiating a drag within a view or across multiple views.
+ * 用于在视图内或跨多个视图中启动拖动的类。
+ *
+ * 拖拽操作都是从startDrag方法开始的，这里面创建拖拽驱动的对象，
+ * 用来判断是否拦截触摸事件和回调EventListener的方法
  */
 public class DragController implements DragDriver.EventListener, TouchController {
     private static final boolean PROFILE_DRAWING_DURING_DRAG = false;
@@ -58,6 +62,7 @@ public class DragController implements DragDriver.EventListener, TouchController
     /**
      * Drag driver for the current drag/drop operation, or null if there is no active DND operation.
      * It's null during accessible drag operations.
+     * 这个对象的实例只会在startDrag方法中创建
      */
     private DragDriver mDragDriver = null;
 
@@ -183,6 +188,7 @@ public class DragController implements DragDriver.EventListener, TouchController
             mDragObject.yOffset = mMotionDownY - (dragLayerY + dragRegionTop);
             mDragObject.stateAnnouncer = DragViewStateAnnouncer.createFor(dragView);
 
+            // 这个对象的实例是InternalDragDriver
             mDragDriver = DragDriver.create(mLauncher, this, mDragObject, mOptions);
         }
 
