@@ -380,7 +380,7 @@ public class DragLayer extends InsettableFrameLayout {
          *      DragLayer.onTouchEvent():362->onTouchEvent action:2  mActiveController:null
          *
          *      当startDrag执行的时候mDragController.onControllerInterceptTouchEvent(ev)肯定返回true
-         *      正常情况startDrag执行之后，DragLayer的onInterceptTouchEvent还回被调用一次，但是有时候不会被调用
+         *      正常情况startDrag执行之后，DragLayer的onInterceptTouchEvent还回被系统调用，但是有时候不会被系统调用
          *      导致mActiveController的值为空，因此执行onTouchEvent的时候就不会执行mActiveController.onControllerTouchEvent(ev)
          *      造成拖拽的View卡主的情况，这种Bug不容易发生。
          *

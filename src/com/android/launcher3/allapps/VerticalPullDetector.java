@@ -20,8 +20,8 @@ public class VerticalPullDetector {
     private float mTouchSlop;
 
     private int mScrollConditions;
-    public static final int DIRECTION_UP = 1 << 0;
-    public static final int DIRECTION_DOWN = 1 << 1;
+    public static final int DIRECTION_UP = 1 << 0;    //向上滑动
+    public static final int DIRECTION_DOWN = 1 << 1;  //向下滑动
     public static final int DIRECTION_BOTH = DIRECTION_DOWN | DIRECTION_UP;
 
     private static final float ANIMATION_DURATION = 1200;
@@ -42,7 +42,7 @@ public class VerticalPullDetector {
     private ScrollState mState = ScrollState.IDLE;
 
     enum ScrollState {
-        IDLE,
+        IDLE,          // 闲置状态
         DRAGGING,      // onDragStart, onDrag
         SETTLING       // onDragEnd
     }
@@ -82,6 +82,7 @@ public class VerticalPullDetector {
 
     /**
      * There's no touch and there's no animation.
+     * 是否是闲置状态
      */
     public boolean isIdleState() {
         return mState == ScrollState.IDLE;

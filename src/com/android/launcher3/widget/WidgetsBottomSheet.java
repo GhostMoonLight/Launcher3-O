@@ -71,7 +71,7 @@ public class WidgetsBottomSheet extends AbstractFloatingView implements Insettab
     private VerticalPullDetector.ScrollInterpolator mScrollInterpolator;
     private Rect mInsets;
     private boolean mWasNavBarLight;
-    private VerticalPullDetector mVerticalPullDetector;
+    private VerticalPullDetector mVerticalPullDetector;  //垂直方向的滑动处理类
 
     public WidgetsBottomSheet(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
