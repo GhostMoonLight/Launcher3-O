@@ -28,6 +28,20 @@ android {
         versionName "2.1"
 
     }
+
+    //签名信息
+    signingConfigs {
+        debug{
+        }
+
+        releaseConfig {
+            storeFile file("./release/launcher.keystore")
+            storePassword KEYSTORE_PASSWORD
+            keyAlias "CLauncher"
+            keyPassword KEY_PASSWORD
+        }
+    }
+
     buildTypes {
         debug {
             buildConfigField "boolean", "LOG_DEBUG", "true"
@@ -35,6 +49,9 @@ android {
 
         release {
             buildConfigField "boolean", "LOG_DEBUG", "true"
+
+            //签名所用的配置文件
+            signingConfig signingConfigs.releaseConfig
         }
     }
 
@@ -54,9 +71,27 @@ android {
             proto.srcDirs 'protos/'
 //            jinLibs.scrDir 'libs'
         }
-
-
     }
+
+    applicationVariants.all { variant ->
+        if (variant.buildType.name == 'release') {
+            variant.outputs.all { output ->
+                def outputFile = output.outputFile
+                if (outputFile != null && outputFile.name.endsWith('.apk')) {
+                    def fileName = output.outputFile.name.replace(".apk", "_V${defaultConfig.versionName}_${releaseTime()}.apk")
+                    if (!variant.flavorName.isEmpty()){
+                        fileName = fileName.replace(".apk", "_${variant.flavorName}.apk")
+                    }
+//                    output.outputFile = new File(outputFile.parent, fileName)
+                    output.outputFileName = new File(fileName)
+                }
+            }
+        }
+    }
+}
+
+def static releaseTime() {
+    return new Date().format("yyyyMMdd", TimeZone.getTimeZone("UTC"))
 }
 
 repositories {
