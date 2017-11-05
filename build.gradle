@@ -24,8 +24,8 @@ android {
         applicationId 'com.zues.launcher'
         minSdkVersion 21
         targetSdkVersion 26
-        versionCode 1
-        versionName "2.1"
+        versionCode 10000
+        versionName "1.0.0"
 
     }
 

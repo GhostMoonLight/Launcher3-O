@@ -121,11 +121,11 @@ public class FolderInfo extends ItemInfo {
     }
 
     public interface FolderListener {
-        public void onAdd(ShortcutInfo item);
-        public void onRemove(ShortcutInfo item);
-        public void onTitleChanged(CharSequence title);
-        public void onItemsChanged(boolean animate);
-        public void prepareAutoUpdate();
+        void onAdd(ShortcutInfo item);
+        void onRemove(ShortcutInfo item);
+        void onTitleChanged(CharSequence title);
+        void onItemsChanged(boolean animate);
+        void prepareAutoUpdate();
     }
 
     public boolean hasOption(int optionFlag) {

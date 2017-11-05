@@ -3,12 +3,19 @@ package com.android.launcher3.folder;
 import android.view.View;
 
 import com.android.launcher3.config.FeatureFlags;
+import com.android.launcher3.logging.LogUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 裁剪文件夹图标布局规则
+ */
 public class ClippedFolderIconLayoutRule implements FolderIcon.PreviewLayoutRule {
 
+    /**
+     * 文件夹Icon中显示图标的个数，现在只支持显示四个
+     */
     static final int MAX_NUM_ITEMS_IN_PREVIEW = 4;
     private static final int MIN_NUM_ITEMS_IN_PREVIEW = 2;
     private static final int MAX_NUM_ITEMS_PER_ROW = 2;
@@ -20,7 +27,7 @@ public class ClippedFolderIconLayoutRule implements FolderIcon.PreviewLayoutRule
 
     private float[] mTmpPoint = new float[2];
 
-    private float mAvailableSpace;
+    private float mAvailableSpace;   // 可利用的空间
     private float mRadius;
     private float mIconSize;
     private boolean mIsRtl;
@@ -65,6 +72,7 @@ public class ClippedFolderIconLayoutRule implements FolderIcon.PreviewLayoutRule
     private void getPosition(int index, int curNumItems, float[] result) {
         // The case of two items is homomorphic to the case of one.
         curNumItems = Math.max(curNumItems, 2);
+        curNumItems = MAX_NUM_ITEMS_IN_PREVIEW;
 
         // We model the preview as a circle of items starting in the appropriate piece of the
         // upper left quadrant (to achieve horizontal and vertical symmetry).
@@ -91,6 +99,7 @@ public class ClippedFolderIconLayoutRule implements FolderIcon.PreviewLayoutRule
         }
 
         // We bump the radius up between 0 and MAX_RADIUS_DILATION % as the number of items increase
+        // 随着项目数量的增加，我们将半径从0增加到MAX_RADIUS_DILATION％
         float radius = mRadius * (1 + MAX_RADIUS_DILATION * (curNumItems -
                 MIN_NUM_ITEMS_IN_PREVIEW) / (MAX_NUM_ITEMS_IN_PREVIEW - MIN_NUM_ITEMS_IN_PREVIEW));
         double theta = theta0 + index * (2 * Math.PI / curNumItems) * direction;
@@ -100,15 +109,21 @@ public class ClippedFolderIconLayoutRule implements FolderIcon.PreviewLayoutRule
         // Map the location along the circle, and offset the coordinates to represent the center
         // of the icon, and to be based from the top / left of the preview area. The y component
         // is inverted to match the coordinate system.
+        /**
+         * 沿着圆圈映射位置，偏移坐标以表示图标的中心，并且基于预览区域的顶部/左侧。 y分量反转以匹配坐标系。
+         */
+        float space = (mAvailableSpace-halfIconSize*4)*2.2f;
+        radius = radius - space;
         result[0] = mAvailableSpace / 2 + (float) (radius * Math.cos(theta) / 2) - halfIconSize;
         result[1] = mAvailableSpace / 2 + (float) (- radius * Math.sin(theta) / 2) - halfIconSize;
-
     }
 
     @Override
     public float scaleForItem(int index, int numItems) {
         // Scale is determined by the number of items in the preview.
-        float scale = 1f;
+        // 比例由预览中的项目数决定。
+        float scale;
+        numItems = MAX_NUM_ITEMS_IN_PREVIEW;
         if (numItems <= 2) {
             scale = MAX_SCALE;
         } else if (numItems == 3) {

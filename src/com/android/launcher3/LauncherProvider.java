@@ -52,12 +52,10 @@ import com.android.launcher3.AutoInstallsLayout.LayoutParserCallback;
 import com.android.launcher3.LauncherSettings.Favorites;
 import com.android.launcher3.LauncherSettings.WorkspaceScreens;
 import com.android.launcher3.compat.UserManagerCompat;
-import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.config.ProviderConfig;
 import com.android.launcher3.dynamicui.ExtractionUtils;
 import com.android.launcher3.graphics.IconShapeOverride;
 import com.android.launcher3.logging.FileLog;
-import com.android.launcher3.provider.LauncherDbUtils;
 import com.android.launcher3.provider.RestoreDbTask;
 import com.android.launcher3.util.ManagedProfileHeuristic;
 import com.android.launcher3.util.NoLocaleSqliteContext;
@@ -79,15 +77,7 @@ public class LauncherProvider extends ContentProvider {
     /**
      * Represents the schema of the database. Changes in scheme need not be backwards compatible.
      */
-    private static final int SCHEMA_VERSION = 27;
-    /**
-     * Represents the actual data. It could include additional validations and normalizations added
-     * overtime. These must be backwards compatible, else we risk breaking old devices during
-     * restore or binary version downgrade.
-     */
-    private static final int DATA_VERSION = 3;
-
-    private static final String PREF_KEY_DATA_VERISON = "provider_data_version";
+    private static final int SCHEMA_VERSION = 1;
 
     public static final String AUTHORITY = ProviderConfig.AUTHORITY;
 
@@ -601,8 +591,7 @@ public class LauncherProvider extends ContentProvider {
         /**
          * Constructor used in tests and for restore.
          */
-        public DatabaseHelper(
-                Context context, Handler widgetHostResetHandler, String tableName) {
+        public DatabaseHelper(Context context, Handler widgetHostResetHandler, String tableName) {
             super(new NoLocaleSqliteContext(context), tableName, null, SCHEMA_VERSION);
             mContext = context;
             mWidgetHostResetHandler = widgetHostResetHandler;
@@ -715,155 +704,18 @@ public class LauncherProvider extends ContentProvider {
             db.execSQL(removeOrphanedFolderItems);
         }
 
+        //该方法会在每次打开数据库时被调用
         @Override
         public void onOpen(SQLiteDatabase db) {
             super.onOpen(db);
-            SharedPreferences prefs = mContext
-                    .getSharedPreferences(LauncherFiles.DEVICE_PREFERENCES_KEY, 0);
-            int oldVersion = prefs.getInt(PREF_KEY_DATA_VERISON, 0);
-            if (oldVersion != DATA_VERSION) {
-                // Only run the data upgrade path for an existing db.
-                if (!Utilities.getPrefs(mContext).getBoolean(EMPTY_DATABASE_CREATED, false)) {
-                    db.beginTransaction();
-                    try {
-                        onDataUpgrade(db, oldVersion);
-                        db.setTransactionSuccessful();
-                    } catch (Exception e) {
-                        Log.d(TAG, "Error updating data version, ignoring", e);
-                        return;
-                    } finally {
-                        db.endTransaction();
-                    }
-                }
-                prefs.edit().putInt(PREF_KEY_DATA_VERISON, DATA_VERSION).apply();
-            }
-        }
-
-        /**
-         * Called when the data is updated as part of app update. It can be called multiple times
-         * with old version, even though it had been run before. The changes made here must be
-         * backwards compatible, else we risk breaking old devices during restore or binary
-         * version downgrade.
-         */
-        protected void onDataUpgrade(SQLiteDatabase db, int oldVersion) {
-            switch (oldVersion) {
-                case 0:
-                case 1: {
-                    // Remove "profile extra"
-                    UserManagerCompat um = UserManagerCompat.getInstance(mContext);
-                    for (UserHandle user : um.getUserProfiles()) {
-                        long serial = um.getSerialNumberForUser(user);
-                        String sql = "update favorites set intent = replace(intent, "
-                                + "';l.profile=" + serial + ";', ';') where itemType = 0;";
-                        db.execSQL(sql);
-                    }
-                }
-                case 2:
-                case 3:
-                    // data updated
-                    return;
-            }
         }
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             if (LOGD) Log.d(TAG, "onUpgrade triggered: " + oldVersion);
             switch (oldVersion) {
-                // The version cannot be lower that 12, as Launcher3 never supported a lower
-                // version of the DB.
-                case 12: {
-                    // With the new shrink-wrapped and re-orderable workspaces, it makes sense
-                    // to persist workspace screens and their relative order.
-                    mMaxScreenId = 0;
-                    addWorkspacesTable(db, false);
-                }
-                case 13: {
-                    db.beginTransaction();
-                    try {
-                        // Insert new column for holding widget provider name
-                        db.execSQL("ALTER TABLE favorites " +
-                                "ADD COLUMN appWidgetProvider TEXT;");
-                        db.setTransactionSuccessful();
-                    } catch (SQLException ex) {
-                        Log.e(TAG, ex.getMessage(), ex);
-                        // Old version remains, which means we wipe old data
-                        break;
-                    } finally {
-                        db.endTransaction();
-                    }
-                }
-                case 14: {
-                    db.beginTransaction();
-                    try {
-                        // Insert new column for holding update timestamp
-                        db.execSQL("ALTER TABLE favorites " +
-                                "ADD COLUMN modified INTEGER NOT NULL DEFAULT 0;");
-                        db.execSQL("ALTER TABLE workspaceScreens " +
-                                "ADD COLUMN modified INTEGER NOT NULL DEFAULT 0;");
-                        db.setTransactionSuccessful();
-                    } catch (SQLException ex) {
-                        Log.e(TAG, ex.getMessage(), ex);
-                        // Old version remains, which means we wipe old data
-                        break;
-                    } finally {
-                        db.endTransaction();
-                    }
-                }
-                case 15: {
-                    if (!addIntegerColumn(db, Favorites.RESTORED, 0)) {
-                        // Old version remains, which means we wipe old data
-                        break;
-                    }
-                }
-                case 16: {
-                    // No-op
-                }
-                case 17: {
-                    // No-op
-                }
-                case 18: {
-                    // Due to a data loss bug, some users may have items associated with screen ids
-                    // which no longer exist. Since this can cause other problems, and since the user
-                    // will never see these items anyway, we use database upgrade as an opportunity to
-                    // clean things up.
-                    removeOrphanedItems(db);
-                }
-                case 19: {
-                    // Add userId column
-                    if (!addProfileColumn(db)) {
-                        // Old version remains, which means we wipe old data
-                        break;
-                    }
-                }
-                case 20:
-                    if (!updateFolderItemsRank(db, true)) {
-                        break;
-                    }
-                case 21:
-                    // Recreate workspace table with screen id a primary key
-                    if (!recreateWorkspaceTable(db)) {
-                        break;
-                    }
-                case 22: {
-                    if (!addIntegerColumn(db, Favorites.OPTIONS, 0)) {
-                        // Old version remains, which means we wipe old data
-                        break;
-                    }
-                }
-                case 23:
-                    // No-op
-                case 24:
-                    ManagedProfileHeuristic.markExistingUsersForNoFolderCreation(mContext);
-                case 25:
-                    convertShortcutsToLauncherActivities(db);
-                case 26:
-                    // QSB was moved to the grid. Clear the first row on screen 0.
-                    if (FeatureFlags.QSB_ON_FIRST_SCREEN &&
-                            !LauncherDbUtils.prepareScreenZeroToHostQsb(mContext, db)) {
-                        break;
-                    }
-                case 27:
-                    // DB Upgraded successfully
+                case 1:
+                case 2:
                     return;
             }
 

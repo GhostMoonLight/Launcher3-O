@@ -32,6 +32,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.RadialGradient;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Region;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
@@ -127,7 +128,7 @@ public class FolderIcon extends FrameLayout implements FolderListener {
     private float mSlop;
 
     private PreviewItemDrawingParams mTmpParams = new PreviewItemDrawingParams(0, 0, 0, 0);
-    private ArrayList<PreviewItemDrawingParams> mDrawingParams = new ArrayList<PreviewItemDrawingParams>();
+    private ArrayList<PreviewItemDrawingParams> mDrawingParams = new ArrayList<>();
     private Drawable mReferenceDrawable = null;
 
     private Alarm mOpenAlarm = new Alarm();
@@ -515,6 +516,7 @@ public class FolderIcon extends FrameLayout implements FolderListener {
     /**
      * This object represents a FolderIcon preview background. It stores drawing / measurement
      * information, handles drawing, and animation (accept state <--> rest state).
+     * 此对象表示文件夹图标预览背景。它存储绘图/测量信息，处理绘图和动画（接受状态< - >静止状态）。
      */
     public static class PreviewBackground {
 
@@ -549,6 +551,7 @@ public class FolderIcon extends FrameLayout implements FolderListener {
         private CellLayout mDrawingDelegate;
         public int delegateCellX;
         public int delegateCellY;
+        private int round = 20;
 
         // When the PreviewBackground is drawn under an icon (for creating a folder) the border
         // should not occlude the icon
@@ -573,10 +576,10 @@ public class FolderIcon extends FrameLayout implements FolderListener {
             final int previewSize = grid.folderIconSizePx;
             final int previewPadding = grid.folderIconPreviewPadding;
 
-            this.previewSize = (previewSize - 2 * previewPadding);
+            this.previewSize = (previewSize - (int)(3.5 * previewPadding));   // 原始值是乘以2
 
             basePreviewOffsetX = (availableSpace - this.previewSize) / 2;
-            basePreviewOffsetY = previewPadding + grid.folderBackgroundOffset + topPadding;
+            basePreviewOffsetY = grid.iconDrawablePaddingPx / 2 + previewPadding + grid.folderBackgroundOffset + topPadding;
 
             // Stroke width is 1dp
             mStrokeWidth = dm.density;
@@ -632,11 +635,11 @@ public class FolderIcon extends FrameLayout implements FolderListener {
         }
 
         public void drawBackground(Canvas canvas) {
-            mPaint.setStyle(Paint.Style.FILL);
+//            mPaint.setStyle(Paint.Style.FILL);
             int alpha = (int) Math.min(MAX_BG_OPACITY, BG_OPACITY * mColorMultiplier);
             mPaint.setColor(Color.argb(alpha, BG_INTENSITY, BG_INTENSITY, BG_INTENSITY));
 
-            drawCircle(canvas, 0 /* deltaRadius */);
+            drawRect(canvas, 0 /* deltaRadius */);
 
             // Draw shadow.
             if (mShadowShader == null) {
@@ -667,7 +670,9 @@ public class FolderIcon extends FrameLayout implements FolderListener {
 
             if (canvas.isHardwareAccelerated()) {
                 mPaint.setXfermode(mShadowPorterDuffXfermode);
-                canvas.drawCircle(radius + offsetX, radius + offsetY, radius, mPaint);
+//                canvas.drawCircle(radius + offsetX, radius + offsetY, radius, mPaint);
+                RectF rf = new RectF(offsetX, offsetY, offsetX+2*radius, 2*radius+offsetY);
+                canvas.drawRoundRect(rf, round, round, mPaint);
                 mPaint.setXfermode(null);
             }
 
@@ -678,7 +683,7 @@ public class FolderIcon extends FrameLayout implements FolderListener {
             mPaint.setColor(Color.argb(255, BG_INTENSITY, BG_INTENSITY, BG_INTENSITY));
             mPaint.setStyle(Paint.Style.STROKE);
             mPaint.setStrokeWidth(mStrokeWidth);
-            drawCircle(canvas, 1 /* deltaRadius */);
+            drawRect(canvas, 1 /* deltaRadius */);
         }
 
         public void drawLeaveBehind(Canvas canvas) {
@@ -687,22 +692,26 @@ public class FolderIcon extends FrameLayout implements FolderListener {
 
             mPaint.setStyle(Paint.Style.FILL);
             mPaint.setColor(Color.argb(160, 245, 245, 245));
-            drawCircle(canvas, 0 /* deltaRadius */);
+            drawRect(canvas, 0 /* deltaRadius */);
 
             mScale = originalScale;
         }
 
-        private void drawCircle(Canvas canvas,float deltaRadius) {
-            float radius = getScaledRadius();
-            canvas.drawCircle(radius + getOffsetX(), radius + getOffsetY(),
-                    radius - deltaRadius, mPaint);
+        private void drawRect(Canvas canvas, float deltaRadius) {
+            float r = getScaledRadius();
+            RectF rf = new RectF(getOffsetX(), getOffsetY(), getOffsetX()+2*r, 2*r+getOffsetY());
+//            canvas.drawRect(radius + getOffsetX(), radius + getOffsetY(),
+//                    radius - deltaRadius, mPaint);
+            canvas.drawRoundRect(rf, round, round, mPaint);
         }
 
         // It is the callers responsibility to save and restore the canvas layers.
         private void clipCanvasSoftware(Canvas canvas, Region.Op op) {
             mPath.reset();
             float r = getScaledRadius();
-            mPath.addCircle(r + getOffsetX(), r + getOffsetY(), r, Path.Direction.CW);
+//            mPath.addCircle(r + getOffsetX(), r + getOffsetY(), r, Path.Direction.CW);
+            RectF rf = new RectF(getOffsetX(), getOffsetY(), getOffsetX()+2*r, 2*r+getOffsetY());
+            mPath.addRoundRect(rf, round, round, Path.Direction.CW);
             canvas.clipPath(mPath, op);
         }
 
@@ -1172,13 +1181,16 @@ public class FolderIcon extends FrameLayout implements FolderListener {
         }
     }
 
+    /**
+     * 文件夹布局规则接口
+     */
     public interface PreviewLayoutRule {
-        PreviewItemDrawingParams computePreviewItemDrawingParams(int index, int curNumItems,
-            PreviewItemDrawingParams params);
-        void init(int availableSpace, int intrinsicIconSize, boolean rtl);
-        float scaleForItem(int index, int totalNumItems);
-        int maxNumItems();
-        boolean clipToBackground();
-        List<View> getItemsToDisplay(Folder folder);
+        // 计算预览项目绘图参数
+        PreviewItemDrawingParams computePreviewItemDrawingParams(int index, int curNumItems, PreviewItemDrawingParams params);
+        void init(int availableSpace, int intrinsicIconSize, boolean rtl);   // 初始化
+        float scaleForItem(int index, int totalNumItems);   // 获取缩放比例
+        int maxNumItems();                           // 最多显示几个图标
+        boolean clipToBackground();                  // 是否裁剪背景
+        List<View> getItemsToDisplay(Folder folder); // 获取要显示的图标集合
     }
 }

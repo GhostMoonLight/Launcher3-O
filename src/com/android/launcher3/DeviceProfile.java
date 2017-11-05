@@ -310,7 +310,7 @@ public class DeviceProfile {
 
         // Folder icon
         folderBackgroundOffset = -edgeMarginPx;
-        folderIconSizePx = iconSizePx + 2 * -folderBackgroundOffset;
+        folderIconSizePx = (int) (iconSizePx + 1.8 * -folderBackgroundOffset);
         folderIconPreviewPadding = res.getDimensionPixelSize(R.dimen.folder_preview_padding);
     }
 

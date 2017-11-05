@@ -52,6 +52,7 @@ import com.android.launcher3.folder.Folder;
 import com.android.launcher3.folder.FolderIcon;
 import com.android.launcher3.graphics.LauncherIcons;
 import com.android.launcher3.logging.FileLog;
+import com.android.launcher3.logging.LogUtils;
 import com.android.launcher3.model.AddWorkspaceItemsTask;
 import com.android.launcher3.model.BgDataModel;
 import com.android.launcher3.model.CacheDataUpdatedTask;
