@@ -677,6 +677,7 @@ public class FolderIcon extends FrameLayout implements FolderListener {
             }
 
             canvas.restoreToCount(saveCount);
+            drawBackgroundColor(canvas);
         }
 
         public void drawBackgroundStroke(Canvas canvas) {
@@ -684,6 +685,15 @@ public class FolderIcon extends FrameLayout implements FolderListener {
             mPaint.setStyle(Paint.Style.STROKE);
             mPaint.setStrokeWidth(mStrokeWidth);
             drawRect(canvas, 1 /* deltaRadius */);
+        }
+
+        private void drawBackgroundColor(Canvas canvas){
+            Paint paint = new Paint();
+            paint.setStyle(Paint.Style.FILL);
+            int alpha = (int) Math.min(MAX_BG_OPACITY, BG_OPACITY * mColorMultiplier);
+            paint.setColor(Color.argb(alpha, BG_INTENSITY, BG_INTENSITY, BG_INTENSITY));
+
+            canvas.drawRoundRect(getBackgroundRectF(), round, round, paint);
         }
 
         public void drawLeaveBehind(Canvas canvas) {
@@ -697,21 +707,22 @@ public class FolderIcon extends FrameLayout implements FolderListener {
             mScale = originalScale;
         }
 
-        private void drawRect(Canvas canvas, float deltaRadius) {
+        private RectF getBackgroundRectF(){
             float r = getScaledRadius();
-            RectF rf = new RectF(getOffsetX(), getOffsetY(), getOffsetX()+2*r, 2*r+getOffsetY());
+            return new RectF(getOffsetX(), getOffsetY(), getOffsetX()+2*r, 2*r+getOffsetY());
+        }
+
+        private void drawRect(Canvas canvas, float deltaRadius) {
 //            canvas.drawRect(radius + getOffsetX(), radius + getOffsetY(),
 //                    radius - deltaRadius, mPaint);
-            canvas.drawRoundRect(rf, round, round, mPaint);
+            canvas.drawRoundRect(getBackgroundRectF(), round, round, mPaint);
         }
 
         // It is the callers responsibility to save and restore the canvas layers.
         private void clipCanvasSoftware(Canvas canvas, Region.Op op) {
             mPath.reset();
-            float r = getScaledRadius();
 //            mPath.addCircle(r + getOffsetX(), r + getOffsetY(), r, Path.Direction.CW);
-            RectF rf = new RectF(getOffsetX(), getOffsetY(), getOffsetX()+2*r, 2*r+getOffsetY());
-            mPath.addRoundRect(rf, round, round, Path.Direction.CW);
+            mPath.addRoundRect(getBackgroundRectF(), round, round, Path.Direction.CW);
             canvas.clipPath(mPath, op);
         }
 
