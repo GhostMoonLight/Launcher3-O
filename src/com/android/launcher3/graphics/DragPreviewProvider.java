@@ -34,6 +34,7 @@ import com.android.launcher3.folder.FolderIcon;
 
 /**
  * A utility class to generate preview bitmap for dragging.
+ * 用于生成拖动的预览位图的实用工具类。
  */
 public class DragPreviewProvider {
 

@@ -38,6 +38,8 @@ import java.nio.ByteBuffer;
 /**
  * Utility class to generate shadow and outline effect, which are used for click feedback
  * and drag-n-drop respectively.
+ *
+ * 全息轮廓帮手
  */
 public class HolographicOutlineHelper {
 

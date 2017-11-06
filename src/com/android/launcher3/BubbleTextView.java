@@ -160,7 +160,6 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver {
             defaultIconSize = grid.folderChildIconSizePx;
         }
         mCenterVertically = a.getBoolean(R.styleable.BubbleTextView_centerVertically, false);
-
         mIconSize = a.getDimensionPixelSize(R.styleable.BubbleTextView_iconSizeOverride,
                 defaultIconSize);
         a.recycle();

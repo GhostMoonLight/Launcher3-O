@@ -2284,6 +2284,7 @@ public class Workspace extends PagedView
         mOutlineProvider = previewProvider;
 
         // The drag bitmap follows the touch point around on the screen
+        // // 绘制拖拽图标
         final Bitmap b = previewProvider.createDragBitmap(mCanvas);
         int halfPadding = previewProvider.previewPadding / 2;
 

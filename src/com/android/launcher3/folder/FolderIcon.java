@@ -576,10 +576,10 @@ public class FolderIcon extends FrameLayout implements FolderListener {
             final int previewSize = grid.folderIconSizePx;
             final int previewPadding = grid.folderIconPreviewPadding;
 
-            this.previewSize = (previewSize - (int)(3.5 * previewPadding));   // 原始值是乘以2
+            this.previewSize = previewSize - (4 * previewPadding);   // 原始值是乘以2
 
             basePreviewOffsetX = (availableSpace - this.previewSize) / 2;
-            basePreviewOffsetY = grid.iconDrawablePaddingPx / 2 + previewPadding + grid.folderBackgroundOffset + topPadding;
+            basePreviewOffsetY = grid.iconDrawablePaddingPx*2 + previewPadding + grid.folderBackgroundOffset + topPadding;
 
             // Stroke width is 1dp
             mStrokeWidth = dm.density;

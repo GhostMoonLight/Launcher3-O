@@ -89,7 +89,7 @@ public class DeviceProfile {
     // Workspace icons
     public int iconSizePx;
     public int iconTextSizePx;
-    public int iconDrawablePaddingPx;
+    public int iconDrawablePaddingPx;        // 图标中图片和文字之间的间隔
     public int iconDrawablePaddingOriginalPx;
 
     public int cellWidthPx;
@@ -282,7 +282,7 @@ public class DeviceProfile {
                                 DisplayMetrics dm) {
         iconSizePx = (int) (Utilities.pxFromDp(inv.iconSize, dm) * scale);
         iconTextSizePx = (int) (Utilities.pxFromSp(inv.iconTextSize, dm) * scale);
-        iconDrawablePaddingPx = drawablePadding;
+        iconDrawablePaddingPx = drawablePadding / 2;
         hotseatIconSizePx = (int) (Utilities.pxFromDp(inv.hotseatIconSize, dm) * scale);
         allAppsIconSizePx = iconSizePx;
         allAppsIconDrawablePaddingPx = iconDrawablePaddingPx;
@@ -352,7 +352,7 @@ public class DeviceProfile {
         folderCellWidthPx = folderChildIconSizePx + 2 * cellPaddingX;
         folderCellHeightPx = folderChildIconSizePx + 2 * cellPaddingY + textHeight;
         folderChildDrawablePaddingPx = Math.max(0,
-                (folderCellHeightPx - folderChildIconSizePx - textHeight) / 3);
+                (folderCellHeightPx - folderChildIconSizePx - textHeight) / 4);
     }
 
     public void updateInsets(Rect insets) {
