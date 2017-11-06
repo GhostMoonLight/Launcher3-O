@@ -189,6 +189,7 @@ public class FolderIcon extends FrameLayout implements FolderListener {
         icon.mFolderName.setText(folderInfo.title);
         icon.mFolderName.setCompoundDrawablePadding(0);
         FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) icon.mFolderName.getLayoutParams();
+        // 设置文件夹的TextView的位置
         lp.topMargin = grid.iconSizePx + grid.iconDrawablePaddingPx;
 
         icon.setTag(folderInfo);
@@ -579,7 +580,7 @@ public class FolderIcon extends FrameLayout implements FolderListener {
             this.previewSize = previewSize - (4 * previewPadding);   // 原始值是乘以2
 
             basePreviewOffsetX = (availableSpace - this.previewSize) / 2;
-            basePreviewOffsetY = grid.iconDrawablePaddingPx*2 + previewPadding + grid.folderBackgroundOffset + topPadding;
+            basePreviewOffsetY = grid.folderIconPreviewPadding * 2 + grid.folderBackgroundOffset + topPadding;
 
             // Stroke width is 1dp
             mStrokeWidth = dm.density;
