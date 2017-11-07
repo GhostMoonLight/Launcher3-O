@@ -2593,17 +2593,20 @@ public class Workspace extends PagedView
 
         int snapScreen = -1;
         boolean resizeOnDrop = false;
+        // 拖拽源(Icon刚开始所在的容器)不是Workspace
         if (d.dragSource != this) {
             final int[] touchXY = new int[] { (int) mDragViewVisualCenter[0],
                     (int) mDragViewVisualCenter[1] };
             onDropExternal(touchXY, dropTargetLayout, d);
-        } else if (mDragInfo != null) {
+        } else if (mDragInfo != null) {  // 拖拽源是Workspace
             final View cell = mDragInfo.cell;
             boolean droppedOnOriginalCellDuringTransition = false;
 
             if (dropTargetLayout != null && !d.cancelled) {
                 // Move internally
+                // 判断是否移动到另一个CellLayout中
                 boolean hasMovedLayouts = (getParentCellLayoutForView(cell) != dropTargetLayout);
+                // 判断是否移动到Hostseat中
                 boolean hasMovedIntoHotseat = mLauncher.isHotseatLayout(dropTargetLayout);
                 long container = hasMovedIntoHotseat ?
                         LauncherSettings.Favorites.CONTAINER_HOTSEAT :
@@ -3821,6 +3824,7 @@ public class Workspace extends PagedView
 
     /**
      * Returns a specific CellLayout
+     * 获取该View所在的CellLayout
      */
     CellLayout getParentCellLayoutForView(View v) {
         ArrayList<CellLayout> layouts = getWorkspaceAndHotseatCellLayouts();

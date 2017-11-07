@@ -3,7 +3,6 @@ package com.android.launcher3.folder;
 import android.view.View;
 
 import com.android.launcher3.config.FeatureFlags;
-import com.android.launcher3.logging.LogUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,9 +19,9 @@ public class ClippedFolderIconLayoutRule implements FolderIcon.PreviewLayoutRule
     private static final int MIN_NUM_ITEMS_IN_PREVIEW = 2;
     private static final int MAX_NUM_ITEMS_PER_ROW = 2;
 
-    final float MIN_SCALE = 0.48f;
+    final float MIN_SCALE = 0.472f;
     final float MAX_SCALE = 0.58f;
-    final float MAX_RADIUS_DILATION = 0.15f;
+    final float MAX_RADIUS_DILATION = -0.025f;
     final float ITEM_RADIUS_SCALE_FACTOR = 1.33f;
 
     private float[] mTmpPoint = new float[2];
@@ -112,8 +111,8 @@ public class ClippedFolderIconLayoutRule implements FolderIcon.PreviewLayoutRule
         /**
          * 沿着圆圈映射位置，偏移坐标以表示图标的中心，并且基于预览区域的顶部/左侧。 y分量反转以匹配坐标系。
          */
-        float space = (mAvailableSpace-halfIconSize*4)*2.2f;
-        radius = radius - space;
+//        float space = (mAvailableSpace-halfIconSize*4)*2.2f;
+//        radius = radius - space;
         result[0] = mAvailableSpace / 2 + (float) (radius * Math.cos(theta) / 2) - halfIconSize;
         result[1] = mAvailableSpace / 2 + (float) (- radius * Math.sin(theta) / 2) - halfIconSize;
     }

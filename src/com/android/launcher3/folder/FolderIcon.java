@@ -552,7 +552,7 @@ public class FolderIcon extends FrameLayout implements FolderListener {
         private CellLayout mDrawingDelegate;
         public int delegateCellX;
         public int delegateCellY;
-        private int round = 20;
+        private int round = 18;
 
         // When the PreviewBackground is drawn under an icon (for creating a folder) the border
         // should not occlude the icon
@@ -580,7 +580,7 @@ public class FolderIcon extends FrameLayout implements FolderListener {
             this.previewSize = previewSize - (4 * previewPadding);   // 原始值是乘以2
 
             basePreviewOffsetX = (availableSpace - this.previewSize) / 2;
-            basePreviewOffsetY = grid.folderIconPreviewPadding * 2 + grid.folderBackgroundOffset + topPadding;
+            basePreviewOffsetY = (int) (grid.folderIconPreviewPadding * 2.2) + grid.folderBackgroundOffset + topPadding;
 
             // Stroke width is 1dp
             mStrokeWidth = dm.density;
@@ -1001,7 +1001,17 @@ public class FolderIcon extends FrameLayout implements FolderListener {
         anim.start();
     }
 
+    // Hoseat中也显示图标文字
     public void setTextVisible(boolean visible) {
+        if (visible) {
+            mFolderName.setVisibility(VISIBLE);
+        } else {
+//            mFolderName.setVisibility(INVISIBLE);
+            mFolderName.setVisibility(VISIBLE);
+        }
+    }
+
+    public void setTextVisibleWhenDrag(boolean visible){
         if (visible) {
             mFolderName.setVisibility(VISIBLE);
         } else {

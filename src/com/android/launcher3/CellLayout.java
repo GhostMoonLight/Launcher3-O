@@ -218,7 +218,7 @@ public class CellLayout extends ViewGroup implements BubbleTextShadowHandler {
         mFolderLeaveBehind.delegateCellX = -1;
         mFolderLeaveBehind.delegateCellY = -1;
 
-        mChildScale = mContainerType == HOTSEAT ? grid.inv.hotseatScale : 1f;
+        mChildScale = 1f;//mContainerType == HOTSEAT ? grid.inv.hotseatScale : 1f;
 
         setAlwaysDrawnWithCacheEnabled(false);
         final Resources res = getResources();

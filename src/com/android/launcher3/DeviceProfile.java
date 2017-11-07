@@ -282,7 +282,7 @@ public class DeviceProfile {
                                 DisplayMetrics dm) {
         iconSizePx = (int) (Utilities.pxFromDp(inv.iconSize, dm) * scale);
         iconTextSizePx = (int) (Utilities.pxFromSp(inv.iconTextSize, dm) * scale);
-        iconDrawablePaddingPx = drawablePadding / 2;
+        iconDrawablePaddingPx = drawablePadding / 3;
         hotseatIconSizePx = (int) (Utilities.pxFromDp(inv.hotseatIconSize, dm) * scale);
         allAppsIconSizePx = iconSizePx;
         allAppsIconDrawablePaddingPx = iconDrawablePaddingPx;
@@ -651,9 +651,9 @@ public class DeviceProfile {
             case CellLayout.WORKSPACE:
                 return cellHeightPx;
             case CellLayout.FOLDER:
-                return folderCellHeightPx;
+                return cellHeightPx; //folderCellHeightPx;
             case CellLayout.HOTSEAT:
-                return hotseatCellHeightPx;
+                return cellHeightPx; //hotseatCellHeightPx;
             default:
                 // ??
                 return 0;

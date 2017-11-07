@@ -19,6 +19,7 @@ package com.android.launcher3.graphics;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.Region.Op;
 import android.graphics.drawable.Drawable;
@@ -87,7 +88,7 @@ public class DragPreviewProvider {
                 // For FolderIcons the text can bleed into the icon area, and so we need to
                 // hide the text completely (which can't be achieved by clipping).
                 if (((FolderIcon) mView).getTextVisible()) {
-                    ((FolderIcon) mView).setTextVisible(false);
+                    ((FolderIcon) mView).setTextVisibleWhenDrag(false);
                     textVisible = true;
                 }
             }
@@ -98,7 +99,7 @@ public class DragPreviewProvider {
 
             // Restore text visibility of FolderIcon if necessary
             if (textVisible) {
-                ((FolderIcon) mView).setTextVisible(true);
+                ((FolderIcon) mView).setTextVisibleWhenDrag(true);
             }
         }
         destCanvas.restore();
@@ -136,6 +137,21 @@ public class DragPreviewProvider {
         canvas.setBitmap(null);
 
         return b;
+    }
+
+    private Bitmap loadBitmapFromView(View v) {
+        int w = v.getWidth();
+        int h = v.getHeight();
+        Bitmap bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        Canvas c = new Canvas(bmp);
+
+        c.drawColor(Color.WHITE);
+        /** 如果不设置canvas画布为白色，则生成透明 */
+
+        v.layout(0, 0, w, h);
+        v.draw(c);
+
+        return bmp;
     }
 
     public final void generateDragOutline(Canvas canvas) {

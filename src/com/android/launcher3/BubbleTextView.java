@@ -540,7 +540,8 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver {
         if (visible) {
             super.setTextColor(mTextColor);
         } else {
-            super.setTextColor(res.getColor(android.R.color.transparent));
+//            super.setTextColor(res.getColor(android.R.color.transparent));
+            super.setTextColor(mTextColor);
         }
     }
 
