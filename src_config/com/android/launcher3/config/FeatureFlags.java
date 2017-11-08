@@ -64,6 +64,8 @@ public final class FeatureFlags {
 
     // 拖拽的时候显示不显示Icon中的文字
     public static final boolean SHOW_TEXT_DRAG = false;
+    // 是否有左屏
+    public static final boolean HAS_CUSTOM_CONTENT = true;
 
 
 

@@ -3639,6 +3639,9 @@ public class Workspace extends PagedView
     }
 
     public int getCurrentPageOffsetFromCustomContent() {
+        if (hasCustomContent()){
+            return getCurrentPage()>0?getCurrentPage():1;
+        }
         return getNextPage() - numCustomPages();
     }
 

@@ -33,8 +33,6 @@ import android.widget.FrameLayout;
 import com.android.launcher3.CellLayout.ContainerType;
 import com.android.launcher3.badge.BadgeRenderer;
 import com.android.launcher3.config.FeatureFlags;
-import com.android.launcher3.logging.LogUtils;
-
 import java.util.ArrayList;
 
 public class DeviceProfile {
@@ -519,7 +517,6 @@ public class DeviceProfile {
      * 布局，Launcher中各个组件的显示位置
      */
     public void layout(Launcher launcher, boolean notifyListeners) {
-        LogUtils.eTag("************layout start*****************");
         FrameLayout.LayoutParams lp;
         // false纵向模式    true水平模式
         boolean hasVerticalBarLayout = isVerticalBarLayout();
@@ -532,7 +529,6 @@ public class DeviceProfile {
         lp.height = searchBarBounds.y;
         lp.topMargin = mInsets.top + edgeMarginPx;
         searchBar.setLayoutParams(lp);
-        LogUtils.eTag("Search Bar width:"+lp.width+" height:"+lp.height+" top:"+lp.topMargin);
 
         // Layout the workspace
         // WorkSapce充满全屏，通过设置padding来给Hoseat显示预留空间
@@ -541,7 +537,6 @@ public class DeviceProfile {
         workspace.setPadding(workspacePadding.left, workspacePadding.top, workspacePadding.right,
                 workspacePadding.bottom);
         workspace.setPageSpacing(getWorkspacePageSpacing());
-        LogUtils.eTag("workspace PaddingRect:"+workspacePadding);
 
         // Only display when enabled
         if (FeatureFlags.QSB_ON_FIRST_SCREEN) {
@@ -631,7 +626,6 @@ public class DeviceProfile {
                 mListeners.get(i).onLauncherLayoutChanged();
             }
         }
-        LogUtils.eTag("************layout end*****************");
     }
 
     private int getCurrentWidth() {

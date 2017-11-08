@@ -49,6 +49,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.StrictMode;
 import android.os.SystemClock;
@@ -104,6 +105,7 @@ import com.android.launcher3.folder.FolderIcon;
 import com.android.launcher3.keyboard.CustomActionsPopup;
 import com.android.launcher3.keyboard.ViewGroupFocusHelper;
 import com.android.launcher3.logging.FileLog;
+import com.android.launcher3.logging.LogUtils;
 import com.android.launcher3.logging.UserEventDispatcher;
 import com.android.launcher3.model.ModelWriter;
 import com.android.launcher3.model.PackageItemInfo;
@@ -248,6 +250,7 @@ public class Launcher extends BaseActivity
     private SpannableStringBuilder mDefaultKeySsb = null;
 
     @Thunk boolean mWorkspaceLoading = true;
+    boolean isBindItemsFinished = false;    //bindItems是否调用
 
     private boolean mPaused = true;
     private boolean mOnResumeNeedsLoad;
@@ -353,6 +356,7 @@ public class Launcher extends BaseActivity
                     .build());
         }
         if (LauncherAppState.PROFILE_STARTUP) {
+            LogUtils.eTag("Launcher onCreate");
             Trace.beginSection("Launcher-onCreate");
         }
 
@@ -431,7 +435,9 @@ public class Launcher extends BaseActivity
         } else {
             // Pages bound synchronously.
             mWorkspace.setCurrentPage(currentScreen);
-            setWorkspaceLoading(true);
+            // 有左屏的时候，旋转屏幕bindItems()方法可能先执行然后在执行到这里，这就导致了mWorkspaceLoading又被设置成了true
+            if (!isBindItemsFinished)
+                setWorkspaceLoading(true);
         }
 
         // For handling default keys
@@ -623,7 +629,7 @@ public class Launcher extends BaseActivity
         if (mLauncherCallbacks != null) {
             return mLauncherCallbacks.hasCustomContentToLeft();
         }
-        return true;
+        return FeatureFlags.HAS_CUSTOM_CONTENT;
     }
 
     /**
@@ -1869,6 +1875,11 @@ public class Launcher extends BaseActivity
         for (int page: mSynchronouslyBoundPages) {
             mWorkspace.restoreInstanceStateForChild(page);
         }
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState, @Nullable PersistableBundle persistentState) {
+        super.onCreate(savedInstanceState, persistentState);
     }
 
     @Override
@@ -3826,7 +3837,7 @@ public class Launcher extends BaseActivity
             Trace.beginSection("Page bind completed");
         }
         mWorkspace.restoreInstanceStateForRemainingPages();
-
+        isBindItemsFinished = true;
         setWorkspaceLoading(false);
 
         if (mPendingActivityResult != null) {
