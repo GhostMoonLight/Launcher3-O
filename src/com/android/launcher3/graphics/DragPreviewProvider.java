@@ -19,7 +19,6 @@ package com.android.launcher3.graphics;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.Region.Op;
 import android.graphics.drawable.Drawable;
@@ -30,6 +29,7 @@ import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherAppWidgetHostView;
 import com.android.launcher3.R;
 import com.android.launcher3.Workspace;
+import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.config.ProviderConfig;
 import com.android.launcher3.folder.FolderIcon;
 
@@ -74,11 +74,17 @@ public class DragPreviewProvider {
     private void drawDragView(Canvas destCanvas) {
         destCanvas.save();
         if (mView instanceof TextView) {
-            Drawable d = Workspace.getTextViewIcon((TextView) mView);
-            Rect bounds = getDrawableBounds(d);
-            destCanvas.translate(blurSizeOutline / 2 - bounds.left,
-                    blurSizeOutline / 2 - bounds.top);
-            d.draw(destCanvas);
+            if (FeatureFlags.SHOW_TEXT_DRAG){
+                destCanvas.translate(-mView.getScrollX() + blurSizeOutline / 2,
+                        -mView.getScrollY() + blurSizeOutline / 2);
+                mView.draw(destCanvas);
+            }else {
+                Drawable d = Workspace.getTextViewIcon((TextView) mView);
+                Rect bounds = getDrawableBounds(d);
+                destCanvas.translate(blurSizeOutline / 2 - bounds.left,
+                        blurSizeOutline / 2 - bounds.top);
+                d.draw(destCanvas);
+            }
         } else {
             final Rect clipRect = mTempRect;
             mView.getDrawingRect(clipRect);
@@ -87,7 +93,7 @@ public class DragPreviewProvider {
             if (mView instanceof FolderIcon) {
                 // For FolderIcons the text can bleed into the icon area, and so we need to
                 // hide the text completely (which can't be achieved by clipping).
-                if (((FolderIcon) mView).getTextVisible()) {
+                if (((FolderIcon) mView).getTextVisible() && !FeatureFlags.SHOW_TEXT_DRAG) {
                     ((FolderIcon) mView).setTextVisibleWhenDrag(false);
                     textVisible = true;
                 }
@@ -119,6 +125,10 @@ public class DragPreviewProvider {
             Rect bounds = getDrawableBounds(d);
             width = bounds.width();
             height = bounds.height();
+            if (FeatureFlags.SHOW_TEXT_DRAG){
+                width = mView.getWidth();
+                height = mView.getHeight();
+            }
         } else if (mView instanceof LauncherAppWidgetHostView) {
             scale = ((LauncherAppWidgetHostView) mView).getScaleToFit();
             width = (int) (mView.getWidth() * scale);
@@ -137,21 +147,6 @@ public class DragPreviewProvider {
         canvas.setBitmap(null);
 
         return b;
-    }
-
-    private Bitmap loadBitmapFromView(View v) {
-        int w = v.getWidth();
-        int h = v.getHeight();
-        Bitmap bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-        Canvas c = new Canvas(bmp);
-
-        c.drawColor(Color.WHITE);
-        /** 如果不设置canvas画布为白色，则生成透明 */
-
-        v.layout(0, 0, w, h);
-        v.draw(c);
-
-        return bmp;
     }
 
     public final void generateDragOutline(Canvas canvas) {

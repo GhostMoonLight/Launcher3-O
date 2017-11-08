@@ -4134,6 +4134,7 @@ public class Launcher extends BaseActivity
         mModel.refreshAndBindWidgetsAndShortcuts(this, mWidgetsView.isEmpty(), packageUser);
     }
 
+    // s锁定屏幕方向
     public void lockScreenOrientation() {
         if (mRotationEnabled) {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);

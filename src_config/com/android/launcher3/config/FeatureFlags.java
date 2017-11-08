@@ -62,6 +62,9 @@ public final class FeatureFlags {
     // 是否禁用抽屉页   true禁用  false不禁用    禁用抽屉页之后就在Destop中显示数据(该逻辑还没有实现)
     public static final boolean DISABLE_ALL_APPS = false;
 
+    // 拖拽的时候显示不显示Icon中的文字
+    public static final boolean SHOW_TEXT_DRAG = false;
+
 
 
 

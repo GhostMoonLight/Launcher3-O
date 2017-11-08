@@ -635,13 +635,21 @@ public class DragLayer extends InsettableFrameLayout {
             // The child may be scaled (always about the center of the view) so to account for it,
             // we have to offset the position by the scaled size.  Once we do that, we can center
             // the drag view about the scaled child view.
-            toY += Math.round(toScale * tv.getPaddingTop());
-            toY -= dragView.getMeasuredHeight() * (1 - toScale) / 2;
-            if (dragView.getDragVisualizeOffset() != null) {
-                toY -=  Math.round(toScale * dragView.getDragVisualizeOffset().y);
-            }
+            if (FeatureFlags.SHOW_TEXT_DRAG){
+                toY += Math.round(scale * (child.getPaddingTop() - dragView.getDragRegionTop()));
+                toY -= scale * dragView.getBlurSizeOutline() / 2;
+                toY -= (1 - scale) * dragView.getMeasuredHeight() / 2;
+                // Center in the x coordinate about the target's drawable
+                toX -= (dragView.getMeasuredWidth() - Math.round(scale * child.getMeasuredWidth())) / 2;
+            } else {
+                toY += Math.round(toScale * tv.getPaddingTop());
+                toY -= dragView.getMeasuredHeight() * (1 - toScale) / 2;
+                if (dragView.getDragVisualizeOffset() != null) {
+                    toY -= Math.round(toScale * dragView.getDragVisualizeOffset().y);
+                }
 
-            toX -= (dragView.getMeasuredWidth() - Math.round(scale * child.getMeasuredWidth())) / 2;
+                toX -= (dragView.getMeasuredWidth() - Math.round(scale * child.getMeasuredWidth())) / 2;
+            }
         } else if (child instanceof FolderIcon) {
             // Account for holographic blur padding on the drag view
             toY += Math.round(scale * (child.getPaddingTop() - dragView.getDragRegionTop()));
