@@ -1122,8 +1122,8 @@ public class Launcher extends BaseActivity
         if (mLauncherTab != null) {
             mLauncherTab.getClient().onPause();
         }
-
         if (mLauncherCallbacks != null) {
+
             mLauncherCallbacks.onPause();
         }
     }
@@ -1131,13 +1131,13 @@ public class Launcher extends BaseActivity
     public interface CustomContentCallbacks {
         // Custom content is completely shown. {@code fromResume} indicates whether this was caused
         // by a onResume or by scrolling otherwise.
-        public void onShow(boolean fromResume);
+        void onShow(boolean fromResume);
 
         // Custom content is completely hidden
-        public void onHide();
+        void onHide();
 
         // Custom content scroll progress changed. From 0 (not showing) to 1 (fully showing).
-        public void onScrollProgressChanged(float progress);
+        void onScrollProgressChanged(float progress);
 
         // Indicates whether the user is allowed to scroll away from the custom content.
         boolean isScrollingAllowed();
@@ -2889,14 +2889,14 @@ public class Launcher extends BaseActivity
                 mDeviceProfile.shouldIgnoreLongPressToOverview(mLastDispatchTouchEventX);
 
         if (v instanceof Workspace) { // 长按的是Workspace
-            // Workspace不在编辑模式
+            // Workspace不在预览状态
             if (!mWorkspace.isInOverviewMode()) {
                 // Workspace不处于触摸活动 并且 该长按不忽略
                 if (!mWorkspace.isTouchActive() && !ignoreLongPressToOverview) {
                     getUserEventDispatcher().logActionOnContainer(Action.Touch.LONGPRESS,
                             Action.Direction.NONE, ContainerType.WORKSPACE,
                             mWorkspace.getCurrentPage());
-                    // Workspace进入编辑模式
+                    // Workspace进入预览状态
                     showOverviewMode(true);
                     // 执行触觉反馈
                     mWorkspace.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS,

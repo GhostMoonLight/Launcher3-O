@@ -195,7 +195,7 @@ public class Workspace extends PagedView
         NORMAL          (false, false, ContainerType.WORKSPACE),     // 正常状态
         NORMAL_HIDDEN   (false, false, ContainerType.ALLAPPS),       // ALLAPPS显示状态
         SPRING_LOADED   (false, true, ContainerType.WORKSPACE),      // 拖拽模式
-        OVERVIEW        (true, true, ContainerType.OVERVIEW),        // 编辑模式
+        OVERVIEW        (true, true, ContainerType.OVERVIEW),        // 预览状态
         OVERVIEW_HIDDEN (true, false, ContainerType.WIDGETS);        // Widgets显示状态
 
         public final boolean shouldUpdateWidget;
