@@ -61,6 +61,9 @@
     <uses-permission android:name="com.zues.launcher.permission.WRITE_SETTINGS" />
     <uses-permission android:name="com.zues.launcher.permission.QSB" />
     <uses-permission android:name="android.permission.SET_WALLPAPER_HINTS" />
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
     <application
         android:backupAgent="com.android.launcher3.LauncherBackupAgent"
@@ -119,6 +122,12 @@
                 <action android:name="android.intent.action.APPLICATION_PREFERENCES" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
+        </activity>
+
+        <activity
+            android:name="com.android.launcher3.TestActivity"
+            android:theme="@style/SettingsTheme"
+            android:autoRemoveFromRecents="true">
         </activity>
 
         <!--

@@ -1,10 +1,5 @@
 package com.android.launcher3.download;
 
-import android.text.TextUtils;
-
-import com.android.launcher3.LauncherApplication;
-import com.android.launcher3.utils.PackageUtil;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -91,6 +86,7 @@ public class DownloadManager {
 
 	/** 当下载状态发送改变的时候回调 */
 	public void notifyDownloadStateChanged(DownloadTaskInfo info) {
+	    if (info.isInvalid) return; // 如果该任务无效就不回调
 		synchronized (mObservers) {
 			for (DownloadObserver observer : mObservers) {
 				observer.onDownloadStateChanged(info);
@@ -162,7 +158,9 @@ public class DownloadManager {
                 InitDownloadTask initTask = mInitTaskMap.remove(info.getId());
                 ThreadManager.getDownloadPool().cancel(initTask);
             } else if (info.initState == 3){
+                // 抛弃之前的DownloadTaskInfo，put一个新的DownloadTaskInfo的对象
                 mDownloadMap.put(appInfo.id, info.cloneSelf());
+                info.isInvalid = true; //老的任务设置成无效的，之后该DownloadTaskInfo就不会刷新回调
             }
 		}
 	}
@@ -242,7 +240,7 @@ public class DownloadManager {
             try {
                 URL url = new URL(info.getUrl());
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                connection.setConnectTimeout(5000);
+                connection.setConnectTimeout(1000);
                 connection.setRequestMethod("GET");
                 info.size = connection.getContentLength();
                 if (info.size >= 0) {
@@ -380,14 +378,7 @@ public class DownloadManager {
 					a:while (!isStop && downloading) {
 						synchronized (info) {
 							if (info.getDownloadState() == STATE_PAUSED){
-//								try {
-//									info.wait();
-//								} catch (Exception e) {
-//                                    e.printStackTrace();
-//								}
-//                                if (isStop){
-                                    break a;
-//                                }
+								break a;
 							}
 						}
 						
@@ -404,8 +395,8 @@ public class DownloadManager {
                                     info.setSpeed(info.getCurrentSize() - info.oldDownloaded);
                                     info.oldDownloaded = info.getCurrentSize();
                                 }
+								DownloadDB.getInstance().updateUnfinished(this);
                             }
-							DownloadDB.getInstance().updateUnfinished(this);
 						}else{
 							downloading = false;
 							synchronized (info) {
@@ -479,11 +470,11 @@ public class DownloadManager {
 	 * 检查文件是否下载完成
 	 */
 	private boolean checkDownloadFile(String path) {
-		PackageUtil.AppSnippet sAppSnippet = PackageUtil.getAppSnippet(LauncherApplication.getInstance(), path);
-		
-		if(sAppSnippet == null || TextUtils.isEmpty(sAppSnippet.packageName)) {
-			return false;
-		}
+//		PackageUtil.AppSnippet sAppSnippet = PackageUtil.getAppSnippet(LauncherApplication.getInstance(), path);
+//
+//		if(sAppSnippet == null || TextUtils.isEmpty(sAppSnippet.packageName)) {
+//			return false;
+//		}
 		return true;
 	}
 

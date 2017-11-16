@@ -5,6 +5,7 @@ import android.text.TextUtils;
 import com.android.launcher3.LauncherApplication;
 import com.android.launcher3.util.Utils;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 /**
@@ -26,6 +27,8 @@ public class DownloadTaskInfo {
     private int completeThreadCount;
     public long lastUpdateTime;  //上次刷新进度的时间
     public long oldDownloaded;   //获取速度时上次下载的长度
+    public boolean isInvalid = false;      // 是否是无效的的，当暂停任务的时候该字段会置成true
+    private static DecimalFormat df =new DecimalFormat("#.00");
 
     public static DownloadTaskInfo clone(DownloadInfo downloadInfo){
         DownloadTaskInfo downloadTaskInfo = new DownloadTaskInfo();
@@ -40,7 +43,7 @@ public class DownloadTaskInfo {
 
     public float getCurrentProgress(){
         if (size == 0) return 0;
-        float progress = currentSize*1.0f/size;
+        float progress = Float.valueOf(df.format(currentSize*1.0f/size));
         if (progress < 0) progress = 0;
         return progress;
     }
@@ -93,7 +96,7 @@ public class DownloadTaskInfo {
     }
 
     public static String getPath(String name){
-        return LauncherApplication.getInstance().getDoanloadDir()+"/"+name+".apk";
+        return LauncherApplication.getInstance().getDoanloadDir()+"/"+name;
     }
 
     public synchronized void setCompleteThreadCount(){

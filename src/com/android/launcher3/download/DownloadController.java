@@ -2,8 +2,6 @@ package com.android.launcher3.download;
 
 import android.view.View;
 
-import com.android.launcher3.utils.PackageUtil;
-
 /**
  * Created by cgx on 2016/12/7.
  * 控制下载和View的刷新, 下载载体是以单个View为最小单元的
@@ -66,7 +64,7 @@ public class DownloadController implements DownloadManager.DownloadObserver{
         }else if (mState == DownloadManager.STATE_WAITING || mState == DownloadManager.STATE_DOWNLOADING) {
             mDownloadManager.pause(info);
         } else if (mState == DownloadManager.STATE_DOWNLOADED) {
-            PackageUtil.installApkNormal(DownloadTaskInfo.getPath(info.name));
+//            PackageUtil.installApkNormal(DownloadTaskInfo.getPath(info.name));
         }
     }
 
