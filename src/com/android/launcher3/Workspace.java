@@ -549,7 +549,7 @@ public class Workspace extends PagedView
         return numCustomPages();
     }
 
-    // 设置布局容器动画
+    // 设置布局容器动画    android:animateLayoutChanges="true"
     private void setupLayoutTransition() {
         /**
          * 1.LayoutTransition.APPEARING：当View出现或者添加的时候View出现的动画。
