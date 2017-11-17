@@ -1,5 +1,10 @@
 package com.android.launcher3.download;
 
+import android.text.TextUtils;
+
+import com.android.launcher3.LauncherApplication;
+import com.android.launcher3.util.PackageUtil;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -470,11 +475,13 @@ public class DownloadManager {
 	 * 检查文件是否下载完成
 	 */
 	private boolean checkDownloadFile(String path) {
-//		PackageUtil.AppSnippet sAppSnippet = PackageUtil.getAppSnippet(LauncherApplication.getInstance(), path);
-//
-//		if(sAppSnippet == null || TextUtils.isEmpty(sAppSnippet.packageName)) {
-//			return false;
-//		}
+		if (!TextUtils.isEmpty(path) && path.endsWith(".apk")) {
+			PackageUtil.AppSnippet sAppSnippet = PackageUtil.getAppSnippet(LauncherApplication.getInstance(), path);
+
+			if (sAppSnippet == null || TextUtils.isEmpty(sAppSnippet.packageName)) {
+				return false;
+			}
+		}
 		return true;
 	}
 

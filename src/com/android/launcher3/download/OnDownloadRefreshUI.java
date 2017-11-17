@@ -5,6 +5,6 @@ package com.android.launcher3.download;
  * 下载过程中View的刷新回调
  */
 
-public interface OnDownloadRefreshUI {
+interface OnDownloadRefreshUI {
     void onRefreshUI(DownloadTaskInfo info);
 }
