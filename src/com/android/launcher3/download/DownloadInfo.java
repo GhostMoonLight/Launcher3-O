@@ -15,6 +15,7 @@ public class DownloadInfo implements Parcelable,Serializable {
     public String name;  //名称
     public String url;    //地址
     public long size;    //大小
+    public int mState;    // 下载状态
 
     public DownloadInfo() {
     }

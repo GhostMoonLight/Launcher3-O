@@ -134,6 +134,7 @@ public class DownloadDB {
 				info.size = (Long.valueOf(cursor.getString(cursor.getColumnIndex(DownloadDBHelper.COLUMN_SIZE))));
 				info.url = (cursor.getString(cursor.getColumnIndex(DownloadDBHelper.COLUMN_URL)));
 				info.downloadState = (DownloadManager.STATE_DOWNLOADED);
+				info.setCurrentSize(info.size);
 				if (new File(DownloadTaskInfo.getPath(info.name)).exists()) {
 					list.add(info);
 				}

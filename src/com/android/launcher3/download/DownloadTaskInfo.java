@@ -34,12 +34,23 @@ public class DownloadTaskInfo {
         DownloadTaskInfo downloadTaskInfo = new DownloadTaskInfo();
 
         downloadTaskInfo.id = downloadInfo.id;
+        if (TextUtils.isEmpty(downloadInfo.name)){
+            downloadInfo.name = getFileNameFromUrl(downloadInfo.url);
+        }
         downloadTaskInfo.name = downloadInfo.name;
+
         downloadTaskInfo.url = downloadInfo.url;
         downloadTaskInfo.size = downloadInfo.size;
 
         return downloadTaskInfo;
     }
+
+    private static String getFileNameFromUrl(String url){
+        String fileName = "";
+        fileName = url.substring(url.lastIndexOf("/")+1);
+        return fileName;
+    }
+
 
     public float getCurrentProgress(){
         if (size == 0) return 0;

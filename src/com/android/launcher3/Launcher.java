@@ -3101,6 +3101,8 @@ public class Launcher extends BaseActivity
     /**
      * Shows the apps view.
      * 显示APPS界面
+     *
+     * focusSearchBar  Apps界面中的EditText是否获取焦点并显示软键盘
      */
     public void showAppsView(boolean animated, boolean updatePredictedApps,
             boolean focusSearchBar) {

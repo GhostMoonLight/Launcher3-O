@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -101,6 +102,7 @@ public class DownloadManager {
 
 	/** 当下载进度发送改变的时候回调 */
 	public void notifyDownloadProgressed(DownloadTaskInfo info) {
+        if (info.isInvalid) return; // 如果该任务无效就不回调
 		synchronized (mObservers) {
 			for (DownloadObserver observer : mObservers) {
 				observer.onDownloadProgressed(info);
@@ -110,6 +112,9 @@ public class DownloadManager {
 
 	/** 下载，需要传入一个DownloadInfo对象 */
 	public synchronized void download(DownloadInfo appInfo) {
+	    if (appInfo == null || TextUtils.isEmpty(appInfo.url))
+	        throw new InvalidParameterException("DownloadInfo is null or url is null");
+
 		//先判断是否有这个app的下载信息
 		DownloadTaskInfo info = mDownloadMap.get(appInfo.id);
 		if (info == null) {//如果没有，则根据appInfo创建一个新的下载信息
@@ -119,14 +124,13 @@ public class DownloadManager {
             //如果下载任务存在，且状态是暂停，继续下载
             if (info.getDownloadState() == STATE_PAUSED && info.initState != 0) {
                 if (info.initState == 2 || info.initState == 3){
-                    info.setDownloadState(STATE_DOWNLOADING);//先改变下载状态
+                    info.setDownloadState(STATE_WAITING);//先改变下载状态
                     notifyDownloadStateChanged(info);
                     executeDownload(info);
                 } else if (info.initState == 1){
                     info.setDownloadState(STATE_WAITING);
                 } else {
-                    //为0说明当前线程池已满，等待执行中被暂停了,初始化任务还没执行
-					System.out.print("");
+                    //为0说明当前线程池已满，在队列中被暂停了,初始化任务还没执行
                 }
                 notifyDownloadStateChanged(info);
                 return;
@@ -144,22 +148,15 @@ public class DownloadManager {
 		}
 	}
 
-    private void continueTask(DownloadTaskInfo info){
-        info.setDownloadState(STATE_DOWNLOADING);
-        notifyDownloadStateChanged(info);
-        synchronized (info) {
-            info.notifyAll();
-        }
-    }
-
 	/** 暂停下载 */
 	public synchronized void pause(DownloadInfo appInfo) {
-//		stopDownload(appInfo);
+
 		DownloadTaskInfo info = mDownloadMap.get(appInfo.id);//找出下载信息
 		if (info != null) {//修改下载状态
 			info.setDownloadState(STATE_PAUSED);
 			notifyDownloadStateChanged(info);
             if (info.initState == 0){
+                // 直接从队列中移除Task
                 InitDownloadTask initTask = mInitTaskMap.remove(info.getId());
                 ThreadManager.getDownloadPool().cancel(initTask);
             } else if (info.initState == 3){
@@ -362,8 +359,12 @@ public class DownloadManager {
                 conn.setConnectTimeout(10000);
                 conn.setRequestMethod("GET");
                 // 设置范围，格式为Range：bytes x-y;
+                long start = (startPos + compeleteSize);
+                if (start > endPos){
+                    start = endPos;
+                }
                 conn.setRequestProperty("Range", "bytes="
-                        + (startPos + compeleteSize) + "-" + endPos);
+                        + start + "-" + endPos);
 
                 randomAccessFile = new RandomAccessFile(info.getPath(), "rwd");
                 randomAccessFile.seek(startPos + compeleteSize);
@@ -378,7 +379,7 @@ public class DownloadManager {
 
 					int count;
 					
-					byte[] buffer = new byte[1024*100];
+					byte[] buffer = new byte[1024*10];
                     boolean downloading = true;
 					a:while (!isStop && downloading) {
 						synchronized (info) {
@@ -418,6 +419,8 @@ public class DownloadManager {
 										notifyDownloadStateChanged(info);
 										DownloadDB.getInstance().deleteUnfinished(info.name);
 									}
+									// 清除下载任务Runnable
+									info.taskLists.clear();
 								}
 							}
 						}
