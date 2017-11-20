@@ -101,6 +101,9 @@ public class TestActivity extends Activity implements DownloadManager.DownloadOb
         btn3.setOnClickListener(this);
         btn4.setOnClickListener(this);
         btn5.setOnClickListener(this);
+
+        Button button = findViewById(R.id.btn_del);
+        button.setOnClickListener(this);
     }
 
     @Override
@@ -165,6 +168,9 @@ public class TestActivity extends Activity implements DownloadManager.DownloadOb
                     case DownloadManager.STATE_ERROR:
                         btn.setText("错误");
                         break;
+                    case DownloadManager.STATE_NONE:
+                        btn.setText("下载");
+                        break;
                     default:
                         break;
                 }
@@ -178,10 +184,16 @@ public class TestActivity extends Activity implements DownloadManager.DownloadOb
     @Override
     public void onClick(View v) {
         DownloadInfo info = (DownloadInfo) v.getTag();
-        if (info.mState == DownloadManager.STATE_NONE || info.mState == DownloadManager.STATE_PAUSED || info.mState == DownloadManager.STATE_ERROR) {
-            DownloadManager.getInstance().download(info);
-        }else if (info.mState == DownloadManager.STATE_WAITING || info.mState == DownloadManager.STATE_DOWNLOADING) {
-            DownloadManager.getInstance().pause(info);
+        if (info != null) {
+            if (info.mState == DownloadManager.STATE_NONE || info.mState == DownloadManager.STATE_PAUSED || info.mState == DownloadManager.STATE_ERROR) {
+                DownloadManager.getInstance().download(info);
+            } else if (info.mState == DownloadManager.STATE_WAITING || info.mState == DownloadManager.STATE_DOWNLOADING) {
+                DownloadManager.getInstance().pause(info);
+            }
+        } else {
+            for (DownloadInfo di : list) {
+                DownloadManager.getInstance().cancel(di);
+            }
         }
     }
 }

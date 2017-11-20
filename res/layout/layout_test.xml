@@ -97,5 +97,10 @@
 
             android:text="0%"/>
     </LinearLayout>
-
+    <Button
+        android:id="@+id/btn_del"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:text="删除全部"/>
 </LinearLayout>

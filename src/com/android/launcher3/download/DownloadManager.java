@@ -396,22 +396,23 @@ public class DownloadManager {
                                 info.addCurrentSize(count);
                                 currentTime = System.currentTimeMillis();
                                 if (currentTime - info.lastUpdateTime > 1000) {
-                                    notifyDownloadProgressed(info);//刷新进度
                                     info.lastUpdateTime = currentTime;
                                     info.setSpeed(info.getCurrentSize() - info.oldDownloaded);
                                     info.oldDownloaded = info.getCurrentSize();
                                 }
 								DownloadDB.getInstance().updateUnfinished(this);
                             }
-						}else{
+                            notifyDownloadProgressed(info);//刷新进度
+						} else {
 							downloading = false;
+                            info.setCompleteThreadCount();
 							synchronized (info) {
-								info.setCompleteThreadCount();
+								info.taskLists.remove(this);// 清除下载任务Runnable
 								if (info.getCompleteThreadCount() == THREAD_COUNT) {
 									info.setSpeed(0);
+                                    info.setDownloadState(STATE_DOWNLOADED);
+                                    notifyDownloadStateChanged(info);
 									if (checkDownloadFile(info.getPath())) {
-										info.setDownloadState(STATE_DOWNLOADED);
-										notifyDownloadStateChanged(info);
 										DownloadDB.getInstance().insertFinished(info);
 										DownloadDB.getInstance().deleteUnfinished(info.name);
 									} else {
@@ -419,7 +420,6 @@ public class DownloadManager {
 										notifyDownloadStateChanged(info);
 										DownloadDB.getInstance().deleteUnfinished(info.name);
 									}
-									// 清除下载任务Runnable
 									info.taskLists.clear();
 								}
 							}
