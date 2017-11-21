@@ -137,20 +137,23 @@ public class DownloadManager {
 
 	/** 暂停下载 */
 	public synchronized void pause(DownloadInfo appInfo) {
+		//找出下载信息 暂停下载
+		pause(mDownloadMap.get(appInfo.id));
+	}
 
-		DownloadTaskInfo info = mDownloadMap.get(appInfo.id);//找出下载信息
+	private void pause(DownloadTaskInfo info){
 		if (info != null) {//修改下载状态
 			info.setDownloadState(STATE_PAUSED);
 			notifyDownloadProgressed(info);
-            if (info.initState == 0){
-                // 直接从队列中移除Task
-                InitDownloadTask initTask = mInitTaskMap.remove(info.getId());
-                ThreadManager.getDownloadPool().cancel(initTask);
-            } else if (info.initState == 3){
-                // 抛弃之前的DownloadTaskInfo，put一个新的DownloadTaskInfo的对象
-                mDownloadMap.put(appInfo.id, info.cloneSelf());
-                info.isInvalid = true; //老的任务设置成无效的，之后该DownloadTaskInfo就不会刷新回调
-            }
+			if (info.initState == 0){
+				// 直接从队列中移除Task
+				InitDownloadTask initTask = mInitTaskMap.remove(info.getId());
+				ThreadManager.getDownloadPool().cancel(initTask);
+			} else if (info.initState == 3){
+				// 抛弃之前的DownloadTaskInfo，put一个新的DownloadTaskInfo的对象
+				mDownloadMap.put(info.id, info.cloneSelf());
+				info.isInvalid = true; //老的任务设置成无效的，之后该DownloadTaskInfo就不会刷新回调
+			}
 		}
 	}
 
@@ -171,7 +174,19 @@ public class DownloadManager {
 		}
 	}
 
-	/** 获取下载信息 */
+	/**
+	 * 全部暂停
+	 */
+	public void pauseAll(){
+		for (Entry<Integer, DownloadTaskInfo> entry : mDownloadMap.entrySet()) {
+			if(entry.getValue().getDownloadState()!=STATE_DOWNLOADED){
+				pause(entry.getValue());
+			}
+
+		}
+	}
+
+	/** 根据id获取下载信息 */
 	public synchronized DownloadTaskInfo getDownloadInfo(int id) {
 		
 		DownloadTaskInfo tInfo = mDownloadMap.get(id);
@@ -187,25 +202,12 @@ public class DownloadManager {
 		
 		return tInfo;
 	}
-	/** 获取全部下载中的信息 */
+	/** 获取正在下载的信息 */
 	public synchronized List<DownloadTaskInfo> getAllDownloadingInfo() {
 		List<DownloadTaskInfo> all=new ArrayList<>();
-		List<Integer> allId=new ArrayList<>();
 		for (Entry<Integer, DownloadTaskInfo> entry : mDownloadMap.entrySet()) {
-		    System.out.println("key= " + entry.getKey() + " and value= " + entry.getValue());
 		    if(entry.getValue().getDownloadState()!=STATE_DOWNLOADED){
-		    	int downloadId=entry.getValue().getId();
-		    	boolean needAdd=true;
-		    	for(int i=0;i<allId.size();i++){
-		    		if(downloadId==allId.get(i)){
-		    			needAdd=false;
-		    			break;
-		    		}
-		    	}
-				if (needAdd) {
-					all.add(entry.getValue());
-					allId.add(entry.getValue().getId());
-				}
+				all.add(entry.getValue());
 		    }
 		    
 		}  
