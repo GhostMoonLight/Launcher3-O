@@ -113,11 +113,6 @@ public class TestActivity extends Activity implements DownloadManager.DownloadOb
     }
 
     @Override
-    public void onDownloadStateChanged(DownloadTaskInfo info) {
-        refresh(info);
-    }
-
-    @Override
     public void onDownloadProgressed(DownloadTaskInfo info) {
         refresh(info);
     }

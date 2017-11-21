@@ -3,8 +3,6 @@ package com.android.launcher3.download;
 import android.text.TextUtils;
 import android.view.View;
 
-import com.android.launcher3.util.PackageUtil;
-
 /**
  * Created by cgx on 2016/12/7.
  * 控制下载和View的刷新, 下载载体是以单个View为最小单元的, 只能在自定义View中使用
@@ -20,11 +18,6 @@ public class DownloadController implements DownloadManager.DownloadObserver{
     public DownloadController(OnDownloadRefreshUI view){
         mTargView = view;
         mDownloadManager = DownloadManager.getInstance();
-    }
-
-    @Override
-    public void onDownloadStateChanged(DownloadTaskInfo info) {
-        refresh(info);
     }
 
     @Override
@@ -57,7 +50,7 @@ public class DownloadController implements DownloadManager.DownloadObserver{
         this.info = info;
         DownloadTaskInfo taskInfo = mDownloadManager.getDownloadMap().get(info.id);
         if (taskInfo != null){
-            onDownloadStateChanged(taskInfo);
+            onDownloadProgressed(taskInfo);
         }
     }
 
@@ -70,7 +63,7 @@ public class DownloadController implements DownloadManager.DownloadObserver{
         } else if (mState == DownloadManager.STATE_DOWNLOADED) {
             if (!TextUtils.isEmpty(info.name)){
                 if (info.name.endsWith(".apk")){
-                    PackageUtil.installApkNormal(DownloadTaskInfo.getPath(info.name));
+                    DUtil.installApkNormal(DownloadTaskInfo.getPath(info.name));
                 } else {
                     if (mFinishedClickListener != null) {
                         mFinishedClickListener.onFinishedClick();

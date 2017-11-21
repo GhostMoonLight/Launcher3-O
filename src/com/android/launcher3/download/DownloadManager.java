@@ -2,9 +2,6 @@ package com.android.launcher3.download;
 
 import android.text.TextUtils;
 
-import com.android.launcher3.LauncherApplication;
-import com.android.launcher3.util.PackageUtil;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -90,16 +87,6 @@ public class DownloadManager {
 		}
 	}
 
-	/** 当下载状态发送改变的时候回调 */
-	public void notifyDownloadStateChanged(DownloadTaskInfo info) {
-	    if (info.isInvalid) return; // 如果该任务无效就不回调
-		synchronized (mObservers) {
-			for (DownloadObserver observer : mObservers) {
-				observer.onDownloadStateChanged(info);
-			}
-		}
-	}
-
 	/** 当下载进度发送改变的时候回调 */
 	public void notifyDownloadProgressed(DownloadTaskInfo info) {
         if (info.isInvalid) return; // 如果该任务无效就不回调
@@ -125,14 +112,14 @@ public class DownloadManager {
             if (info.getDownloadState() == STATE_PAUSED && info.initState != 0) {
                 if (info.initState == 2 || info.initState == 3){
                     info.setDownloadState(STATE_WAITING);//先改变下载状态
-                    notifyDownloadStateChanged(info);
+                    notifyDownloadProgressed(info);
                     executeDownload(info);
                 } else if (info.initState == 1){
                     info.setDownloadState(STATE_WAITING);
                 } else {
                     //为0说明当前线程池已满，在队列中被暂停了,初始化任务还没执行
                 }
-                notifyDownloadStateChanged(info);
+                notifyDownloadProgressed(info);
                 return;
             }
         }
@@ -141,7 +128,7 @@ public class DownloadManager {
 		if (info.getDownloadState() == STATE_NONE || info.getDownloadState() == STATE_PAUSED || info.getDownloadState() == STATE_ERROR) {
 			//下载之前，把状态设置为STATE_WAITING，因为此时并没有产开始下载，只是把任务放入了线程池中，当任务真正开始执行时，才会改为STATE_DOWNLOADING
 			info.setDownloadState(STATE_WAITING);
-			notifyDownloadStateChanged(info);//每次状态发生改变，都需要回调该方法通知所有观察者
+			notifyDownloadProgressed(info);//每次状态发生改变，都需要回调该方法通知所有观察者
             InitDownloadTask task = new InitDownloadTask(info);//创建一个下载任务，放入线程池
             mInitTaskMap.put(info.getId(), task);
             ThreadManager.getDownloadPool().execute(task);
@@ -154,7 +141,7 @@ public class DownloadManager {
 		DownloadTaskInfo info = mDownloadMap.get(appInfo.id);//找出下载信息
 		if (info != null) {//修改下载状态
 			info.setDownloadState(STATE_PAUSED);
-			notifyDownloadStateChanged(info);
+			notifyDownloadProgressed(info);
             if (info.initState == 0){
                 // 直接从队列中移除Task
                 InitDownloadTask initTask = mInitTaskMap.remove(info.getId());
@@ -177,7 +164,7 @@ public class DownloadManager {
             }
             info.setDownloadState(STATE_NONE);
             info.setCurrentSize(0);
-			notifyDownloadStateChanged(info);
+			notifyDownloadProgressed(info);
 			File file = new File(info.getPath());
 			file.delete();
             DownloadDB.getInstance().deleteUnfinished(info.name);
@@ -260,13 +247,13 @@ public class DownloadManager {
                     mDownloadMap.remove(info.getId());
                     ret = false;
                     info.setDownloadState(STATE_ERROR);
-                    notifyDownloadStateChanged(info);
+                    notifyDownloadProgressed(info);
                 }
             } catch (Exception e) {
                 mDownloadMap.remove(info.getId());
                 ret = false;
                 info.setDownloadState(STATE_ERROR);
-                notifyDownloadStateChanged(info);
+                notifyDownloadProgressed(info);
                 e.printStackTrace();
                 try {
                     File file = new File(info.getPath());
@@ -348,7 +335,7 @@ public class DownloadManager {
             }
             if (info.downloadState != STATE_DOWNLOADING) {
                 info.setDownloadState(STATE_DOWNLOADING);//先改变下载状态
-                notifyDownloadStateChanged(info);
+                notifyDownloadProgressed(info);
             }
             RandomAccessFile randomAccessFile = null;
 			HttpURLConnection conn = null;
@@ -372,7 +359,7 @@ public class DownloadManager {
 
 				if ((stream = conn.getInputStream()) == null) {
 					info.setDownloadState(STATE_ERROR);//没有下载内容返回，修改为错误状态
-					notifyDownloadStateChanged(info);
+					notifyDownloadProgressed(info);
 				} else {
 
                     if (isStop || info.downloadState != STATE_DOWNLOADING) return;
@@ -400,8 +387,8 @@ public class DownloadManager {
                                     info.setSpeed(info.getCurrentSize() - info.oldDownloaded);
                                     info.oldDownloaded = info.getCurrentSize();
                                 }
-								DownloadDB.getInstance().updateUnfinished(this);
                             }
+                            DownloadDB.getInstance().updateUnfinished(this);
                             notifyDownloadProgressed(info);//刷新进度
 						} else {
 							downloading = false;
@@ -411,13 +398,13 @@ public class DownloadManager {
 								if (info.getCompleteThreadCount() == THREAD_COUNT) {
 									info.setSpeed(0);
                                     info.setDownloadState(STATE_DOWNLOADED);
-                                    notifyDownloadStateChanged(info);
+                                    notifyDownloadProgressed(info);
 									if (checkDownloadFile(info.getPath())) {
 										DownloadDB.getInstance().insertFinished(info);
 										DownloadDB.getInstance().deleteUnfinished(info.name);
 									} else {
 										info.setDownloadState(STATE_ERROR);
-										notifyDownloadStateChanged(info);
+										notifyDownloadProgressed(info);
 										DownloadDB.getInstance().deleteUnfinished(info.name);
 									}
 									info.taskLists.clear();
@@ -430,18 +417,18 @@ public class DownloadManager {
 				e.printStackTrace();
 				//出异常后需要修改状态并
 				synchronized (info){
-					for (DownloadTask task : info.taskLists) {
-						task.stopTask();
-					}
-					if (info.downloadState == STATE_PAUSED){
-						synchronized (info) {
-							info.notifyAll();
-						}
-					}
-					info.initState = 2;
-					info.setDownloadState(STATE_PAUSED);
-					notifyDownloadStateChanged(info);
-					info.setSpeed(0);
+                    if (!DUtil.isConnected()){
+                        for (DownloadTask task : info.taskLists) {
+                            task.stopTask();
+                        }
+                        info.initState = 2;
+                        info.setDownloadState(STATE_PAUSED);
+                    } else {
+                        mDownloadMap.remove(info.getId());
+                        info.setDownloadState(STATE_ERROR);
+                    }
+                    notifyDownloadProgressed(info);
+                    info.setSpeed(0);
 				}
 			} finally {
 				if (randomAccessFile != null) {
@@ -479,7 +466,7 @@ public class DownloadManager {
 	 */
 	private boolean checkDownloadFile(String path) {
 		if (!TextUtils.isEmpty(path) && path.endsWith(".apk")) {
-			PackageUtil.AppSnippet sAppSnippet = PackageUtil.getAppSnippet(LauncherApplication.getInstance(), path);
+			DUtil.AppSnippet sAppSnippet = DUtil.getAppSnippet(path);
 
 			if (sAppSnippet == null || TextUtils.isEmpty(sAppSnippet.packageName)) {
 				return false;
@@ -489,8 +476,6 @@ public class DownloadManager {
 	}
 
 	public interface DownloadObserver {
-
-        void onDownloadStateChanged(DownloadTaskInfo info);
 
         void onDownloadProgressed(DownloadTaskInfo info);
 	}
