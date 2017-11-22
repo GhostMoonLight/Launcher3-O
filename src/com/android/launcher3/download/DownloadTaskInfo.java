@@ -118,6 +118,9 @@ public class DownloadTaskInfo {
         return completeThreadCount;
     }
 
+    /**
+     * 该方法只在pause中调用，用来创建新的DownloadTaskInfo
+     */
     public DownloadTaskInfo cloneSelf() {
         DownloadTaskInfo info = new DownloadTaskInfo();
 
@@ -131,6 +134,7 @@ public class DownloadTaskInfo {
         info.currentSize = currentSize;
 
         for (DownloadManager.DownloadTask task : taskLists){
+            task.isStop = true; // 旧的任务停止执行
             info.taskLists.add(task.cloneSelf(info));
         }
         if (info.initState == 3){

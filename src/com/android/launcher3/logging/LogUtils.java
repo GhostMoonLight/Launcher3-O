@@ -72,6 +72,18 @@ public class LogUtils {
         }
     }
 
+    public static void deTag(String msg){
+        if (mLogEnable) {
+            Log.e(TAG, msg);
+        }
+    }
+
+    public static void dTag(String msg){
+        if (mLogEnable) {
+            Log.d(TAG, msg);
+        }
+    }
+
     public static void e(String msg) {
         if (mLogEnable) {
             String[] content = getMsgAndTagWithLineNumber(msg);

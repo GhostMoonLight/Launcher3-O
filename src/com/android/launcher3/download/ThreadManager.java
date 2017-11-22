@@ -89,7 +89,7 @@ public class ThreadManager {
 		}
 
 		public String getPoolState(){
-            return mPool == null? 0+"" : mPool.toString();
+            return mPool == null? "当前线程池为 null" : mPool.toString();
         }
 
 		/** 取消线程池中某个还未执行的任务 */
