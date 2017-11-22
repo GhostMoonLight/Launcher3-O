@@ -134,7 +134,9 @@ public class DownloadTaskInfo {
         info.currentSize = currentSize;
 
         for (DownloadManager.DownloadTask task : taskLists){
-            task.isStop = true; // 旧的任务停止执行
+            // 请求服务器时期内，任务的下载状态有可能改变为pause，
+            // 所以pause的时候直接设置Task的isStop为true
+            task.isStop = true;
             info.taskLists.add(task.cloneSelf(info));
         }
         if (info.initState == 3){

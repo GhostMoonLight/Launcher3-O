@@ -146,7 +146,7 @@ public class DownloadManager {
 
     /**
      * 暂停某个任务
-     * 请求时期内，任务的下载状态有可能改变为pause，所以pause的时候直接设置Task的isStop为true
+     * 请求服务器时期内，任务的下载状态有可能改变为pause，所以pause的时候直接设置Task的isStop为true
      * 会在cloneSelf方法中把isStop设置为true
      */
 	private void pause(DownloadTaskInfo info){
@@ -373,7 +373,7 @@ public class DownloadManager {
 				} else {
 
 				    if (info.getDownloadState() == STATE_PAUSED){
-				        //请求时期内，任务的下载状态有可能改变为pause，故直接return
+				        //请求服务器时期内，任务的下载状态有可能改变为pause，故直接return
                         LogUtils.dTag("id:"+info.id+" address:@"+Integer.toHexString(info.hashCode())+" threadName:"+threadName+" 请求时期内，任务的下载状态改变为pause，故直接return");
                         // 为保险起见，在pause的时候Task的isStop设置为true
                         return;
