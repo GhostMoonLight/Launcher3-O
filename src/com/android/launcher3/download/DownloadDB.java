@@ -92,7 +92,7 @@ class DownloadDB {
                 );
                 info.addCurrentSize(task.compeleteSize);
 				info.oldDownloaded = info.getCurrentSize();
-				if(task.compeleteSize == +task.endPos-task.startPos+1){
+				if(task.isDownloadFinished()){
 				    // 该task下载完成了
                     info.setCompleteThreadCount();
                 } else {

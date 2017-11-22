@@ -123,8 +123,10 @@ public class TestActivity extends Activity implements DownloadManager.DownloadOb
             public void run() {
                 DownloadInfo dInfo = null;
                 for(DownloadInfo di: list){
-                    if (di.id == info.id)
+                    if (di.id == info.id) {
                         dInfo = di;
+                        break;
+                    }
                 }
 
                 Button btn = null;

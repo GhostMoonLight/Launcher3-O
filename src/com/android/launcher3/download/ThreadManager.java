@@ -88,6 +88,10 @@ public class ThreadManager {
 			return mPool.submit(run);
 		}
 
+		public String getPoolState(){
+            return mPool == null? 0+"" : mPool.toString();
+        }
+
 		/** 取消线程池中某个还未执行的任务 */
 		public synchronized void cancel(Runnable run) {
 			if (mPool != null && (!mPool.isShutdown() || mPool.isTerminating())) {
