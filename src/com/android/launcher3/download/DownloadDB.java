@@ -10,7 +10,7 @@ import com.android.launcher3.LauncherApplication;
 import java.io.File;
 import java.util.ArrayList;
 
-public class DownloadDB {
+class DownloadDB {
 	
 	private SQLiteDatabase mDatabase;
 	private static DownloadDB instance;
@@ -55,9 +55,9 @@ public class DownloadDB {
 		return result;
 	}
 	//删除未完成的
-	public synchronized void deleteUnfinished(String name){
+	public synchronized void deleteUnfinished(long id){
 		SQLiteDatabase db = openDatabase();
-		db.delete(DownloadDBHelper.TABLE_THEME_UNFINISHED, DownloadDBHelper.COLUMN_NAME+"=?", new String[]{name});
+		db.delete(DownloadDBHelper.TABLE_THEME_UNFINISHED, DownloadDBHelper.COLUMN_ID+"=?", new String[]{id+""});
 		db.close();
 	}
 
@@ -92,7 +92,12 @@ public class DownloadDB {
                 );
                 info.addCurrentSize(task.compeleteSize);
 				info.oldDownloaded = info.getCurrentSize();
-                info.taskLists.add(task);
+				if(task.compeleteSize == +task.endPos-task.startPos+1){
+				    // 该task下载完成了
+                    info.setCompleteThreadCount();
+                } else {
+                    info.taskLists.add(task);
+                }
 			}
 		}
 
@@ -116,9 +121,9 @@ public class DownloadDB {
 		db.close();
 	}
 	//删除完成的
-	public synchronized void deleteFinished(String themename){
+	public synchronized void deleteFinished(long id){
 		SQLiteDatabase db = openDatabase();
-		db.delete(DownloadDBHelper.TABLE_THEME_FINISHED, DownloadDBHelper.COLUMN_NAME+"=?", new String[]{themename});
+		db.delete(DownloadDBHelper.TABLE_THEME_FINISHED, DownloadDBHelper.COLUMN_ID+"=?", new String[]{id+""});
 		db.close();
 	}
 	//查询完成的

@@ -2,6 +2,8 @@ package com.android.launcher3.download;
 
 import android.text.TextUtils;
 
+import com.android.launcher3.logging.LogUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -170,7 +172,7 @@ public class DownloadManager {
 			notifyDownloadProgressed(info);
 			File file = new File(info.getPath());
 			file.delete();
-            DownloadDB.getInstance().deleteUnfinished(info.name);
+            DownloadDB.getInstance().deleteUnfinished(info.id);
 		}
 	}
 
@@ -231,7 +233,7 @@ public class DownloadManager {
             try {
                 URL url = new URL(info.getUrl());
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                connection.setConnectTimeout(1000);
+                connection.setConnectTimeout(20000);
                 connection.setRequestMethod("GET");
                 info.size = connection.getContentLength();
                 if (info.size >= 0) {
@@ -284,8 +286,8 @@ public class DownloadManager {
 
                         info.initState = 2;
                         //开始下载
-                        DownloadDB.getInstance().deleteFinished(info.name);
-                        DownloadDB.getInstance().deleteUnfinished(info.name);
+                        DownloadDB.getInstance().deleteFinished(info.id);
+                        DownloadDB.getInstance().deleteUnfinished(info.id);
                         if (info.downloadState != STATE_PAUSED) {
                             executeDownload(info);
                         }
@@ -349,9 +351,6 @@ public class DownloadManager {
                 conn.setRequestMethod("GET");
                 // 设置范围，格式为Range：bytes x-y;
                 long start = (startPos + compeleteSize);
-                if (start > endPos){
-                    start = endPos;
-                }
                 conn.setRequestProperty("Range", "bytes="
                         + start + "-" + endPos);
 
@@ -377,7 +376,6 @@ public class DownloadManager {
 							}
 						}
 						
-						//每次读取到数据后，都需要判断是否为下载状态，如果不是，下载需要终止; 如果是，则刷新进度
 						if ((count = stream.read(buffer)) > 0){
                             randomAccessFile.write(buffer, 0, count);
                             synchronized (info) {
@@ -394,8 +392,9 @@ public class DownloadManager {
                             notifyDownloadProgressed(info);//刷新进度
 						} else {
 							downloading = false;
-                            info.setCompleteThreadCount();
 							synchronized (info) {
+                                info.setCompleteThreadCount();
+                                LogUtils.eTag("id:"+info.id+ " threadId:"+threadName+" start:"+startPos+" end:"+endPos+" complete:"+compeleteSize);
 								info.taskLists.remove(this);// 清除下载任务Runnable
 								if (info.getCompleteThreadCount() == THREAD_COUNT) {
 									info.setSpeed(0);
@@ -403,12 +402,11 @@ public class DownloadManager {
                                     notifyDownloadProgressed(info);
 									if (checkDownloadFile(info.getPath())) {
 										DownloadDB.getInstance().insertFinished(info);
-										DownloadDB.getInstance().deleteUnfinished(info.name);
 									} else {
 										info.setDownloadState(STATE_ERROR);
 										notifyDownloadProgressed(info);
-										DownloadDB.getInstance().deleteUnfinished(info.name);
 									}
+                                    DownloadDB.getInstance().deleteUnfinished(info.id);
 									info.taskLists.clear();
 								}
 							}
@@ -458,7 +456,6 @@ public class DownloadManager {
             t.startPos = startPos;
             t.endPos = endPos;
             t.compeleteSize = compeleteSize;
-            info.addCurrentSize(compeleteSize);
             return t;
         }
     }

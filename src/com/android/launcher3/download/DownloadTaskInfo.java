@@ -110,7 +110,7 @@ public class DownloadTaskInfo {
         return LauncherApplication.getInstance().getDoanloadDir()+"/"+name;
     }
 
-    public synchronized void setCompleteThreadCount(){
+    public void setCompleteThreadCount(){
         completeThreadCount++;
     }
 
@@ -128,12 +128,13 @@ public class DownloadTaskInfo {
         info.url = url;
         info.size = size;
         info.completeThreadCount = completeThreadCount;
+        info.currentSize = currentSize;
 
         for (DownloadManager.DownloadTask task : taskLists){
             info.taskLists.add(task.cloneSelf(info));
         }
         if (info.initState == 3){
-            info.initState = 2;
+            info.initState = 2;   // 初始化完成
         }
         info.oldDownloaded = info.currentSize;
         return info;
