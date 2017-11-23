@@ -168,6 +168,9 @@ public class TestActivity extends Activity implements DownloadManager.DownloadOb
                     case DownloadManager.STATE_NONE:
                         btn.setText("下载");
                         break;
+                    case DownloadManager.STATE_REQUEST:
+                        btn.setText("正在连接...");
+                        break;
                     default:
                         break;
                 }

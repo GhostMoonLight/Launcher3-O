@@ -29,6 +29,7 @@ public class DownloadTaskInfo {
     public long oldDownloaded;   //获取速度时上次下载的长度
     public boolean isInvalid = false;      // 是否是无效的的，当暂停任务的时候该字段会置成true
     private static DecimalFormat df =new DecimalFormat("#.00");
+    public boolean isRequested = false;    // 是否已经请求过链接
 
     public static DownloadTaskInfo clone(DownloadInfo downloadInfo){
         DownloadTaskInfo downloadTaskInfo = new DownloadTaskInfo();

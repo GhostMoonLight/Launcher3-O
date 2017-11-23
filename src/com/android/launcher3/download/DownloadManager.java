@@ -30,6 +30,8 @@ public class DownloadManager {
 	public static final int STATE_DOWNLOADED = 4;
 	/** 下载失败 */
 	public static final int STATE_ERROR = 5;
+    /** 请求链接 */
+    public static final int STATE_REQUEST = 6;
 
 	private static DownloadManager instance;
 
@@ -354,6 +356,14 @@ public class DownloadManager {
 			InputStream stream = null;
 			try {
                 LogUtils.deTag(info.id+" "+threadName+" download start");
+                synchronized (info){
+                    if (!info.isRequested){
+                        LogUtils.dTag(info.id+" "+threadName+" refresh request state");
+                        info.isRequested = true;
+                        info.setDownloadState(STATE_REQUEST);
+                        notifyDownloadProgressed(info);
+                    }
+                }
                 URL url = new URL(info.getUrl());
                 conn = (HttpURLConnection) url.openConnection();
                 conn.setConnectTimeout(10000);
