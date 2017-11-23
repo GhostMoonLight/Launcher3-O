@@ -2,7 +2,6 @@ package com.android.launcher3.download;
 
 import android.text.TextUtils;
 
-import com.android.launcher3.LauncherApplication;
 import com.android.launcher3.util.Utils;
 
 import java.text.DecimalFormat;
@@ -56,7 +55,7 @@ public class DownloadTaskInfo {
     public float getCurrentProgress(){
         if (size == 0) return 0;
         float progress = Float.valueOf(df.format(currentSize*1.0f/size));
-        if (progress < 0) progress = 0;
+        if (progress <= 0) progress = 0;
         return progress;
     }
 
@@ -108,7 +107,7 @@ public class DownloadTaskInfo {
     }
 
     public static String getPath(String name){
-        return LauncherApplication.getInstance().getDoanloadDir()+"/"+name;
+        return DUtil.getDoanloadDir()+"/"+name;
     }
 
     public void setCompleteThreadCount(){
@@ -140,8 +139,8 @@ public class DownloadTaskInfo {
             task.isStop = true;
             info.taskLists.add(task.cloneSelf(info));
         }
-        if (info.initState == 3){
-            info.initState = 2;   // 初始化完成
+        if (info.initState == DownloadManager.INIT_STATE_DOWNLOAD){
+            info.initState = DownloadManager.INIT_STATE_COMPLETED;   // 初始化完成
         }
         info.oldDownloaded = info.currentSize;
         return info;

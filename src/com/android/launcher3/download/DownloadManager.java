@@ -1,5 +1,6 @@
 package com.android.launcher3.download;
 
+import android.content.Context;
 import android.text.TextUtils;
 
 import com.android.launcher3.logging.LogUtils;
@@ -33,33 +34,62 @@ public class DownloadManager {
     /** 请求链接 */
     public static final int STATE_REQUEST = 6;
 
+
+    // 任务还未开始初始化
+    protected static final int INIT_STATE_NONE = 0;
+    // 任务正在初始化
+    protected static final int INIT_STATE_ING = 1;
+    // 任务初始化完成
+    protected static final int INIT_STATE_COMPLETED = 2;
+    // 任务可以执行
+    protected static final int INIT_STATE_DOWNLOAD = 3;
+
+
 	private static DownloadManager instance;
+	private static Context mContext;
+
+	public static void initDownlaodManager(Context context){
+        mContext = context.getApplicationContext();
+        getInstance();
+    }
 
 	private DownloadManager() {
-        //初始化下载任务列表
-        ArrayList<DownloadTaskInfo> list = DownloadDB.getInstance().queryAllUnfinished(this);
-        for (DownloadTaskInfo i: list){
-            addDownloadInfo(i);
+            //初始化下载任务列表
+            ArrayList<DownloadTaskInfo> list = DownloadDB.getInstance().queryAllUnfinished(this);
+            for (DownloadTaskInfo i: list){
+                addDownloadInfo(i);
+            }
+
+            list = DownloadDB.getInstance().queryAllFinished();
+            for (DownloadTaskInfo i: list){
+                addDownloadInfo(i);
+            }
         }
 
-        list = DownloadDB.getInstance().queryAllFinished();
-        for (DownloadTaskInfo i: list){
-            addDownloadInfo(i);
+        private Map<Integer, DownloadTaskInfo> mDownloadMap = new ConcurrentHashMap<>();
+        private Map<Integer, InitDownloadTask> mInitTaskMap = new ConcurrentHashMap<>();
+        /** 用于记录观察者，当信息发送了改变，需要通知他们 */
+        private final List<DownloadObserver> mObservers = new ArrayList<>();
+        private static final int THREAD_COUNT = 3;
+
+    public static DownloadManager getInstance() {
+        getContext();
+        if (instance == null) {
+            synchronized (DownloadManager.class) {
+                if (instance == null) {
+                    instance = new DownloadManager();
+                }
+            }
         }
-	}
+        return instance;
+    }
 
-	private Map<Integer, DownloadTaskInfo> mDownloadMap = new ConcurrentHashMap<>();
-    private Map<Integer, InitDownloadTask> mInitTaskMap = new ConcurrentHashMap<>();
-	/** 用于记录观察者，当信息发送了改变，需要通知他们 */
-	private final List<DownloadObserver> mObservers = new ArrayList<>();
-    private static final int THREAD_COUNT = 3;
-
-	public static synchronized DownloadManager getInstance() {
-		if (instance == null) {
-			instance = new DownloadManager();
-		}
-		return instance;
-	}
+    public static Context getContext(){
+        if (mContext == null){
+            throw new RuntimeException("DownlaodManager not initialized");
+        }
+        return mContext;
+    }
 	
 	//获取下载任务
 	public Map<Integer, DownloadTaskInfo> getDownloadMap(){
@@ -103,6 +133,10 @@ public class DownloadManager {
 
 	/** 下载，需要传入一个DownloadInfo对象 */
 	public synchronized void download(DownloadInfo appInfo) {
+        if (!DUtil.isConnected(mContext)){
+            LogUtils.dTag("no network connection");
+            return;
+        }
 	    LogUtils.dTag("*********current pool:"+ThreadManager.getDownloadPool().getPoolState());
 	    if (appInfo == null || TextUtils.isEmpty(appInfo.url))
 	        throw new InvalidParameterException("DownloadInfo is null or url is null");
@@ -114,12 +148,12 @@ public class DownloadManager {
 			mDownloadMap.put(appInfo.id, info);
 		}else{
             //如果下载任务存在，且状态是暂停，继续下载
-            if (info.getDownloadState() == STATE_PAUSED && info.initState != 0) {
-                if (info.initState == 2 || info.initState == 3){
+            if (info.getDownloadState() == STATE_PAUSED && info.initState != INIT_STATE_NONE) {
+                if (info.initState == INIT_STATE_COMPLETED || info.initState == INIT_STATE_DOWNLOAD){
                     info.setDownloadState(STATE_WAITING);//先改变下载状态
                     notifyDownloadProgressed(info);
                     executeDownload(info);
-                } else if (info.initState == 1){
+                } else if (info.initState == INIT_STATE_ING){
                     info.setDownloadState(STATE_WAITING);
                 } else {
                     //为0说明当前线程池已满，在队列中被暂停了,初始化任务还没执行
@@ -155,11 +189,11 @@ public class DownloadManager {
 		if (info != null) {//修改下载状态
 			info.setDownloadState(STATE_PAUSED);
 			notifyDownloadProgressed(info);
-			if (info.initState == 0){
+			if (info.initState == INIT_STATE_NONE){
 				// 直接从队列中移除Task
 				InitDownloadTask initTask = mInitTaskMap.remove(info.getId());
 				ThreadManager.getDownloadPool().cancel(initTask);
-			} else if (info.initState == 3){
+			} else if (info.initState == INIT_STATE_DOWNLOAD){
 				// 抛弃之前的DownloadTaskInfo，put一个新的DownloadTaskInfo的对象
 				mDownloadMap.put(info.id, info.cloneSelf());
 				info.isInvalid = true; //老的任务设置成无效的，之后该DownloadTaskInfo就不会刷新回调
@@ -235,7 +269,7 @@ public class DownloadManager {
     /**
      * 初始化下载任务
      */
-    public class InitDownloadTask implements Runnable {
+    class InitDownloadTask implements Runnable {
         private DownloadTaskInfo info;
 
         public InitDownloadTask(DownloadTaskInfo info){
@@ -244,7 +278,7 @@ public class DownloadManager {
 
         @Override
         public void run() {
-            info.initState = 1;
+            info.initState = INIT_STATE_ING;
             boolean ret;   // 请求服务器时候成功
             try {
                 LogUtils.deTag(info.id+" init start");
@@ -298,7 +332,7 @@ public class DownloadManager {
                                 (threadCount - 1) * range, info.size - 1, 0);
                         info.taskLists.add(task);
 
-                        info.initState = 2;
+                        info.initState = INIT_STATE_COMPLETED;
                         //开始下载
                         DownloadDB.getInstance().deleteFinished(info.id);
                         DownloadDB.getInstance().deleteUnfinished(info.id);
@@ -313,15 +347,14 @@ public class DownloadManager {
 
     private void executeDownload(DownloadTaskInfo info){
         for (DownloadTask downloadTask : info.taskLists) {
-//            DownloadDB.getInstance().insertUnfinished(downloadTask);
 			downloadTask.isStop = false;
             ThreadManager.getDownloadPool().execute(downloadTask);
         }
-        info.initState = 3;
+        info.initState = INIT_STATE_DOWNLOAD;
     }
 
 	/** 下载任务 */
-	public class DownloadTask implements Runnable {
+    class DownloadTask implements Runnable {
 		public final DownloadTaskInfo info;
         public boolean isStop = false;
         public long startPos;
@@ -446,17 +479,10 @@ public class DownloadManager {
 				e.printStackTrace();
 				//出异常后需要修改状态并
 				synchronized (info){
-                    if (!DUtil.isConnected()){
-                        for (DownloadTask task : info.taskLists) {
-                            task.stopTask();
-                        }
-                        info.initState = 2;
-                        info.setDownloadState(STATE_PAUSED);
-                        notifyDownloadProgressed(info);
-                    } else {
-                        downloadError(info);
+                    if (!info.isInvalid){
+                        LogUtils.deTag("下载异常，任务暂停");
+                        pause(info);
                     }
-                    info.setSpeed(0);
 				}
 			} finally {
 				if (randomAccessFile != null) {

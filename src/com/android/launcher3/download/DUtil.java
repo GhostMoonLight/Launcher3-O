@@ -9,8 +9,9 @@ import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Environment;
 
-import com.android.launcher3.LauncherApplication;
+import com.android.launcher3.logging.LogUtils;
 
 import java.io.File;
 
@@ -25,8 +26,8 @@ public class DUtil {
      * 是否已连接网络（未连接、wifi、2G、3G等）
      * @return
      */
-    public static boolean isConnected() {
-        ConnectivityManager connectivityManager = (ConnectivityManager) LauncherApplication.getInstance().getSystemService(Context.CONNECTIVITY_SERVICE);
+    public static boolean isConnected(Context context) {
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = connectivityManager.getActiveNetworkInfo();
         if (netInfo != null) {
             return netInfo.isConnected();
@@ -50,8 +51,8 @@ public class DUtil {
      */
     public static AppSnippet getAppSnippet(String apkPath) {
         AppSnippet sAppSnippet = null;
-        Context context = LauncherApplication.getInstance();
         try {
+            Context context = DownloadManager.getContext();
             PackageManager pm = context.getPackageManager();
             PackageInfo packageInfo = pm.getPackageArchiveInfo(apkPath, PackageManager.GET_ACTIVITIES);
             //			Resources sResources = getUninstalledApkResources(context, apkPath);
@@ -92,12 +93,59 @@ public class DUtil {
      * @param filePath
      */
     public static void installApkNormal(String filePath) {
-        Context sContext = LauncherApplication.getInstance().getApplicationContext();
+        Context context = DownloadManager.getContext();
         File file = new File(filePath);
         Intent intent = new Intent();
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setAction(Intent.ACTION_VIEW);
         intent.setDataAndType(Uri.fromFile(file), "application/vnd.android.package-archive");
-        sContext.startActivity(intent);
+        context.startActivity(intent);
+    }
+
+    /**
+     * 判断sdcard是否可用
+     *
+     * @return
+     */
+    public static boolean isSDCardAvailable() {
+        boolean sdcardAvailable = false;
+        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+            sdcardAvailable = true;
+        }
+        return sdcardAvailable;
+    }
+
+    /**
+     * 下载目录
+     */
+    public static String getDoanloadDir() {
+        String strCacheDir;
+        File cacheDir;
+        File cacheFile;
+
+        Context context = DownloadManager.getContext();
+        if (isSDCardAvailable()) {
+            cacheDir = context.getExternalCacheDir();
+
+            if (cacheDir == null) {
+                cacheDir = new File(Environment.getExternalStorageDirectory().toString() + "/Android/data/" + context.getPackageName() + "/cache");
+                if (!cacheDir.exists()){
+                    if (!cacheDir.mkdirs()){
+                        LogUtils.eTag("创建DoanloadDir 失败");
+                    }
+                }
+            }
+        } else {
+            cacheDir = context.getCacheDir();
+
+        }
+        cacheFile = new File(cacheDir, "download");
+        if (!cacheFile.exists()){
+            if (!cacheFile.mkdirs()){
+                LogUtils.eTag("创建Download 缓存Dir 失败");
+            }
+        }
+        strCacheDir = cacheFile.getAbsolutePath();
+        return strCacheDir;
     }
 }

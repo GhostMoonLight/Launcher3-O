@@ -79,7 +79,7 @@ class DownloadDB {
                     info.size = (Long.valueOf(cursor.getString(cursor.getColumnIndex(DownloadDBHelper.COLUMN_SIZE))));
                     info.url = (cursor.getString(cursor.getColumnIndex("url")));
                     info.downloadState = DownloadManager.STATE_PAUSED;
-                    info.initState = 2;
+                    info.initState = DownloadManager.INIT_STATE_COMPLETED;
 
                     array.put(info.id, info);
                 }
