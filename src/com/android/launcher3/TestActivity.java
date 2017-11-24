@@ -186,10 +186,8 @@ public class TestActivity extends Activity implements DownloadManager.DownloadOb
     public void onClick(View v) {
         DownloadInfo info = (DownloadInfo) v.getTag();
         if (info != null) {
-            if (info.mState == DownloadManager.STATE_NONE || info.mState == DownloadManager.STATE_PAUSED || info.mState == DownloadManager.STATE_ERROR) {
+            if (info.mState != DownloadManager.STATE_DOWNLOADED) {
                 DownloadManager.getInstance().download(info);
-            } else if (info.mState == DownloadManager.STATE_WAITING || info.mState == DownloadManager.STATE_DOWNLOADING) {
-                DownloadManager.getInstance().pause(info);
             }
         } else {
             for (DownloadInfo di : list) {

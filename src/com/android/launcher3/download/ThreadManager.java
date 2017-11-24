@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * 一个简易的线程池管理类，提供三个线程池
  */
-public class ThreadManager {
+class ThreadManager {
 	public static final String DEFAULT_SINGLE_POOL_NAME = "DEFAULT_SINGLE_POOL_NAME";
 
 	private static final int  COREPOOLSIZE = 12;

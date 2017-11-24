@@ -9,23 +9,23 @@ import java.util.ArrayList;
 
 /**
  * Created by cgx on 2016/12/6.
+ * 下载任务信息类
  *
  */
-
 public class DownloadTaskInfo {
-    public int id;       //唯一标识
-    public String name;  //名称
-    public String url;    //地址
-    public long size;    //大小
+    public int id;        // 唯一标识
+    public String name;   // 名称
+    public String url;    // 地址
+    public long size;     // 大小
 
-    private long currentSize = 0;//当前的size
-    public int downloadState = 0;//下载的状态
+    private long currentSize = 0;   // 当前下载的size
+    public int downloadState = 0;   // 下载的状态
     private String speed;
     public ArrayList<DownloadManager.DownloadTask> taskLists = new ArrayList<>();
-    public int initState; //初始化状态 1:正在初始化，2：初始化完成，3:执行下载
+    public int initState;           // 任务的初始化状态 1:正在初始化，2：初始化完成，3:执行下载
     private int completeThreadCount;
-    public long lastUpdateTime;  //上次刷新进度的时间
-    public long oldDownloaded;   //获取速度时上次下载的长度
+    public long lastUpdateTime;            // 上次刷新进度的时间
+    public long oldDownloaded;             // 获取速度时上次下载的长度
     public boolean isInvalid = false;      // 是否是无效的的，当暂停任务的时候该字段会置成true
     private static DecimalFormat df =new DecimalFormat("#.00");
     public boolean isRequested = false;    // 是否已经请求过链接

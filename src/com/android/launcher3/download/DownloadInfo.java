@@ -11,10 +11,10 @@ import java.io.Serializable;
 
 public class DownloadInfo implements Parcelable,Serializable {
 
-    public int id;       //唯一标识
-    public String name;  //名称
-    public String url;    //地址
-    public long size;    //大小
+    public int id;        // 唯一标识
+    public String name;   // 名称
+    public String url;    // 地址
+    public long size;     // 大小
     public int mState;    // 下载状态
 
     public DownloadInfo() {

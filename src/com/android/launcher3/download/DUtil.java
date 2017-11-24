@@ -20,7 +20,7 @@ import java.io.File;
  *
  */
 
-public class DUtil {
+class DUtil {
 
     /**
      * 是否已连接网络（未连接、wifi、2G、3G等）

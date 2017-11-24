@@ -125,10 +125,10 @@ public class DownloadManager {
 	public void notifyDownloadProgressed(DownloadTaskInfo info) {
         if (info.isInvalid) return; // 如果该任务无效就不回调
 		synchronized (mObservers) {
-			for (DownloadObserver observer : mObservers) {
-				observer.onDownloadProgressed(info);
-			}
-		}
+            for (DownloadObserver observer : mObservers) {
+                observer.onDownloadProgressed(info);
+            }
+        }
 	}
 
 	/** 下载，需要传入一个DownloadInfo对象 */
@@ -148,8 +148,11 @@ public class DownloadManager {
 			mDownloadMap.put(appInfo.id, info);
 		}else{
             //如果下载任务存在，且状态是暂停，继续下载
-            if (info.getDownloadState() == STATE_PAUSED && info.initState != INIT_STATE_NONE) {
-                if (info.initState == INIT_STATE_COMPLETED || info.initState == INIT_STATE_DOWNLOAD){
+            if (info.getDownloadState() == STATE_PAUSED
+                    && info.initState != INIT_STATE_NONE) {
+
+                if (info.initState == INIT_STATE_COMPLETED
+                        || info.initState == INIT_STATE_DOWNLOAD){
                     info.setDownloadState(STATE_WAITING);//先改变下载状态
                     notifyDownloadProgressed(info);
                     executeDownload(info);
@@ -158,9 +161,13 @@ public class DownloadManager {
                 } else {
                     //为0说明当前线程池已满，在队列中被暂停了,初始化任务还没执行
                 }
+
                 notifyDownloadProgressed(info);
-                return;
+            } else if (info.getDownloadState() == STATE_WAITING
+                    || info.getDownloadState() == STATE_DOWNLOADING){
+                pause(info);
             }
+            return;
         }
 
 		//判断状态是否为STATE_NONE、STATE_PAUSED、STATE_ERROR。只有这3种状态才能进行下载，其他状态不予处理
@@ -353,9 +360,28 @@ public class DownloadManager {
         info.initState = INIT_STATE_DOWNLOAD;
     }
 
-	/** 下载任务 */
+	/**
+	 * 检查文件是否下载完成
+	 */
+	private boolean checkDownloadFile(String path) {
+		if (!TextUtils.isEmpty(path) && path.endsWith(".apk")) {
+			DUtil.AppSnippet sAppSnippet = DUtil.getAppSnippet(path);
+
+			if (sAppSnippet == null || TextUtils.isEmpty(sAppSnippet.packageName)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public interface DownloadObserver {
+
+        void onDownloadProgressed(DownloadTaskInfo info);
+
+    }
+    /** 下载任务 */
     class DownloadTask implements Runnable {
-		public final DownloadTaskInfo info;
+        public final DownloadTaskInfo info;
         public boolean isStop = false;
         public long startPos;
         public long endPos;
@@ -366,28 +392,28 @@ public class DownloadManager {
             this.info = info;
         }
 
-		public DownloadTask(DownloadTaskInfo info, String threadName, long startPos, long endPos, long compeleteSize) {
-			this.info = info;
+        public DownloadTask(DownloadTaskInfo info, String threadName, long startPos, long endPos, long compeleteSize) {
+            this.info = info;
             this.threadName = threadName;
             this.startPos = startPos;
             this.endPos = endPos;
             this.compeleteSize = compeleteSize;
-		}
-		
-		public void stopTask(){
-			isStop = true;
-		}
-		
-		@Override
-		public void run() {
+        }
+
+        public void stopTask(){
+            isStop = true;
+        }
+
+        @Override
+        public void run() {
             if (info.downloadState == STATE_PAUSED) {
                 return;
             }
 
             RandomAccessFile randomAccessFile = null;
-			HttpURLConnection conn = null;
-			InputStream stream = null;
-			try {
+            HttpURLConnection conn = null;
+            InputStream stream = null;
+            try {
                 LogUtils.deTag(info.id+" "+threadName+" download start");
                 synchronized (info){
                     if (!info.isRequested){
@@ -408,34 +434,34 @@ public class DownloadManager {
 
                 randomAccessFile = new RandomAccessFile(info.getPath(), "rwd");
                 randomAccessFile.seek(startPos + compeleteSize);
-				long currentTime;
+                long currentTime;
 
-				if ((stream = conn.getInputStream()) == null) {
-					//没有下载内容返回，修改为错误状态
+                if ((stream = conn.getInputStream()) == null) {
+                    //没有下载内容返回，修改为错误状态
                     downloadError(info);
-				} else {
+                } else {
 
-				    if (info.getDownloadState() == STATE_PAUSED){
-				        //请求服务器时期内，任务的下载状态有可能改变为pause，故直接return
+                    if (info.getDownloadState() == STATE_PAUSED){
+                        //请求服务器时期内，任务的下载状态有可能改变为pause，故直接return
                         LogUtils.dTag("id:"+info.id+" address:@"+Integer.toHexString(info.hashCode())+" threadName:"+threadName+" 请求时期内，任务的下载状态改变为pause，故直接return");
                         // 为保险起见，在pause的时候Task的isStop设置为true
                         return;
                     }
 
-				    LogUtils.deTag("id:"+info.id+" address:@"+Integer.toHexString(info.hashCode())+" threadName:"+threadName+" start write data");
+                    LogUtils.deTag("id:"+info.id+" address:@"+Integer.toHexString(info.hashCode())+" threadName:"+threadName+" start write data");
                     info.setDownloadState(STATE_DOWNLOADING);//改变下载状态
-					int count;
-					byte[] buffer = new byte[1024*10];
+                    int count;
+                    byte[] buffer = new byte[1024*10];
                     boolean downloading = true;
-					a:while (!isStop && downloading) {
-						synchronized (info) {
-							if (info.getDownloadState() == STATE_PAUSED){
-							    LogUtils.dTag("id:"+info.id+" address:@"+Integer.toHexString(info.hashCode())+" threadName:"+threadName+" download pause");
-								break a;
-							}
-						}
-						
-						if ((count = stream.read(buffer)) > 0){
+                    a:while (!isStop && downloading) {
+                        synchronized (info) {
+                            if (info.getDownloadState() == STATE_PAUSED){
+                                LogUtils.dTag("id:"+info.id+" address:@"+Integer.toHexString(info.hashCode())+" threadName:"+threadName+" download pause");
+                                break a;
+                            }
+                        }
+
+                        if ((count = stream.read(buffer)) > 0){
                             randomAccessFile.write(buffer, 0, count);
                             synchronized (info) {
                                 compeleteSize += count;
@@ -470,41 +496,41 @@ public class DownloadManager {
                                 notifyDownloadProgressed(info);//刷新进度
                                 DownloadDB.getInstance().updateUnfinished(this);
                             }
-						}
-					}
-					if (isStop)
+                        }
+                    }
+                    if (isStop)
                         LogUtils.dTag("id:"+info.id+" address:@"+Integer.toHexString(info.hashCode())+" threadName:"+threadName+" Task pause or cancel");
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-				//出异常后需要修改状态并
-				synchronized (info){
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                //出异常后需要修改状态并
+                synchronized (info){
                     if (!info.isInvalid){
                         LogUtils.deTag("下载异常，任务暂停");
                         pause(info);
                     }
-				}
-			} finally {
-				if (randomAccessFile != null) {
-					try {
+                }
+            } finally {
+                if (randomAccessFile != null) {
+                    try {
                         randomAccessFile.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-				if (stream != null) {
-					try {
-						stream.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (stream != null) {
+                    try {
+                        stream.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
                 if (conn != null)
                     conn.disconnect();
-			}
+            }
             LogUtils.deTag("id:"+info.id+" address:@"+Integer.toHexString(info.hashCode())+ " threadName:"+threadName+" download end。 startPos:"+startPos+" endPos:"+endPos+" complete:"+compeleteSize+" isDownloadFinished:"+isDownloadFinished());
             LogUtils.dTag("*********current pool state:"+ThreadManager.getDownloadPool().getPoolState());
-		}
+        }
 
         public DownloadTask cloneSelf(DownloadTaskInfo info) {
             DownloadTask t = new DownloadTask(info);
@@ -520,23 +546,4 @@ public class DownloadManager {
             return compeleteSize == endPos-startPos+1;
         }
     }
-	
-	/**
-	 * 检查文件是否下载完成
-	 */
-	private boolean checkDownloadFile(String path) {
-		if (!TextUtils.isEmpty(path) && path.endsWith(".apk")) {
-			DUtil.AppSnippet sAppSnippet = DUtil.getAppSnippet(path);
-
-			if (sAppSnippet == null || TextUtils.isEmpty(sAppSnippet.packageName)) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	public interface DownloadObserver {
-
-        void onDownloadProgressed(DownloadTaskInfo info);
-	}
 }

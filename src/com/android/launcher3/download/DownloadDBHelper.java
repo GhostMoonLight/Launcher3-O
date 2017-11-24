@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 /**
  * 下载数据库
  */
-public class DownloadDBHelper extends SQLiteOpenHelper {
+class DownloadDBHelper extends SQLiteOpenHelper {
 
 	public static String COLUMN_ID = "id";
 	public static String COLUMN_NAME = "name";
