@@ -9,20 +9,20 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 class DownloadDBHelper extends SQLiteOpenHelper {
 
-	public static String COLUMN_ID = "id";
-	public static String COLUMN_NAME = "name";
-	public static String COLUMN_SIZE = "size";
-	public static String COLUMN_CURRENTSIZE = "currentsize";
-	public static String COLUMN_URL = "url";
-	public static String COLUMN_START_POS = "start_pos";  //下载开始位置
-	public static String COLUMN_END_POS = "edn_pos";      //下载结束的位置
-	public static String COLUMN_THREAD_NAME = "thread_name";
+	static String COLUMN_ID = "id";
+	static String COLUMN_NAME = "name";
+	static String COLUMN_SIZE = "size";
+	static String COLUMN_CURRENTSIZE = "currentsize";
+	static String COLUMN_URL = "url";
+	static String COLUMN_START_POS = "start_pos";  //下载开始位置
+	static String COLUMN_END_POS = "edn_pos";      //下载结束的位置
+	static String COLUMN_THREAD_NAME = "thread_name";
 	
-	public static String TABLE_THEME_UNFINISHED = "download_unfinished";
-	public static String TABLE_THEME_FINISHED = "download_finished";
+	static String TABLE_THEME_UNFINISHED = "download_unfinished";
+	static String TABLE_THEME_FINISHED = "download_finished";
 	private static int VERSION = 1;
 
-	public DownloadDBHelper(Context context) {
+	DownloadDBHelper(Context context) {
 		super(context, "download.db", null, VERSION);
 	}
 

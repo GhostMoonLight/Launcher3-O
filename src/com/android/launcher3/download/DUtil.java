@@ -11,8 +11,6 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Environment;
 
-import com.android.launcher3.logging.LogUtils;
-
 import java.io.File;
 
 /**
@@ -131,7 +129,7 @@ class DUtil {
                 cacheDir = new File(Environment.getExternalStorageDirectory().toString() + "/Android/data/" + context.getPackageName() + "/cache");
                 if (!cacheDir.exists()){
                     if (!cacheDir.mkdirs()){
-                        LogUtils.eTag("创建DoanloadDir 失败");
+                        DLog.eTag("创建DoanloadDir 失败");
                     }
                 }
             }
@@ -142,7 +140,7 @@ class DUtil {
         cacheFile = new File(cacheDir, "download");
         if (!cacheFile.exists()){
             if (!cacheFile.mkdirs()){
-                LogUtils.eTag("创建Download 缓存Dir 失败");
+                DLog.eTag("创建Download 缓存Dir 失败");
             }
         }
         strCacheDir = cacheFile.getAbsolutePath();

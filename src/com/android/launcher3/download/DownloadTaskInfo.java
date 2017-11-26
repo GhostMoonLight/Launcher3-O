@@ -21,16 +21,16 @@ public class DownloadTaskInfo {
     private long currentSize = 0;   // 当前下载的size
     public int downloadState = 0;   // 下载的状态
     private String speed;
-    public ArrayList<DownloadManager.DownloadTask> taskLists = new ArrayList<>();
-    public int initState;           // 任务的初始化状态 1:正在初始化，2：初始化完成，3:执行下载
+    ArrayList<DownloadManager.DownloadTask> taskLists = new ArrayList<>();
+    int initState;           // 任务的初始化状态 1:正在初始化，2：初始化完成，3:执行下载
     private int completeThreadCount;
-    public long lastUpdateTime;            // 上次刷新进度的时间
-    public long oldDownloaded;             // 获取速度时上次下载的长度
-    public boolean isInvalid = false;      // 是否是无效的的，当暂停任务的时候该字段会置成true
+    long lastUpdateTime;            // 上次刷新进度的时间
+    long oldDownloaded;             // 获取速度时上次下载的长度
+    boolean isInvalid = false;      // 是否是无效的的，当暂停任务的时候该字段会置成true
     private static DecimalFormat df =new DecimalFormat("#.00");
-    public boolean isRequested = false;    // 是否已经请求过链接
+    boolean isRequested = false;    // 是否已经请求过链接
 
-    public static DownloadTaskInfo clone(DownloadInfo downloadInfo){
+    static DownloadTaskInfo clone(DownloadInfo downloadInfo){
         DownloadTaskInfo downloadTaskInfo = new DownloadTaskInfo();
 
         downloadTaskInfo.id = downloadInfo.id;
@@ -59,7 +59,7 @@ public class DownloadTaskInfo {
         return progress;
     }
 
-    public int getDownloadState() {
+    int getDownloadState() {
         return downloadState;
     }
 
@@ -67,14 +67,14 @@ public class DownloadTaskInfo {
         return id;
     }
 
-    public void setDownloadState(int state){
+    void setDownloadState(int state){
         downloadState = state;
         if(state != DownloadManager.STATE_DOWNLOADING){
             speed = 0+"";
         }
     }
 
-    public void setSpeed(long speed){
+    void setSpeed(long speed){
         if(speed < 0) speed = 0;
         this.speed = Utils.getDataSize(speed);
     }
@@ -86,11 +86,11 @@ public class DownloadTaskInfo {
         return speed+"/s";
     }
 
-    public void setCurrentSize(long currentSize){
+    void setCurrentSize(long currentSize){
         this.currentSize = currentSize;
     }
 
-    public synchronized void addCurrentSize(long addSize){
+    synchronized void addCurrentSize(long addSize){
         currentSize += addSize;
     }
 
@@ -106,22 +106,22 @@ public class DownloadTaskInfo {
         return getPath(name);
     }
 
-    public static String getPath(String name){
+    static String getPath(String name){
         return DUtil.getDoanloadDir()+"/"+name;
     }
 
-    public void setCompleteThreadCount(){
+    void setCompleteThreadCount(){
         completeThreadCount++;
     }
 
-    public int getCompleteThreadCount(){
+    int getCompleteThreadCount(){
         return completeThreadCount;
     }
 
     /**
      * 该方法只在pause中调用，用来创建新的DownloadTaskInfo
      */
-    public DownloadTaskInfo cloneSelf() {
+    DownloadTaskInfo cloneSelf() {
         DownloadTaskInfo info = new DownloadTaskInfo();
 
         info.id = id;

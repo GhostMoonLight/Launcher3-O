@@ -2,9 +2,6 @@ package com.android.launcher3.download;
 
 import android.content.Context;
 import android.text.TextUtils;
-
-import com.android.launcher3.logging.LogUtils;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,7 +45,7 @@ public class DownloadManager {
 	private static DownloadManager instance;
 	private static Context mContext;
 
-	public static void initDownlaodManager(Context context){
+	public static void initDownloadManager(Context context){
         mContext = context.getApplicationContext();
         getInstance();
     }
@@ -86,7 +83,7 @@ public class DownloadManager {
 
     public static Context getContext(){
         if (mContext == null){
-            throw new RuntimeException("DownlaodManager not initialized");
+            throw new RuntimeException("DownloadManager not initialized");
         }
         return mContext;
     }
@@ -134,10 +131,10 @@ public class DownloadManager {
 	/** 下载，需要传入一个DownloadInfo对象 */
 	public synchronized void download(DownloadInfo appInfo) {
         if (!DUtil.isConnected(mContext)){
-            LogUtils.dTag("no network connection");
+            DLog.dTag("no network connection");
             return;
         }
-	    LogUtils.dTag("*********current pool:"+ThreadManager.getDownloadPool().getPoolState());
+	    DLog.dTag("*********current pool:"+ThreadManager.getDownloadPool().getPoolState());
 	    if (appInfo == null || TextUtils.isEmpty(appInfo.url))
 	        throw new InvalidParameterException("DownloadInfo is null or url is null");
 
@@ -288,7 +285,7 @@ public class DownloadManager {
             info.initState = INIT_STATE_ING;
             boolean ret;   // 请求服务器时候成功
             try {
-                LogUtils.deTag(info.id+" init start");
+                DLog.deTag(info.id+" init start");
                 URL url = new URL(info.getUrl());
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setConnectTimeout(20000);
@@ -305,7 +302,7 @@ public class DownloadManager {
                     accessFile.setLength(info.size);
                     accessFile.close();
                     connection.disconnect();
-                    LogUtils.deTag(info.id+" init end");
+                    DLog.deTag(info.id+" init end");
                 }else{
                     ret = false;
                     downloadError(info);
@@ -386,18 +383,18 @@ public class DownloadManager {
         public long startPos;
         public long endPos;
         public String threadName;
-        public long compeleteSize;  //已经下载的长度
+        public long completeSize;  //已经下载的长度
 
         private DownloadTask(DownloadTaskInfo info){
             this.info = info;
         }
 
-        public DownloadTask(DownloadTaskInfo info, String threadName, long startPos, long endPos, long compeleteSize) {
+        public DownloadTask(DownloadTaskInfo info, String threadName, long startPos, long endPos, long completeSize) {
             this.info = info;
             this.threadName = threadName;
             this.startPos = startPos;
             this.endPos = endPos;
-            this.compeleteSize = compeleteSize;
+            this.completeSize = completeSize;
         }
 
         public void stopTask(){
@@ -414,10 +411,10 @@ public class DownloadManager {
             HttpURLConnection conn = null;
             InputStream stream = null;
             try {
-                LogUtils.deTag(info.id+" "+threadName+" download start");
+                DLog.deTag(info.id+" "+threadName+" download start");
                 synchronized (info){
                     if (!info.isRequested){
-                        LogUtils.dTag(info.id+" "+threadName+" refresh request state");
+                        DLog.dTag(info.id+" "+threadName+" refresh request state");
                         info.isRequested = true;
                         info.setDownloadState(STATE_REQUEST);
                         notifyDownloadProgressed(info);
@@ -428,12 +425,12 @@ public class DownloadManager {
                 conn.setConnectTimeout(10000);
                 conn.setRequestMethod("GET");
                 // 设置范围，格式为Range：bytes x-y;
-                long start = (startPos + compeleteSize);
+                long start = (startPos + completeSize);
                 conn.setRequestProperty("Range", "bytes="
                         + start + "-" + endPos);
 
                 randomAccessFile = new RandomAccessFile(info.getPath(), "rwd");
-                randomAccessFile.seek(startPos + compeleteSize);
+                randomAccessFile.seek(startPos + completeSize);
                 long currentTime;
 
                 if ((stream = conn.getInputStream()) == null) {
@@ -443,12 +440,12 @@ public class DownloadManager {
 
                     if (info.getDownloadState() == STATE_PAUSED){
                         //请求服务器时期内，任务的下载状态有可能改变为pause，故直接return
-                        LogUtils.dTag("id:"+info.id+" address:@"+Integer.toHexString(info.hashCode())+" threadName:"+threadName+" 请求时期内，任务的下载状态改变为pause，故直接return");
+                        DLog.dTag("id:"+info.id+" address:@"+Integer.toHexString(info.hashCode())+" threadName:"+threadName+" 请求时期内，任务的下载状态改变为pause，故直接return");
                         // 为保险起见，在pause的时候Task的isStop设置为true
                         return;
                     }
 
-                    LogUtils.deTag("id:"+info.id+" address:@"+Integer.toHexString(info.hashCode())+" threadName:"+threadName+" start write data");
+                    DLog.deTag("id:"+info.id+" address:@"+Integer.toHexString(info.hashCode())+" threadName:"+threadName+" start write data");
                     info.setDownloadState(STATE_DOWNLOADING);//改变下载状态
                     int count;
                     byte[] buffer = new byte[1024*10];
@@ -456,7 +453,7 @@ public class DownloadManager {
                     a:while (!isStop && downloading) {
                         synchronized (info) {
                             if (info.getDownloadState() == STATE_PAUSED){
-                                LogUtils.dTag("id:"+info.id+" address:@"+Integer.toHexString(info.hashCode())+" threadName:"+threadName+" download pause");
+                                DLog.dTag("id:"+info.id+" address:@"+Integer.toHexString(info.hashCode())+" threadName:"+threadName+" download pause");
                                 break a;
                             }
                         }
@@ -464,7 +461,7 @@ public class DownloadManager {
                         if ((count = stream.read(buffer)) > 0){
                             randomAccessFile.write(buffer, 0, count);
                             synchronized (info) {
-                                compeleteSize += count;
+                                completeSize += count;
                                 info.addCurrentSize(count);
                                 currentTime = System.currentTimeMillis();
                                 if (currentTime - info.lastUpdateTime > 1000) {
@@ -499,14 +496,14 @@ public class DownloadManager {
                         }
                     }
                     if (isStop)
-                        LogUtils.dTag("id:"+info.id+" address:@"+Integer.toHexString(info.hashCode())+" threadName:"+threadName+" Task pause or cancel");
+                        DLog.dTag("id:"+info.id+" address:@"+Integer.toHexString(info.hashCode())+" threadName:"+threadName+" Task pause or cancel");
                 }
             } catch (Exception e) {
                 e.printStackTrace();
                 //出异常后需要修改状态并
                 synchronized (info){
                     if (!info.isInvalid){
-                        LogUtils.deTag("下载异常，任务暂停");
+                        DLog.deTag("download exception, task pause");
                         pause(info);
                     }
                 }
@@ -528,8 +525,8 @@ public class DownloadManager {
                 if (conn != null)
                     conn.disconnect();
             }
-            LogUtils.deTag("id:"+info.id+" address:@"+Integer.toHexString(info.hashCode())+ " threadName:"+threadName+" download end。 startPos:"+startPos+" endPos:"+endPos+" complete:"+compeleteSize+" isDownloadFinished:"+isDownloadFinished());
-            LogUtils.dTag("*********current pool state:"+ThreadManager.getDownloadPool().getPoolState());
+            DLog.deTag("id:"+info.id+" address:@"+Integer.toHexString(info.hashCode())+ " threadName:"+threadName+" download end。 startPos:"+startPos+" endPos:"+endPos+" complete:"+ completeSize +" isDownloadFinished:"+isDownloadFinished());
+            DLog.dTag("*********current pool state:"+ThreadManager.getDownloadPool().getPoolState());
         }
 
         public DownloadTask cloneSelf(DownloadTaskInfo info) {
@@ -537,13 +534,13 @@ public class DownloadManager {
             t.threadName = threadName;
             t.startPos = startPos;
             t.endPos = endPos;
-            t.compeleteSize = compeleteSize;
+            t.completeSize = completeSize;
             return t;
         }
 
         // 该Task下载的数据是否下载完成
         public boolean isDownloadFinished(){
-            return compeleteSize == endPos-startPos+1;
+            return completeSize == endPos-startPos+1;
         }
     }
 }

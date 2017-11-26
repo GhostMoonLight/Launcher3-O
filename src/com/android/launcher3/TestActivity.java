@@ -30,7 +30,7 @@ public class TestActivity extends Activity implements DownloadManager.DownloadOb
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.layout_test);
-        DownloadManager.initDownlaodManager(this);
+        DownloadManager.initDownloadManager(this);
         DownloadManager.getInstance().registerObserver(this);
         btn = findViewById(R.id.btn);
         tv = findViewById(R.id.pro_tv);
@@ -129,6 +129,7 @@ public class TestActivity extends Activity implements DownloadManager.DownloadOb
                         break;
                     }
                 }
+                if (dInfo == null) return;
 
                 Button btn = null;
                 TextView tv = null;

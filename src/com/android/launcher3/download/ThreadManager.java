@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 class ThreadManager {
 	public static final String DEFAULT_SINGLE_POOL_NAME = "DEFAULT_SINGLE_POOL_NAME";
 
-	private static final int  COREPOOLSIZE = 12;
+	private static final int COREPOOL_SIZE = 12;
 
 
 	private static ThreadPoolProxy mDownloadPool = null;
@@ -33,7 +33,7 @@ class ThreadManager {
 	public static ThreadPoolProxy getDownloadPool() {
 		synchronized (mDownloadLock) {
 			if (mDownloadPool == null) {
-				mDownloadPool = new ThreadPoolProxy(COREPOOLSIZE, COREPOOLSIZE, 5L);
+				mDownloadPool = new ThreadPoolProxy(COREPOOL_SIZE, COREPOOL_SIZE, 5L);
 			}
 			return mDownloadPool;
 		}
@@ -45,7 +45,7 @@ class ThreadManager {
 	}
 
 	/** 获取一个单线程池，所有任务将会被按照加入的顺序执行，免除了同步开销的问题 */
-	public static ThreadPoolProxy getSinglePool(String name) {
+	static ThreadPoolProxy getSinglePool(String name) {
 		synchronized (mSingleLock) {
 			ThreadPoolProxy singlePool = mMap.get(name);
 			if (singlePool == null) {

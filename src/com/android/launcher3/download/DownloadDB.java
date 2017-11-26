@@ -22,7 +22,7 @@ class DownloadDB {
 		return instance;
 	}
 	
-	public synchronized SQLiteDatabase openDatabase() {
+	synchronized SQLiteDatabase openDatabase() {
 		mDatabase = new DownloadDBHelper(LauncherApplication.getInstance()).getWritableDatabase();
 		return mDatabase;
 	}
@@ -36,7 +36,7 @@ class DownloadDB {
 			values.put(DownloadDBHelper.COLUMN_ID, info.info.id);
 			values.put(DownloadDBHelper.COLUMN_NAME, info.info.name);
 			values.put(DownloadDBHelper.COLUMN_SIZE, info.info.size);
-			values.put(DownloadDBHelper.COLUMN_CURRENTSIZE, info.compeleteSize);
+			values.put(DownloadDBHelper.COLUMN_CURRENTSIZE, info.completeSize);
 			values.put(DownloadDBHelper.COLUMN_URL, info.info.url);
 			values.put(DownloadDBHelper.COLUMN_START_POS, info.startPos);
 			values.put(DownloadDBHelper.COLUMN_END_POS, info.endPos);
@@ -49,7 +49,7 @@ class DownloadDB {
 	public synchronized int updateUnfinished(DownloadManager.DownloadTask info){
 		SQLiteDatabase db = openDatabase();
 		ContentValues values = new ContentValues();
-		values.put(DownloadDBHelper.COLUMN_CURRENTSIZE, info.compeleteSize);
+		values.put(DownloadDBHelper.COLUMN_CURRENTSIZE, info.completeSize);
 		int result = db.update(DownloadDBHelper.TABLE_THEME_UNFINISHED, values, DownloadDBHelper.COLUMN_ID+"=? and " + DownloadDBHelper.COLUMN_THREAD_NAME+"=?", new String[]{info.info.id+"", info.threadName});
 		db.close();
 		return result;
@@ -90,7 +90,7 @@ class DownloadDB {
                         , Long.valueOf(cursor.getString(cursor.getColumnIndex(DownloadDBHelper.COLUMN_END_POS)))
                         , Long.valueOf(cursor.getString(cursor.getColumnIndex(DownloadDBHelper.COLUMN_CURRENTSIZE)))
                 );
-                info.addCurrentSize(task.compeleteSize);
+                info.addCurrentSize(task.completeSize);
 				info.oldDownloaded = info.getCurrentSize();
 				if(task.isDownloadFinished()){
 				    // 该task下载完成了
