@@ -16,13 +16,13 @@ import java.util.Map;
 
 /**
  * Created by shajia on 17-11-16.
+ *
  */
 
 public class TestActivity extends Activity implements DownloadManager.DownloadObserver, View.OnClickListener {
 
     Button btn, btn2, btn3, btn4, btn5;
     TextView tv, tv2, tv3, tv4, tv5;
-    int mState;
 
     ArrayList<DownloadInfo> list = new ArrayList<>();
 

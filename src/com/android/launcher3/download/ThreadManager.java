@@ -33,7 +33,7 @@ class ThreadManager {
 	public static ThreadPoolProxy getDownloadPool() {
 		synchronized (mDownloadLock) {
 			if (mDownloadPool == null) {
-				mDownloadPool = new ThreadPoolProxy(COREPOOL_SIZE, COREPOOL_SIZE, 5L);
+				mDownloadPool = new ThreadPoolProxy(COREPOOL_SIZE, COREPOOL_SIZE*2, 5L);
 			}
 			return mDownloadPool;
 		}
@@ -81,10 +81,18 @@ class ThreadManager {
 				//但是当总线程数大于mMaximumPoolSize时，将会抛出异常，交给RejectedExecutionHandler处理
 				//mKeepAliveTime是线程执行完任务后，且队列中没有可以执行的任务，存活的时间，后面的参数是时间单位
 				//ThreadFactory是每次创建新的线程工厂
-				mPool = new ThreadPoolExecutor(mCorePoolSize, mMaximumPoolSize, mKeepAliveTime, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(), Executors.defaultThreadFactory(), new AbortPolicy());
+				mPool = new ThreadPoolExecutor(
+						mCorePoolSize,                       // 核心线程池大小
+						mMaximumPoolSize,                    // 最大线程池大小
+						mKeepAliveTime,                      // 线程池中超过corePoolSize数目的空闲线程最大存活时间
+						TimeUnit.MILLISECONDS,               // keepAliveTime时间单位
+						new LinkedBlockingQueue<Runnable>(), // 阻塞任务队列
+						Executors.defaultThreadFactory(),    // 新建线程工厂
+						new AbortPolicy());                  // 当提交任务数超过maximumPoolSize+workQueue之和时，任务会交给RejectedExecutionHandler来处理
+
+				mPool.allowCoreThreadTimeOut(true);   //线程池中corePoolSize线程空闲时间达到keepAliveTime也将关闭
 			}
-			
-//			mPool.execute(run);
+
 			return mPool.submit(run);
 		}
 
