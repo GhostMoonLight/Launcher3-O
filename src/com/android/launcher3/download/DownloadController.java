@@ -56,11 +56,9 @@ public class DownloadController implements DownloadManager.DownloadObserver{
 
     //下载按钮的点击执行
     public void executeClick(DownloadInfo info){
-        if (mState == DownloadManager.STATE_NONE || mState == DownloadManager.STATE_PAUSED || mState == DownloadManager.STATE_ERROR) {
-            mDownloadManager.download(info);
-        }else if (mState == DownloadManager.STATE_WAITING || mState == DownloadManager.STATE_DOWNLOADING) {
-            mDownloadManager.pause(info);
-        } else if (mState == DownloadManager.STATE_DOWNLOADED) {
+        if (info.mState != DownloadManager.STATE_DOWNLOADED) {
+            DownloadManager.getInstance().download(info);
+        } else {
             if (!TextUtils.isEmpty(info.name)){
                 if (info.name.endsWith(".apk")){
                     DUtil.installApkNormal(DownloadTaskInfo.getPath(info.name));

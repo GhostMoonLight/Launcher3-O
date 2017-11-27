@@ -358,7 +358,7 @@ public class DownloadManager {
     }
 
 	/**
-	 * 检查文件是否下载完成
+	 * 检查apk是否下载完成
 	 */
 	private boolean checkDownloadFile(String path) {
 		if (!TextUtils.isEmpty(path) && path.endsWith(".apk")) {
