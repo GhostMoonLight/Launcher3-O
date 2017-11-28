@@ -221,6 +221,9 @@ public class DragController implements DragDriver.EventListener, TouchController
         return dragView;
     }
 
+    /**
+     * 回调onDragStart
+     */
     private void callOnDragStart() {
         for (DragListener listener : new ArrayList<>(mListeners)) {
             listener.onDragStart(mDragObject, mOptions);

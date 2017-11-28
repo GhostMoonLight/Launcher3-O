@@ -3186,6 +3186,9 @@ public class Launcher extends BaseActivity
         return anim;
     }
 
+    /**
+     * 进入拖拽模式
+     */
     public void enterSpringLoadedDragMode() {
         if (LOGD) {
             Log.d(TAG, String.format("enterSpringLoadedDragMode [mState=%s", mState.name()));

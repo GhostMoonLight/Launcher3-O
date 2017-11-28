@@ -526,9 +526,13 @@ public class PopupContainerWithArrow extends AbstractFloatingView implements Dra
 
     /**
      * Determines when the deferred drag should be started.
-     *
+     * 确定何时应该启动延迟的拖动。
      * Current behavior:
      * - Start the drag if the touch passes a certain distance from the original touch down.
+     *   如果触摸从原始触摸经过一定距离，则开始拖动。
+     *
+     *   预拖条件。桌面图标的时候什么时候才开始执行拖拽
+     *      长按会先显示shortcuts,移动一段距离后才开始真正的拖拽
      */
     public DragOptions.PreDragCondition createPreDragCondition() {
         return new DragOptions.PreDragCondition() {

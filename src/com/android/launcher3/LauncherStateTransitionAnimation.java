@@ -32,6 +32,7 @@ import com.android.launcher3.allapps.AllAppsContainerView;
 import com.android.launcher3.allapps.AllAppsTransitionController;
 import com.android.launcher3.anim.AnimationLayerSet;
 import com.android.launcher3.config.FeatureFlags;
+import com.android.launcher3.logging.LogUtils;
 import com.android.launcher3.util.CircleRevealOutlineProvider;
 import com.android.launcher3.util.Thunk;
 import com.android.launcher3.widget.WidgetsContainerView;
@@ -196,6 +197,7 @@ public class LauncherStateTransitionAnimation {
     public void startAnimationToWorkspace(final Launcher.State fromState,
             final Workspace.State fromWorkspaceState, final Workspace.State toWorkspaceState,
             final boolean animated, final Runnable onCompleteRunnable) {
+        LogUtils.dTag("fromState:"+fromState+" fromWorkspaceState:"+fromWorkspaceState+" toWorkspaceState:"+toWorkspaceState+" animated:"+animated);
         if (toWorkspaceState != Workspace.State.NORMAL &&
                 toWorkspaceState != Workspace.State.SPRING_LOADED &&
                 toWorkspaceState != Workspace.State.OVERVIEW) {

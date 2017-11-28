@@ -27,7 +27,7 @@ public class DragOptions {
 
     /**
      * Whether or not an accessible drag operation is in progress.
-     * 是否可以进行拖放操作
+     * 是否可以进行拖拽操作
      */
     public boolean isAccessibleDrag = false;
 
@@ -49,7 +49,7 @@ public class DragOptions {
      */
     public interface PreDragCondition {
 
-        public boolean shouldStartDrag(double distanceDragged);
+        boolean shouldStartDrag(double distanceDragged);
 
         /**
          * The pre-drag has started, but onDragStart() is

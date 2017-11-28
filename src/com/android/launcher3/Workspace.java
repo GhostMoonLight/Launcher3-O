@@ -2332,6 +2332,7 @@ public class Workspace extends PagedView
             PopupContainerWithArrow popupContainer = PopupContainerWithArrow
                     .showForIcon((BubbleTextView) child);
             if (popupContainer != null) {
+                // 创建DragOptions.PreDragCondition，用来判断什么时候开始开始拖拽
                 dragOptions.preDragCondition = popupContainer.createPreDragCondition();
 
                 mLauncher.getUserEventDispatcher().resetElapsedContainerMillis();
