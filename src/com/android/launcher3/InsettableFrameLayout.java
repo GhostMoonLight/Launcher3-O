@@ -9,9 +9,6 @@ import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
-import com.android.launcher3.allapps.AllAppsContainerView;
-import com.android.launcher3.config.FeatureFlags;
-
 public class InsettableFrameLayout extends FrameLayout implements
     ViewGroup.OnHierarchyChangeListener, Insettable {
 
@@ -37,8 +34,8 @@ public class InsettableFrameLayout extends FrameLayout implements
             lp.leftMargin += (newInsets.left - oldInsets.left);
             lp.rightMargin += (newInsets.right - oldInsets.right);
             lp.bottomMargin += (newInsets.bottom - oldInsets.bottom);
+            child.setLayoutParams(lp);
         }
-        child.setLayoutParams(lp);
     }
 
     @Override

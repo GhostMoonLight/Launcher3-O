@@ -521,14 +521,19 @@ public class DeviceProfile {
         // false纵向模式    true水平模式
         boolean hasVerticalBarLayout = isVerticalBarLayout();
 
-        // Layout the search bar space
+        // Layout the DropTargetBar
         Point searchBarBounds = getSearchBarDimensForWidgetOpts();
         View searchBar = launcher.getDropTargetBar();
         lp = (FrameLayout.LayoutParams) searchBar.getLayoutParams();
-        lp.width = searchBarBounds.x;
-        lp.height = searchBarBounds.y;
-        lp.topMargin = mInsets.top + edgeMarginPx;
-        searchBar.setLayoutParams(lp);
+        if (lp instanceof InsettableFrameLayout.LayoutParams){
+            // DropTargetBar布局文件中如果设置ignoreInsets为true,则不设置topMargin
+            if (!((InsettableFrameLayout.LayoutParams)lp).ignoreInsets){
+                lp.width = searchBarBounds.x;
+                lp.height = searchBarBounds.y;
+                lp.topMargin = mInsets.top + edgeMarginPx;
+                searchBar.setLayoutParams(lp);
+            }
+        }
 
         // Layout the workspace
         // WorkSapce充满全屏，通过设置padding来给Hoseat显示预留空间

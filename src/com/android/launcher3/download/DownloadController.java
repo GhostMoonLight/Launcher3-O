@@ -76,6 +76,10 @@ public class DownloadController implements DownloadManager.DownloadObserver{
     }
 
 
+    /**
+     * 设置下载完成后点击时的回调
+     * @param listener
+     */
     public void setOnFinishedClickListener(OnFinishedClickListener listener){
         mFinishedClickListener = listener;
     }
@@ -84,5 +88,13 @@ public class DownloadController implements DownloadManager.DownloadObserver{
     // 下载完成点击的监听,用来处理点击下载完成item的操作
     public interface OnFinishedClickListener{
         void onFinishedClick();
+    }
+
+    /**
+     * Created by cgx on 2016/12/8.
+     * 下载过程中View的刷新回调
+     */
+    public interface OnDownloadRefreshUI {
+        void onRefreshUI(DownloadTaskInfo info);
     }
 }
