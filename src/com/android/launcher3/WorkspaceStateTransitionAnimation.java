@@ -234,7 +234,11 @@ public class WorkspaceStateTransitionAnimation {
         int workspaceDuration = getAnimationDuration(states);
         animateWorkspace(states, animated, workspaceDuration, layerViews,
                 accessibilityEnabled);
-        animateBackgroundGradient(states, animated, BACKGROUND_FADE_OUT_DURATION);
+
+        if (!states.stateIsSpringLoaded) {
+            // 改变DragLayer的背景
+            animateBackgroundGradient(states, animated, BACKGROUND_FADE_OUT_DURATION);
+        }
         return mStateAnimator;
     }
 
@@ -282,7 +286,9 @@ public class WorkspaceStateTransitionAnimation {
         if (states.stateIsOverview || states.stateIsOverviewHidden) {
             finalWorkspaceTranslationY = mWorkspace.getOverviewModeTranslationY();
         } else if (states.stateIsSpringLoaded) {
-            finalWorkspaceTranslationY = mWorkspace.getSpringLoadedTranslationY();
+            // 新状态是拖拽状态时workspace的垂直偏移距离
+//            finalWorkspaceTranslationY = mWorkspace.getSpringLoadedTranslationY();
+            finalWorkspaceTranslationY = 0;
         }
 
         final int childCount = mWorkspace.getChildCount();
@@ -296,9 +302,12 @@ public class WorkspaceStateTransitionAnimation {
             mWorkspace.enableFreeScroll();
         }
 
+        // 新状态不是正常状态
         if (!states.stateIsNormal) {
             if (states.stateIsSpringLoaded) {
-                mNewScale = mSpringLoadedShrinkFactor;
+                // 新状态是拖拽状态时Workspace的缩放大小
+//                mNewScale = mSpringLoadedShrinkFactor;
+                mNewScale = 1;
             } else if (states.stateIsOverview || states.stateIsOverviewHidden) {
                 mNewScale = mOverviewModeShrinkFactor;
             }
@@ -335,25 +344,30 @@ public class WorkspaceStateTransitionAnimation {
                 }
             }
 
-            if (animated) {
-                float oldBackgroundAlpha = cl.getBackgroundAlpha();
-                if (initialAlpha != finalAlpha) {
-                    Animator alphaAnim = ObjectAnimator.ofFloat(
-                            cl.getShortcutsAndWidgets(), View.ALPHA, finalAlpha);
-                    alphaAnim.setDuration(duration)
-                            .setInterpolator(mZoomInInterpolator);
-                    mStateAnimator.play(alphaAnim);
-                }
-                if (oldBackgroundAlpha != 0 || finalBackgroundAlpha != 0) {
-                    ValueAnimator bgAnim = ObjectAnimator.ofFloat(cl, "backgroundAlpha",
-                            oldBackgroundAlpha, finalBackgroundAlpha);
-                    bgAnim.setInterpolator(mZoomInInterpolator);
-                    bgAnim.setDuration(duration);
-                    mStateAnimator.play(bgAnim);
+            if (!states.stateIsSpringLoaded) {
+                if (animated) {
+                    float oldBackgroundAlpha = cl.getBackgroundAlpha();
+                    if (initialAlpha != finalAlpha) {
+                        Animator alphaAnim = ObjectAnimator.ofFloat(
+                                cl.getShortcutsAndWidgets(), View.ALPHA, finalAlpha);
+                        alphaAnim.setDuration(duration)
+                                .setInterpolator(mZoomInInterpolator);
+                        mStateAnimator.play(alphaAnim);
+                    }
+                    if (oldBackgroundAlpha != 0 || finalBackgroundAlpha != 0) {
+                        ValueAnimator bgAnim = ObjectAnimator.ofFloat(cl, "backgroundAlpha",
+                                oldBackgroundAlpha, finalBackgroundAlpha);
+                        bgAnim.setInterpolator(mZoomInInterpolator);
+                        bgAnim.setDuration(duration);
+                        mStateAnimator.play(bgAnim);
+                    }
+                } else {
+                    cl.setBackgroundAlpha(finalBackgroundAlpha);
+                    cl.setShortcutAndWidgetAlpha(finalAlpha);
                 }
             } else {
-                cl.setBackgroundAlpha(finalBackgroundAlpha);
-                cl.setShortcutAndWidgetAlpha(finalAlpha);
+                cl.setBackgroundAlpha(1);
+                cl.setShortcutAndWidgetAlpha(1);
             }
 
             if (Workspace.isQsbContainerPage(i) &&

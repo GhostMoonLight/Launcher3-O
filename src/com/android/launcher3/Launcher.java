@@ -3201,8 +3201,12 @@ public class Launcher extends BaseActivity
                 Workspace.State.SPRING_LOADED, true /* animated */,
                 null /* onCompleteRunnable */);
         setState(State.WORKSPACE_SPRING_LOADED);
+        enterFullScreen();
     }
 
+    /**
+     * 延迟退出拖拽模式
+     */
     public void exitSpringLoadedDragModeDelayed(final boolean successfulDrop, int delay,
             final Runnable onCompleteRunnable) {
         if (!isStateSpringLoaded()) {
@@ -3227,6 +3231,7 @@ public class Launcher extends BaseActivity
                     exitSpringLoadedDragMode();
                 }
                 mExitSpringLoadedModeRunnable = null;
+                exitFullScreen();
             }
         };
         mHandler.postDelayed(mExitSpringLoadedModeRunnable, delay);
@@ -3237,6 +3242,9 @@ public class Launcher extends BaseActivity
                 || mState == State.WIDGETS_SPRING_LOADED;
     }
 
+    /**
+     * 退出拖拽模式
+     */
     public void exitSpringLoadedDragMode() {
         if (mState == State.APPS_SPRING_LOADED) {
             showAppsView(true /* animated */,
@@ -4324,6 +4332,26 @@ public class Launcher extends BaseActivity
             return (Launcher) context;
         }
         return ((Launcher) ((ContextWrapper) context).getBaseContext());
+    }
+
+    /**
+     * 全屏显示     隐藏状态栏，显示删除区域
+     */
+    public void enterFullScreen() {
+        WindowManager.LayoutParams attrs = getWindow().getAttributes();
+        attrs.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
+        getWindow().setAttributes(attrs);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+    }
+
+    /**
+     * 取消全屏显示
+     */
+    public void exitFullScreen() {
+        WindowManager.LayoutParams attrs = getWindow().getAttributes();
+        attrs.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        getWindow().setAttributes(attrs);
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
     }
 
     private class RotationPrefChangeHandler implements OnSharedPreferenceChangeListener {

@@ -21,7 +21,6 @@
     android:layout_height="@dimen/dynamic_grid_drop_target_size"
     android:layout_gravity="center_horizontal|top"
     launcher:layout_ignoreInsets="true"
-    android:background="#008e8e"
     android:focusable="false">
 
     <FrameLayout

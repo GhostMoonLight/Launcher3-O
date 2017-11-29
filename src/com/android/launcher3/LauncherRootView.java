@@ -23,7 +23,7 @@ public class LauncherRootView extends InsettableFrameLayout {
     @ViewDebug.ExportedProperty(category = "launcher")
     private int mRightInsetBarWidth;
 
-    private View mAlignedView;
+    private View mAlignedView;    // 实际就是DragLayer
 
     public LauncherRootView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -47,14 +47,25 @@ public class LauncherRootView extends InsettableFrameLayout {
     @Override
     protected boolean fitSystemWindows(Rect insets) {
         LogUtils.eTag("insets:"+insets);
+        if (insets.top == 0 && insets.bottom == 0){
+            // 进入全屏模式的时候insets的top和bottom都为0
+            // 对于有虚拟按键的设备来说bottom是不为0的，进入全屏模式的时候bottom就变为0了，
+            // 进入全屏模式的时候会重新布局，bottom的值变化会影响布局
+            // 这里如果top和bottom都为0则使用之前的mInsets中的值
+            insets.top = mInsets.top;
+            insets.bottom = mInsets.bottom;
+        }
         boolean rawInsetsChanged = !mInsets.equals(insets);
         mDrawSideInsetBar = (insets.right > 0 || insets.left > 0) &&
                 (!Utilities.ATLEAST_MARSHMALLOW ||
                 getContext().getSystemService(ActivityManager.class).isLowRamDevice());
         mRightInsetBarWidth = insets.right;
         mLeftInsetBarWidth = insets.left;
+
+        // 该方法中会遍历子View，让子View根据Insets来布局
         setInsets(mDrawSideInsetBar ? new Rect(0, insets.top, 0, insets.bottom) : insets);
 
+        // 如果left和right不为0，则需要给DragLayout设置leftMargin和rightMargin
         if (mAlignedView != null && mDrawSideInsetBar) {
             // Apply margins on aligned view to handle left/right insets.
             MarginLayoutParams lp = (MarginLayoutParams) mAlignedView.getLayoutParams();
@@ -68,6 +79,7 @@ public class LauncherRootView extends InsettableFrameLayout {
         if (rawInsetsChanged) {
             // Update the grid again
             Launcher launcher = Launcher.getLauncher(getContext());
+            // Insets变化的回调，通知Launcher重新布局
             launcher.onInsetsChanged(insets);
         }
 
