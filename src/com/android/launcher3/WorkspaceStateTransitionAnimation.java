@@ -34,6 +34,7 @@ import com.android.launcher3.anim.AnimationLayerSet;
 import com.android.launcher3.anim.PropertyListBuilder;
 import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.dragndrop.DragLayer;
+import com.android.launcher3.logging.LogUtils;
 import com.android.launcher3.util.Thunk;
 
 /**
@@ -235,10 +236,8 @@ public class WorkspaceStateTransitionAnimation {
         animateWorkspace(states, animated, workspaceDuration, layerViews,
                 accessibilityEnabled);
 
-        if (!states.stateIsSpringLoaded) {
-            // 改变DragLayer的背景
-            animateBackgroundGradient(states, animated, BACKGROUND_FADE_OUT_DURATION);
-        }
+        // 改变DragLayer的背景
+        animateBackgroundGradient(states, animated, BACKGROUND_FADE_OUT_DURATION);
         return mStateAnimator;
     }
 
@@ -344,7 +343,9 @@ public class WorkspaceStateTransitionAnimation {
                 }
             }
 
-            if (!states.stateIsSpringLoaded) {
+            if (!states.stateIsSpringLoaded
+                    || (states.stateIsSpringLoaded && states.oldStateIsOverviewHidden)) {
+                LogUtils.eTag("finalBackgroundAlpha:"+finalBackgroundAlpha+" finalAlpha:"+finalAlpha);
                 if (animated) {
                     float oldBackgroundAlpha = cl.getBackgroundAlpha();
                     if (initialAlpha != finalAlpha) {
@@ -365,9 +366,6 @@ public class WorkspaceStateTransitionAnimation {
                     cl.setBackgroundAlpha(finalBackgroundAlpha);
                     cl.setShortcutAndWidgetAlpha(finalAlpha);
                 }
-            } else {
-                cl.setBackgroundAlpha(1);
-                cl.setShortcutAndWidgetAlpha(1);
             }
 
             if (Workspace.isQsbContainerPage(i) &&
@@ -479,8 +477,8 @@ public class WorkspaceStateTransitionAnimation {
 
         final DragLayer dragLayer = mLauncher.getDragLayer();
         final float startAlpha = dragLayer.getBackgroundAlpha();
-        float finalAlpha = states.stateIsNormal || states.stateIsNormalHidden ?
-                0 : mWorkspaceScrimAlpha;
+        float finalAlpha = states.stateIsNormal || states.stateIsNormalHidden
+                || states.stateIsSpringLoaded? 0 : mWorkspaceScrimAlpha;
 
         if (finalAlpha != startAlpha) {
             if (animated) {
@@ -491,7 +489,7 @@ public class WorkspaceStateTransitionAnimation {
                     @Override
                     public void onAnimationUpdate(ValueAnimator animation) {
                         dragLayer.setBackgroundAlpha(
-                                ((Float)animation.getAnimatedValue()).floatValue());
+                                ((Float) animation.getAnimatedValue()).floatValue());
                     }
                 });
                 bgFadeOutAnimation.setInterpolator(new DecelerateInterpolator(1.5f));
