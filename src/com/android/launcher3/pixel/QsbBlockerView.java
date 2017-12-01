@@ -22,6 +22,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
 import android.util.Property;
@@ -44,12 +45,16 @@ public class QsbBlockerView extends FrameLayout implements OnStateChangeListener
     private View mView;
 
     private final Paint mBgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private Rect rect = new Rect();
 
     public QsbBlockerView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         mBgPaint.setColor(Color.WHITE);
         mBgPaint.setAlpha(0);
+        int dis = getContext().getResources().getDimensionPixelOffset(R.dimen.popup_padding_start);
+        rect.top = dis;
+        rect.left = 0;
     }
 
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -100,7 +105,11 @@ public class QsbBlockerView extends FrameLayout implements OnStateChangeListener
 
     @Override
     protected void onDraw(Canvas canvas) {
-        canvas.drawPaint(mBgPaint);
+//        canvas.drawPaint(mBgPaint);
+        mBgPaint.setStyle(Paint.Style.FILL);//实心矩形框
+        rect.bottom = getHeight();
+        rect.right = getWidth() - rect.left;
+        canvas.drawRect(rect, mBgPaint);
     }
 
     @Override

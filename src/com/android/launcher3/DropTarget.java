@@ -94,6 +94,10 @@ public interface DropTarget {
 
             return res;
         }
+
+        public final float getQuarterWide(){
+            return dragView.getDragRegion().width() / 3;
+        }
     }
 
     /**

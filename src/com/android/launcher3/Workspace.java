@@ -3122,6 +3122,9 @@ public class Workspace extends PagedView
      * - A side page if we are in spring-loaded mode and the drag object is over it
      * - The current page otherwise
      *
+     * 这里面判断是否移动到left or right边的布局
+     *
+     * 布局是否与当前不同
      * @return whether the layout is different from the current {@link #mDragTargetLayout}.
      */
     private boolean setDropLayoutForDragObject(DragObject d, float centerX, float centerY) {
@@ -3136,14 +3139,14 @@ public class Workspace extends PagedView
         int nextPage = getNextPage();
         if (layout == null && !isPageInTransition()) {
             // Check if the item is dragged over left page
-            mTempTouchCoordinates[0] = Math.min(centerX, d.x);
+            mTempTouchCoordinates[0] = Math.min(centerX-d.getQuarterWide(), d.x);
             mTempTouchCoordinates[1] = d.y;
             layout = verifyInsidePage(nextPage + (mIsRtl ? 1 : -1), mTempTouchCoordinates);
         }
 
         if (layout == null && !isPageInTransition()) {
             // Check if the item is dragged over right page
-            mTempTouchCoordinates[0] = Math.max(centerX, d.x);
+            mTempTouchCoordinates[0] = Math.max(centerX+d.getQuarterWide(), d.x);
             mTempTouchCoordinates[1] = d.y;
             layout = verifyInsidePage(nextPage + (mIsRtl ? -1 : 1), mTempTouchCoordinates);
         }
@@ -3162,6 +3165,7 @@ public class Workspace extends PagedView
 
     /**
      * Returns the child CellLayout if the point is inside the page coordinates, null otherwise.
+     * 如果点在页面坐标内，则返回子CellLayout，否则返回null。
      */
     private CellLayout verifyInsidePage(int pageNo, float[] touchXy)  {
         if (pageNo >= numCustomPages() && pageNo < getPageCount()) {

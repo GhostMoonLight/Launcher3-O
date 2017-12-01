@@ -34,7 +34,6 @@ import com.android.launcher3.anim.AnimationLayerSet;
 import com.android.launcher3.anim.PropertyListBuilder;
 import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.dragndrop.DragLayer;
-import com.android.launcher3.logging.LogUtils;
 import com.android.launcher3.util.Thunk;
 
 /**
@@ -273,8 +272,8 @@ public class WorkspaceStateTransitionAnimation {
         }
 
         // Update the workspace state
-        float finalBackgroundAlpha = (states.stateIsSpringLoaded || states.stateIsOverview) ?
-                1.0f : 0f;
+//        float finalBackgroundAlpha = (states.stateIsSpringLoaded || states.stateIsOverview) ? 1.0f : 0f;
+        float finalBackgroundAlpha = states.stateIsOverview ? 1.0f : 0f;
         float finalHotseatAlpha = (states.stateIsNormal || states.stateIsSpringLoaded ||
                 (FeatureFlags.LAUNCHER3_ALL_APPS_PULL_UP && states.stateIsNormalHidden)) ? 1f : 0f;
         float finalOverviewPanelAlpha = states.stateIsOverview ? 1f : 0f;
@@ -343,29 +342,25 @@ public class WorkspaceStateTransitionAnimation {
                 }
             }
 
-            if (!states.stateIsSpringLoaded
-                    || (states.stateIsSpringLoaded && states.oldStateIsOverviewHidden)) {
-                LogUtils.eTag("finalBackgroundAlpha:"+finalBackgroundAlpha+" finalAlpha:"+finalAlpha);
-                if (animated) {
-                    float oldBackgroundAlpha = cl.getBackgroundAlpha();
-                    if (initialAlpha != finalAlpha) {
-                        Animator alphaAnim = ObjectAnimator.ofFloat(
-                                cl.getShortcutsAndWidgets(), View.ALPHA, finalAlpha);
-                        alphaAnim.setDuration(duration)
-                                .setInterpolator(mZoomInInterpolator);
-                        mStateAnimator.play(alphaAnim);
-                    }
-                    if (oldBackgroundAlpha != 0 || finalBackgroundAlpha != 0) {
-                        ValueAnimator bgAnim = ObjectAnimator.ofFloat(cl, "backgroundAlpha",
-                                oldBackgroundAlpha, finalBackgroundAlpha);
-                        bgAnim.setInterpolator(mZoomInInterpolator);
-                        bgAnim.setDuration(duration);
-                        mStateAnimator.play(bgAnim);
-                    }
-                } else {
-                    cl.setBackgroundAlpha(finalBackgroundAlpha);
-                    cl.setShortcutAndWidgetAlpha(finalAlpha);
+            if (animated) {
+                float oldBackgroundAlpha = cl.getBackgroundAlpha();
+                if (initialAlpha != finalAlpha) {
+                    Animator alphaAnim = ObjectAnimator.ofFloat(
+                            cl.getShortcutsAndWidgets(), View.ALPHA, finalAlpha);
+                    alphaAnim.setDuration(duration)
+                            .setInterpolator(mZoomInInterpolator);
+                    mStateAnimator.play(alphaAnim);
                 }
+                if (oldBackgroundAlpha != 0 || finalBackgroundAlpha != 0) {
+                    ValueAnimator bgAnim = ObjectAnimator.ofFloat(cl, "backgroundAlpha",
+                            oldBackgroundAlpha, finalBackgroundAlpha);
+                    bgAnim.setInterpolator(mZoomInInterpolator);
+                    bgAnim.setDuration(duration);
+                    mStateAnimator.play(bgAnim);
+                }
+            } else {
+                cl.setBackgroundAlpha(finalBackgroundAlpha);
+                cl.setShortcutAndWidgetAlpha(finalAlpha);
             }
 
             if (Workspace.isQsbContainerPage(i) &&

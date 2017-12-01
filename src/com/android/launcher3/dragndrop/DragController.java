@@ -347,6 +347,7 @@ public class DragController implements DragDriver.EventListener, TouchController
 
     /**
      * Clamps the position to the drag layer bounds.
+     * 将位置锁定到拖动图层边界。
      */
     private int[] getClampedDragLayerPos(float x, float y) {
         mLauncher.getDragLayer().getLocalVisibleRect(mDragLayerRect);
