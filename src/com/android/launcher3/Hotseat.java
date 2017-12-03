@@ -191,12 +191,12 @@ public class Hotseat extends FrameLayout
             } else {
                 mBackgroundColorAnimator = ValueAnimator.ofInt(mBackgroundColor, color);
                 mBackgroundColorAnimator.setEvaluator(new ArgbEvaluator());
-                mBackgroundColorAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                    @Override
-                    public void onAnimationUpdate(ValueAnimator animation) {
-                        mBackground.setColor((Integer) animation.getAnimatedValue());
-                    }
-                });
+//                mBackgroundColorAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+//                    @Override
+//                    public void onAnimationUpdate(ValueAnimator animation) {
+//                        mBackground.setColor((Integer) animation.getAnimatedValue());
+//                    }
+//                });
                 mBackgroundColorAnimator.addListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
@@ -207,8 +207,14 @@ public class Hotseat extends FrameLayout
             }
             mBackgroundColor = color;
         }
+
+        // 修改  Hotseat背景设置为透明
+        mBackgroundColor = mLauncher.getResources().getColor(android.R.color.transparent);
+        mBackground = new ColorDrawable(mBackgroundColor);
+        setBackground(mBackground);
     }
 
+    // mBackground被设置为透明 所以这个方法true或false效果都为透明
     public void setBackgroundTransparent(boolean enable) {
         if (enable) {
             mBackground.setAlpha(0);

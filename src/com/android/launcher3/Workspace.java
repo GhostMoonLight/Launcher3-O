@@ -186,7 +186,7 @@ public class Workspace extends PagedView
     private float[] mTempTouchCoordinates = new float[2];
 
     private SpringLoadedDragController mSpringLoadedDragController;
-    private float mOverviewModeShrinkFactor;
+    private float mOverviewModeShrinkFactor;   // 进入编辑模式时Workspace的缩放大小
 
     // State variable that indicates whether the pages are small (ie when you're
     // in all apps or customize mode)
@@ -378,6 +378,7 @@ public class Workspace extends PagedView
         }
     }
 
+    // 状态变化的监听回调   QsbBlockerView类中onAttachedToWindow方法中设置该监听
     public void setOnStateChangeListener(OnStateChangeListener listener) {
         mOnStateChangeListener = listener;
     }
@@ -2111,6 +2112,7 @@ public class Workspace extends PagedView
             mLauncher.notifyWidgetProvidersChanged();
         }
 
+        // 状态变化的时候回调状态变化的监听
         if (mOnStateChangeListener != null) {
             mOnStateChangeListener.prepareStateChange(toState, animated ? workspaceAnim : null);
         }
@@ -3067,6 +3069,7 @@ public class Workspace extends PagedView
                 minSpanY = item.minSpanY;
             }
 
+            // 查找最近的位置
             mTargetCell = findNearestArea((int) mDragViewVisualCenter[0],
                     (int) mDragViewVisualCenter[1], minSpanX, minSpanY,
                     mDragTargetLayout, mTargetCell);
@@ -3075,16 +3078,19 @@ public class Workspace extends PagedView
 
             setCurrentDropOverCell(mTargetCell[0], mTargetCell[1]);
 
+            // 计算拖拽View中心到最近摆放拖拽view的位置的距离
             float targetCellDistance = mDragTargetLayout.getDistanceFromCell(
                     mDragViewVisualCenter[0], mDragViewVisualCenter[1], mTargetCell);
 
             manageFolderFeedback(mDragTargetLayout, mTargetCell, targetCellDistance, d);
 
+            // 判断最近的位置是否被占用
             boolean nearestDropOccupied = mDragTargetLayout.isNearestDropLocationOccupied((int)
                     mDragViewVisualCenter[0], (int) mDragViewVisualCenter[1], item.spanX,
                     item.spanY, child, mTargetCell);
 
             if (!nearestDropOccupied) {
+                // 如果没有被占用，就在那里显示图标的轮廓框
                 mDragTargetLayout.visualizeDropLocation(child, mOutlineProvider,
                         mTargetCell[0], mTargetCell[1], item.spanX, item.spanY, false, d);
             } else if ((mDragMode == DRAG_MODE_NONE || mDragMode == DRAG_MODE_REORDER)
@@ -3092,6 +3098,8 @@ public class Workspace extends PagedView
                     mLastReorderY != reorderY)) {
 
                 int[] resultSpan = new int[2];
+
+                // 如果没有位置，并且是排序状态，则进行排序处理
                 mDragTargetLayout.performReorder((int) mDragViewVisualCenter[0],
                         (int) mDragViewVisualCenter[1], minSpanX, minSpanY, item.spanX, item.spanY,
                         child, mTargetCell, resultSpan, CellLayout.MODE_SHOW_REORDER_HINT);
@@ -3104,6 +3112,7 @@ public class Workspace extends PagedView
                 mReorderAlarm.setAlarm(REORDER_TIMEOUT);
             }
 
+            // 如果是创建文件夹或者放置到文件夹状态
             if (mDragMode == DRAG_MODE_CREATE_FOLDER || mDragMode == DRAG_MODE_ADD_TO_FOLDER ||
                     !nearestDropOccupied) {
                 if (mDragTargetLayout != null) {

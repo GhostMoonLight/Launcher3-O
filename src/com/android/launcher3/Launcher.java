@@ -2925,10 +2925,12 @@ public class Launcher extends BaseActivity
         // The hotseat touch handling does not go through Workspace, and we always allow long press
         // on hotseat items.
         if (!mDragController.isDragging()) {
+
+            // itemUnderLongClick为null说明长按的是Workspace
             if (itemUnderLongClick == null) {
                 // User long pressed on empty space
                 if (mWorkspace.isInOverviewMode()) {
-                    mWorkspace.startReordering(v);
+                    mWorkspace.startReordering(v);  // Workspace进入排序模式
                     getUserEventDispatcher().logActionOnContainer(Action.Touch.LONGPRESS,
                             Action.Direction.NONE, ContainerType.OVERVIEW);
                 } else {
@@ -4337,7 +4339,7 @@ public class Launcher extends BaseActivity
     /**
      * 全屏显示     隐藏状态栏，显示删除区域
      */
-    public void enterFullScreen() {
+    private void enterFullScreen() {
         WindowManager.LayoutParams attrs = getWindow().getAttributes();
         attrs.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
         getWindow().setAttributes(attrs);
@@ -4347,7 +4349,7 @@ public class Launcher extends BaseActivity
     /**
      * 取消全屏显示
      */
-    public void exitFullScreen() {
+    private void exitFullScreen() {
         WindowManager.LayoutParams attrs = getWindow().getAttributes();
         attrs.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().setAttributes(attrs);

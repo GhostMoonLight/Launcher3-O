@@ -2040,6 +2040,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
         mIsReordering = false;
     }
 
+    // Workspace进入排序模式
     public boolean startReordering(View v) {
         int dragViewIndex = indexOfChild(v);
 
@@ -2056,7 +2057,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
             dragViewIndex <= mTempVisiblePagesRange[1]) {
             // Find the drag view under the pointer
             mDragView = getChildAt(dragViewIndex);
-            mDragView.animate().scaleX(1.15f).scaleY(1.15f).setDuration(100).start();
+            mDragView.animate().scaleX(1.12f).scaleY(1.12f).setDuration(100).start();
             mDragViewBaselineLeft = mDragView.getLeft();
             snapToPage(getPageNearestToCenterOfScreen());
             disableFreeScroll();

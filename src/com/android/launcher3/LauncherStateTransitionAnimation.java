@@ -197,7 +197,7 @@ public class LauncherStateTransitionAnimation {
     public void startAnimationToWorkspace(final Launcher.State fromState,
             final Workspace.State fromWorkspaceState, final Workspace.State toWorkspaceState,
             final boolean animated, final Runnable onCompleteRunnable) {
-        LogUtils.dTag("fromState:"+fromState+" fromWorkspaceState:"+fromWorkspaceState+" toWorkspaceState:"+toWorkspaceState+" animated:"+animated);
+        LogUtils.dTag("fromLauncherState:"+fromState+" fromWorkspaceState:"+fromWorkspaceState+" toWorkspaceState:"+toWorkspaceState+" animated:"+animated);
         if (toWorkspaceState != Workspace.State.NORMAL &&
                 toWorkspaceState != Workspace.State.SPRING_LOADED &&
                 toWorkspaceState != Workspace.State.OVERVIEW) {

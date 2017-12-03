@@ -37,6 +37,10 @@
             DeleteDropTarget：   显示移除或者取消
             UninstallDropTarget：显示卸载
                 InfoDropTarget： 继承UninstallDropTarget。显示应用信息
+                
+#####Launcher变换的相关动画
+     LauncherStateTransitionAnimation
+     WorkspaceStateTransitionAnimation
      
 #####拖拽事件的流程
      长按事件都是在Launcher的onLongClick方法中触发的
@@ -47,8 +51,22 @@
      
      ------------------------
      DragController中handleMoveEvent方法用来处理滑动事件，会触发callOnDragStart回调onDragStart方法,
-     DropTargetBar中的onDragStart方法会让DropTargetBar显示出来;
-     Workspace中的onDragStart方法中会让Workspace进入拖拽模式;
+         1. DropTargetBar中的onDragStart方法会让DropTargetBar显示出来;
+         2. Workspace中的onDragStart方法中会调用Launcher.enterSpringLoadedDragMode让Workspace进入拖拽模式;
+                进入拖拽模式的过程中在setStateWithAnimation方法中会回调mOnStateChangeListener.prepareStateChange
+                状态变化的监听，QsbBlockerView是OnStateChangeListener的唯一实现类。进入拖拽模式时，QsbBlockerView会
+                显示一个背景就是在OnStateChangeListener方法中处理的。
+         3. WorkspaceStateTransitionAnimation.animateWorkspace方法中设置变换动画的监听，动画开始的时候调用
+                setShouldAutoHide方法显示Page Indicator.
+                
+         animateWorkspace方法执行后Launcher就开始执行动画进入拖拽模式！
+         
+     拖拽模式中的几种拖拽状态：   这几种状态都是在Workspace的onDragOver中发生的.
+        1. 准备创建文件夹，
+        2. 拖拽时跳转到上一屏或者下一屏，
+        3. 排序状态，
+         
+         
      
 
 

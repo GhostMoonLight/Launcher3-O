@@ -482,6 +482,7 @@ public class AllAppsContainerView extends BaseContainerView implements DragSourc
             mlp.rightMargin = insets.right;
             setLayoutParams(mlp);
         } else {
+            // AllApp界面设置nav_bar_bg的高度
             View navBarBg = findViewById(R.id.nav_bar_bg);
             ViewGroup.LayoutParams navBarBgLp = navBarBg.getLayoutParams();
             navBarBgLp.height = insets.bottom;

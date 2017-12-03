@@ -26,6 +26,7 @@ import com.android.launcher3.Utilities;
 
 /**
  * Saves and loads colors extracted from the wallpaper, as well as the associated wallpaper id.
+ * 保存并加载从壁纸中提取的颜色以及关联的墙纸ID。
  */
 public class ExtractedColors {
     private static final String TAG = "ExtractedColors";
