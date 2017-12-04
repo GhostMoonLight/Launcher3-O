@@ -1417,8 +1417,12 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
         mAllowOverScroll = enable;
     }
 
+    /**
+     * 拖拽页移动时，获取离拖拽页最近的PageIndex
+     */
     private int getNearestHoverOverPageIndex() {
         if (mDragView != null) {
+            // 计算mDragView的中心到PageView最左边的距离
             int dragX = (int) (mDragView.getLeft() + (mDragView.getMeasuredWidth() / 2)
                     + mDragView.getTranslationX());
             getFreeScrollPageRange(mTempVisiblePagesRange);
@@ -1426,6 +1430,7 @@ public abstract class PagedView extends ViewGroup implements ViewGroup.OnHierarc
             int minIndex = indexOfChild(mDragView);
             for (int i = mTempVisiblePagesRange[0]; i <= mTempVisiblePagesRange[1]; i++) {
                 View page = getPageAt(i);
+                // 计算每一页的中心到最左边的距离
                 int pageX = (int) (page.getLeft() + page.getMeasuredWidth() / 2);
                 int d = Math.abs(dragX - pageX);
                 if (d < minDistance) {

@@ -2047,6 +2047,7 @@ public class Workspace extends PagedView
         mStateTransitionAnimation.snapToPageFromOverView(whichPage);
     }
 
+    // 获取编译模式时Workspace垂直方向上偏移的距离
     int getOverviewModeTranslationY() {
         DeviceProfile grid = mLauncher.getDeviceProfile();
         int overviewButtonBarHeight = grid.getOverviewModeButtonBarHeight();

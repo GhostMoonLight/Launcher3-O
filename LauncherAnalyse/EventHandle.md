@@ -63,7 +63,10 @@
          
      拖拽模式中的几种拖拽状态：   这几种状态都是在Workspace的onDragOver中发生的.
         1. 准备创建文件夹，
-        2. 拖拽时跳转到上一屏或者下一屏，
+        
+        2. 拖拽时跳转到上一屏或者下一屏，    
+               setDropLayoutForDragObject: 这里面判断是否移动到left or right边的布局
+               
         3. 排序状态，
          
          
