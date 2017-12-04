@@ -947,6 +947,7 @@ public class CellLayout extends ViewGroup implements BubbleTextShadowHandler {
             lp.y = oldY;
 
             // Exit early if we're not actually moving the view
+            // 如果我们没有实际移动视图，尽早退出
             if (oldX == newX && oldY == newY) {
                 lp.isLockedToGrid = true;
                 return true;
@@ -2657,6 +2658,16 @@ public class CellLayout extends ViewGroup implements BubbleTextShadowHandler {
         /**
          * Indicates whether the item will set its x, y, width and height parameters freely,
          * or whether these will be computed based on cellX, cellY, cellHSpan and cellVSpan.
+         *
+         * 指示项目是否自由设置其x，y，宽度和高度参数，
+         * 或者这些参数是基于cellX，cellY，cellHSpan和cellVSpan计算的。
+         * true 表示cellX，cellY，cellHSpan和cellVSpan计算的，不能自由设置x，y
+         * false 表示能自由设置x，y
+         *
+         * 这个参数的作用：
+         *      icon在排序过程中移动的过程中会频繁触发onMeasure，
+         *      该参数控制是否在onMeasure的过程中计算x，y的值
+         *      animateChildToPosition方法中会设置该参数的值
          */
         public boolean isLockedToGrid = true;
 
@@ -2721,6 +2732,25 @@ public class CellLayout extends ViewGroup implements BubbleTextShadowHandler {
          */
         public void setup(int cellWidth, int cellHeight, boolean invertHorizontally, int colCount,
                 float cellScaleX, float cellScaleY) {
+            if (isLockedToGrid) {
+                final int myCellHSpan = cellHSpan;
+                final int myCellVSpan = cellVSpan;
+                int myCellX = useTmpCoords ? tmpCellX : cellX;
+                int myCellY = useTmpCoords ? tmpCellY : cellY;
+
+                if (invertHorizontally) {
+                    myCellX = colCount - myCellX - cellHSpan;
+                }
+
+                width = (int) (myCellHSpan * cellWidth / cellScaleX - leftMargin - rightMargin);
+                height = (int) (myCellVSpan * cellHeight / cellScaleY - topMargin - bottomMargin);
+                x = (myCellX * cellWidth + leftMargin);
+                y = (myCellY * cellHeight + topMargin);
+            }
+        }
+
+        public void setUpWithHotseat(int cellWidth, int cellHeight, boolean invertHorizontally, int colCount,
+                                     float cellScaleX, float cellScaleY) {
             if (isLockedToGrid) {
                 final int myCellHSpan = cellHSpan;
                 final int myCellVSpan = cellVSpan;
