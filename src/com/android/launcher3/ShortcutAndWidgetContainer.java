@@ -123,6 +123,7 @@ public class ShortcutAndWidgetContainer extends ViewGroup {
                 int cellPaddingY = (int) Math.max(0, ((lp.height - cHeight) / 2f));
                 int cellPaddingX = (int) (profile.edgeMarginPx / 2f);
                 child.setPadding(cellPaddingX, cellPaddingY, cellPaddingX, 0);
+
             }
         } else {
             lp.x = 0;

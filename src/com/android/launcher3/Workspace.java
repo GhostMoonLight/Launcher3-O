@@ -3043,6 +3043,8 @@ public class Workspace extends PagedView
         if (item.spanX < 0 || item.spanY < 0) {
             throw new RuntimeException("Improper spans found");
         }
+
+        // 计算DragView的中心
         mDragViewVisualCenter = d.getVisualCenter(mDragViewVisualCenter);
 
         final View child = (mDragInfo == null) ? null : mDragInfo.cell;

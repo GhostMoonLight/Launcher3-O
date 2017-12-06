@@ -737,6 +737,7 @@ public class CellLayout extends ViewGroup implements BubbleTextShadowHandler {
 
     /**
      * Given a cell coordinate, return the point that represents the center of the cell
+     * 给定单元格坐标，返回代表单元格中心的点，数值记录在result中
      *
      * @param cellX X coordinate of the cell
      * @param cellY Y coordinate of the cell
@@ -1130,6 +1131,7 @@ public class CellLayout extends ViewGroup implements BubbleTextShadowHandler {
      * @param spanX Horizontal span of the object.
      * @param spanY Vertical span of the object.
      * @param ignoreOccupied If true, the result can be an occupied cell
+     *                       如果为true，则结果可以是占用的单元格
      * @param result Array in which to place the result, or null (in which case a new array will
      *        be allocated)
      * @return The X, Y cell of a vacant area that can contain this object,
@@ -1159,6 +1161,8 @@ public class CellLayout extends ViewGroup implements BubbleTextShadowHandler {
             return bestXY;
         }
 
+        // 遍历的次数和单元格占用的格数有关，如果minSpanY是1，则遍历countY次，
+        // 如果minSpanY大于1，则遍历countY - (minSpanY - 1)次
         for (int y = 0; y < countY - (minSpanY - 1); y++) {
             inner:
             for (int x = 0; x < countX - (minSpanX - 1); x++) {
@@ -2468,13 +2472,17 @@ public class CellLayout extends ViewGroup implements BubbleTextShadowHandler {
      * cell location. Uses Euclidean distance to score multiple vacant areas.
      *
      * @param pixelX The X location at which you want to search for a vacant area.
+     *               您想要搜索空白区域的X位置。
      * @param pixelY The Y location at which you want to search for a vacant area.
+     *               您想要搜索空白区域的Y位置。
      * @param spanX Horizontal span of the object.
+     *              对象的水平跨度。水平方向占几格
      * @param spanY Vertical span of the object.
-     * @param ignoreView Considers space occupied by this view as unoccupied
+     *              对象的垂直跨度。。垂直方向占几格
      * @param result Previously returned value to possibly recycle.
      * @return The X, Y cell of a vacant area that can contain this object,
      *         nearest the requested location.
+     *         可以包含此对象的空白区域单元格的XY值，距离请求的位置最近。
      */
     public int[] findNearestArea(int pixelX, int pixelY, int spanX, int spanY, int[] result) {
         return findNearestArea(pixelX, pixelY, spanX, spanY, spanX, spanY, false, result, null);
