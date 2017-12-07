@@ -721,6 +721,7 @@ public class CellLayout extends ViewGroup implements BubbleTextShadowHandler {
 
     /**
      * Given a cell coordinate, return the point that represents the upper left corner of that cell
+     * 给定单元格坐标，返回代表该单元左上角的点
      *
      * @param cellX X coordinate of the cell
      * @param cellY Y coordinate of the cell
@@ -733,6 +734,8 @@ public class CellLayout extends ViewGroup implements BubbleTextShadowHandler {
 
         result[0] = hStartPadding + cellX * mCellWidth;
         result[1] = vStartPadding + cellY * mCellHeight;
+
+        mShortcutsAndWidgets.adjustX(cellX, result);
     }
 
     /**
@@ -761,6 +764,8 @@ public class CellLayout extends ViewGroup implements BubbleTextShadowHandler {
         final int vStartPadding = getPaddingTop();
         result[0] = hStartPadding + cellX * mCellWidth + (spanX * mCellWidth) / 2;
         result[1] = vStartPadding + cellY * mCellHeight + (spanY * mCellHeight) / 2;
+
+        mShortcutsAndWidgets.adjustX(cellX, result);
     }
 
      /**
@@ -992,6 +997,7 @@ public class CellLayout extends ViewGroup implements BubbleTextShadowHandler {
         return false;
     }
 
+    // 显示图标的轮廓框
     void visualizeDropLocation(View v, DragPreviewProvider outlineProvider, int cellX, int cellY,
             int spanX, int spanY, boolean resize, DropTarget.DragObject dragObject) {
         final int oldDragCellX = mDragCell[0];
@@ -1055,6 +1061,9 @@ public class CellLayout extends ViewGroup implements BubbleTextShadowHandler {
                         top += ((mCellHeight * spanY) - dragOutline.getHeight()) / 2;
                     }
                 }
+
+
+
                 r.set(left, top, left + dragOutline.getWidth(), top + dragOutline.getHeight());
             }
 

@@ -123,7 +123,7 @@ public class ShortcutAndWidgetContainer extends ViewGroup {
                 int cellPaddingY = (int) Math.max(0, ((lp.height - cHeight) / 2f));
                 int cellPaddingX = (int) (profile.edgeMarginPx / 2f);
                 child.setPadding(cellPaddingX, cellPaddingY, cellPaddingX, 0);
-
+                adjustX(lp);
             }
         } else {
             lp.x = 0;
@@ -135,6 +135,39 @@ public class ShortcutAndWidgetContainer extends ViewGroup {
         int childheightMeasureSpec = MeasureSpec.makeMeasureSpec(lp.height, MeasureSpec.EXACTLY);
         child.measure(childWidthMeasureSpec, childheightMeasureSpec);
     }
+
+    // 如果在Hotseat中调整X的坐标
+    private void adjustX(CellLayout.LayoutParams lp){
+        if (mContainerType == CellLayout.HOTSEAT) {
+            if (getChildCount() < 5) {
+                // 把mCellWidth平分成几份
+                int splitNumber = 4;
+                // 把一个mCellWidth的宽度拿做间隔
+                int space = mCellWidth / splitNumber;
+                //mCellWidth分完之后多余的space
+                int overSpace = (splitNumber - (getChildCount() - 1))*space;
+                int offsetX = ((5 - getChildCount() - 1) * mCellWidth + overSpace) / 2;
+                lp.x += (offsetX + lp.cellX * space);
+            }
+        }
+    }
+
+    // 如果在Hotseat中调整X的坐标
+    public void adjustX(int cellX, int[] result) {
+        if (mContainerType == CellLayout.HOTSEAT) {
+            if (getChildCount() < 5) {
+                // 把mCellWidth平分成几份
+                int splitNumber = 4;
+                // 把一个mCellWidth的宽度拿做间隔
+                int space = mCellWidth / splitNumber;
+                //mCellWidth分完之后多余的space
+                int overSpace = (splitNumber - (getChildCount() - 1)) * space;
+                int offsetX = ((5 - getChildCount() - 1) * mCellWidth + overSpace) / 2;
+                result[0] += (offsetX + cellX * space);
+            }
+        }
+    }
+
 
     public boolean invertLayoutHorizontally() {
         return mInvertIfRtl && Utilities.isRtl(getResources());

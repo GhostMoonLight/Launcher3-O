@@ -2696,6 +2696,7 @@ public class Workspace extends PagedView
                     if (hasMovedLayouts) {
                         // Reparent the view
                         CellLayout parentCell = getParentCellLayoutForView(cell);
+                        // 从之前的Cellayout中删除该cell
                         if (parentCell != null) {
                             parentCell.removeView(cell);
                         } else if (ProviderConfig.IS_DOGFOOD_BUILD) {
@@ -2768,6 +2769,7 @@ public class Workspace extends PagedView
                     mLauncher.getDragController().animateDragViewToOriginalPosition(
                             mDelayedResizeRunnable, cell,
                             mStateTransitionAnimation.mSpringLoadedTransitionTime);
+                    // 退出编辑模式
                     mLauncher.exitSpringLoadedDragMode();
                     mLauncher.getDropTargetBar().onDragEnd();
                     parent.onDropChild(cell);
