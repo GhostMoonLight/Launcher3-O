@@ -162,10 +162,12 @@ public class Workspace extends PagedView
 
     /**
      * The CellLayout that is currently being dragged over
+     * 当前正在拖动的View所在CellLayout
      */
     @Thunk CellLayout mDragTargetLayout = null;
     /**
      * The CellLayout that we will show as highlighted
+     * 我们将突出显示的CellLayout
      */
     private CellLayout mDragOverlappingLayout = null;
 
@@ -2247,7 +2249,7 @@ public class Workspace extends PagedView
         }
 
         mDragInfo = cellInfo;
-        child.setVisibility(INVISIBLE);
+        child.setVisibility(INVISIBLE);  // 让长按的view不可见
 
         if (options.isAccessibleDrag) {
             mDragController.addDragListener(new AccessibleDragListenerAdapter(
@@ -2589,7 +2591,6 @@ public class Workspace extends PagedView
     public void onDrop(final DragObject d) {
         mDragViewVisualCenter = d.getVisualCenter(mDragViewVisualCenter);
         CellLayout dropTargetLayout = mDropToLayout;
-
         // We want the point to be mapped to the dragTarget.
         if (dropTargetLayout != null) {
             if (mLauncher.isHotseatLayout(dropTargetLayout)) {
@@ -2696,7 +2697,7 @@ public class Workspace extends PagedView
                     if (hasMovedLayouts) {
                         // Reparent the view
                         CellLayout parentCell = getParentCellLayoutForView(cell);
-                        // 从之前的Cellayout中删除该cell
+                        // 从之前的CellLayout中删除该cell
                         if (parentCell != null) {
                             parentCell.removeView(cell);
                         } else if (ProviderConfig.IS_DOGFOOD_BUILD) {
@@ -2785,6 +2786,7 @@ public class Workspace extends PagedView
                             onCompleteRunnable, animationType, cell, false);
                 } else {
                     int duration = snapScreen < 0 ? -1 : ADJACENT_SCREEN_DROP_DURATION;
+                    // dragView 动画放置到虚拟图标显示的位置上
                     mLauncher.getDragLayer().animateViewIntoPosition(d.dragView, cell, duration,
                             onCompleteRunnable, this);
                 }
@@ -2990,6 +2992,9 @@ public class Workspace extends PagedView
        xy[1] = xy[1] - v.getTop();
    }
 
+    /**
+     * 拖拽View的中心是否在Hotseat中
+     */
    boolean isPointInSelfOverHotseat(int x, int y) {
        mTempXY[0] = x;
        mTempXY[1] = y;
@@ -3054,6 +3059,9 @@ public class Workspace extends PagedView
             if (mLauncher.isHotseatLayout(mDragTargetLayout)) {
                 mSpringLoadedDragController.cancel();
             } else {
+                // setDropLayoutForDragObject如果返回true，表示layout与当前mDragTargetLayout不一样，
+                // 则会调用mSpringLoadedDragController.setAlarm(mDragTargetLayout);设置跳转到上一页的定时器，
+                // 如果一小段时间内DragView没有大幅度滑动，就会进行跳转
                 mSpringLoadedDragController.setAlarm(mDragTargetLayout);
             }
         }
@@ -3130,6 +3138,8 @@ public class Workspace extends PagedView
     /**
      * Updates {@link #mDragTargetLayout} and {@link #mDragOverlappingLayout}
      * based on the DragObject's position.
+     * 更新{@link #mDragTargetLayout}和{@link #mDragOverlappingLayout}
+     * 基于DragObject的位置。
      *
      * The layout will be:
      * - The Hotseat if the drag object is over it
@@ -3140,11 +3150,14 @@ public class Workspace extends PagedView
      *
      * 布局是否与当前不同
      * @return whether the layout is different from the current {@link #mDragTargetLayout}.
+     *
+     * 更新mDragTargetLayout，返回值表示mDragTargetLayout是否与当前拖拽所处的Layout不同  true表示相同
      */
     private boolean setDropLayoutForDragObject(DragObject d, float centerX, float centerY) {
         CellLayout layout = null;
         // Test to see if we are over the hotseat first
         if (mLauncher.getHotseat() != null && !isDragWidget(d)) {
+            // 判断拖拽View的中心是否在Hotseat中
             if (isPointInSelfOverHotseat(d.x, d.y)) {
                 layout = mLauncher.getHotseat().getLayout();
             }
@@ -3153,8 +3166,12 @@ public class Workspace extends PagedView
         int nextPage = getNextPage();
         if (layout == null && !isPageInTransition()) {
             // Check if the item is dragged over left page
+            // 向左再加一段偏移距离(也就是减去一段偏移距离), 用来判断是否跳转到上一页(通过判断偏移后的中心点是否在上一个layout中,来判断是否跳转)
             mTempTouchCoordinates[0] = Math.min(centerX-d.getQuarterWide(), d.x);
             mTempTouchCoordinates[1] = d.y;
+            // 这里面用来判断是否跳转到上一页, 如果layout有值，且layout与当前mDragTargetLayout不一样，
+            // 则会调用mSpringLoadedDragController.setAlarm(mDragTargetLayout);设置跳转到上一页的定时器，
+            // 如果一小段时间内DragView没有大幅度滑动，就会进行跳转
             layout = verifyInsidePage(nextPage + (mIsRtl ? 1 : -1), mTempTouchCoordinates);
         }
 

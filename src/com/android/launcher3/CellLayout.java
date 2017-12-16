@@ -946,6 +946,7 @@ public class CellLayout extends ViewGroup implements BubbleTextShadowHandler {
             }
             clc.setupLp(child);
             lp.isLockedToGrid = false;
+
             final int newX = lp.x;
             final int newY = lp.y;
 
@@ -1114,7 +1115,7 @@ public class CellLayout extends ViewGroup implements BubbleTextShadowHandler {
                 result, resultSpan);
     }
 
-    private final Stack<Rect> mTempRectStack = new Stack<Rect>();
+    private final Stack<Rect> mTempRectStack = new Stack<>();
     private void lazyInitTempRectStack() {
         if (mTempRectStack.isEmpty()) {
             for (int i = 0; i < mCountX * mCountY; i++) {
@@ -1160,7 +1161,7 @@ public class CellLayout extends ViewGroup implements BubbleTextShadowHandler {
         final int[] bestXY = result != null ? result : new int[2];
         double bestDistance = Double.MAX_VALUE;
         final Rect bestRect = new Rect(-1, -1, -1, -1);
-        final Stack<Rect> validRegions = new Stack<Rect>();
+        final Stack<Rect> validRegions = new Stack<>();
 
         final int countX = mCountX;
         final int countY = mCountY;
@@ -2400,7 +2401,6 @@ public class CellLayout extends ViewGroup implements BubbleTextShadowHandler {
                 }
                 setItemPlacementDirty(true);
                 animateItemsToSolution(finalSolution, dragView, mode == MODE_ON_DROP);
-
                 if (!DESTRUCTIVE_REORDER &&
                         (mode == MODE_ON_DROP || mode == MODE_ON_DROP_EXTERNAL)) {
                     commitTempPlacement();
@@ -2589,12 +2589,14 @@ public class CellLayout extends ViewGroup implements BubbleTextShadowHandler {
         resultRect.set(x, y, x + width, y + height);
     }
 
+    // 将标记单元格为占用的视图
     public void markCellsAsOccupiedForView(View view) {
         if (view == null || view.getParent() != mShortcutsAndWidgets) return;
         LayoutParams lp = (LayoutParams) view.getLayoutParams();
         mOccupied.markCells(lp.cellX, lp.cellY, lp.cellHSpan, lp.cellVSpan, true);
     }
 
+    // 将单元格标记为未占用的视图
     public void markCellsAsUnoccupiedForView(View view) {
         if (view == null || view.getParent() != mShortcutsAndWidgets) return;
         LayoutParams lp = (LayoutParams) view.getLayoutParams();
@@ -2617,6 +2619,10 @@ public class CellLayout extends ViewGroup implements BubbleTextShadowHandler {
         }
     }
 
+    /**
+     * 这个方法主要是用于父容器添加子View时调用。
+     * 用于生成和此容器类型相匹配的布局参数类。
+     */
     @Override
     public ViewGroup.LayoutParams generateLayoutParams(AttributeSet attrs) {
         return new CellLayout.LayoutParams(getContext(), attrs);
@@ -2627,6 +2633,9 @@ public class CellLayout extends ViewGroup implements BubbleTextShadowHandler {
         return p instanceof CellLayout.LayoutParams;
     }
 
+    /**
+     * 传入viewGroupLayoutParams 然后生成和容器类型匹配的布局LayoutParams
+     */
     @Override
     protected ViewGroup.LayoutParams generateLayoutParams(ViewGroup.LayoutParams p) {
         return new CellLayout.LayoutParams(p);

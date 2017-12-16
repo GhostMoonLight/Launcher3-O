@@ -666,6 +666,7 @@ public class DragLayer extends InsettableFrameLayout {
         final int fromX = r.left;
         final int fromY = r.top;
         child.setVisibility(INVISIBLE);
+        // 动画执行结束的时候child设置为可见
         Runnable onCompleteRunnable = new Runnable() {
             public void run() {
                 child.setVisibility(VISIBLE);
@@ -691,9 +692,12 @@ public class DragLayer extends InsettableFrameLayout {
 
     /**
      * This method animates a view at the end of a drag and drop animation.
+     * 此方法在拖放动画结束时为视图添加动画。
      *
      * @param view The view to be animated. This view is drawn directly into DragLayer, and so
      *        doesn't need to be a child of DragLayer.
+     *         将被执行动画的view。 此视图直接绘制到“拖动层”中，因此不需要是“拖动层”的子项。
+     *
      * @param from The initial location of the view. Only the left and top parameters are used.
      * @param to The final location of the view. Only the left and top parameters are used. This
      *        location doesn't account for scaling, and so should be centered about the desired
@@ -710,6 +714,8 @@ public class DragLayer extends InsettableFrameLayout {
      * @param anchorView If not null, this represents the view which the animated view stays
      *        anchored to in case scrolling is currently taking place. Note: currently this is
      *        only used for the X dimension for the case of the workspace.
+     *        如果不为空，则代表动画视图在当前正在进行滚动的情况下保持锚定的视图。
+     *        注意：目前这仅用于工作区情况下的X维度。
      */
     public void animateView(final DragView view, final Rect from, final Rect to,
             final float finalAlpha, final float initScaleX, final float initScaleY,

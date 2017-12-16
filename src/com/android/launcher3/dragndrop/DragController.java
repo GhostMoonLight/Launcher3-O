@@ -95,7 +95,7 @@ public class DragController implements DragDriver.EventListener, TouchController
     private int mTmpPoint[] = new int[2];
     private Rect mDragLayerRect = new Rect();
 
-    private boolean mIsInPreDrag;
+    private boolean mIsInPreDrag;   // true表示只是长按显示了图标的shortcuts，此时还没有开始拖拽
 
     /**
      * Interface to receive notifications when a drag starts or stops
@@ -167,6 +167,8 @@ public class DragController implements DragDriver.EventListener, TouchController
         /**
          * 从Launcher中的onLongClick事件执行到这里时，mOptions的值是直接new的,
          * 所以preDragCondition的值为空，mIsInPreDrag这里肯定为false
+         *
+         *  preDragCondition的实现类是DragOptions.PreDragCondition
          */
         mIsInPreDrag = mOptions.preDragCondition != null
                 && !mOptions.preDragCondition.shouldStartDrag(0);
@@ -368,6 +370,7 @@ public class DragController implements DragDriver.EventListener, TouchController
         mLastTouchUpTime = -1;
     }
 
+    // 处理ACTION_MOVE
     @Override
     public void onDriverDragMove(float x, float y) {
         final int[] dragLayerPos = getClampedDragLayerPos(x, y);
@@ -383,6 +386,7 @@ public class DragController implements DragDriver.EventListener, TouchController
         }
     }
 
+    // 处理ACTION_UP
     @Override
     public void onDriverDragEnd(float x, float y) {
         DropTarget dropTarget;
@@ -398,6 +402,7 @@ public class DragController implements DragDriver.EventListener, TouchController
         endDrag();
     }
 
+    // 处理ACTION_CANCEL
     @Override
     public void onDriverDragCancel() {
         cancelDrag();

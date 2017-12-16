@@ -77,7 +77,6 @@ public class ShortcutAndWidgetContainer extends ViewGroup {
         int widthSpecSize = MeasureSpec.getSize(widthMeasureSpec);
         int heightSpecSize =  MeasureSpec.getSize(heightMeasureSpec);
         setMeasuredDimension(widthSpecSize, heightSpecSize);
-
         for (int i = 0; i < count; i++) {
             View child = getChildAt(i);
             if (child.getVisibility() != GONE) {
@@ -94,6 +93,7 @@ public class ShortcutAndWidgetContainer extends ViewGroup {
                     profile.appWidgetScale.x, profile.appWidgetScale.y);
         } else {
             lp.setup(mCellWidth, mCellHeight, invertLayoutHorizontally(), mCountX);
+            adjustX(lp);
         }
     }
 
