@@ -54,6 +54,7 @@ import com.android.launcher3.anim.PropertyListBuilder;
 import com.android.launcher3.config.ProviderConfig;
 import com.android.launcher3.folder.FolderIcon;
 import com.android.launcher3.graphics.DragPreviewProvider;
+import com.android.launcher3.logging.LogUtils;
 import com.android.launcher3.util.CellAndSpan;
 import com.android.launcher3.util.GridOccupancy;
 import com.android.launcher3.util.ParcelableSparseArray;
@@ -952,6 +953,7 @@ public class CellLayout extends ViewGroup implements BubbleTextShadowHandler {
 
             lp.x = oldX;
             lp.y = oldY;
+            LogUtils.eTag("CellX:"+lp.cellX+" newX:"+newX+" oldX:"+oldX);
 
             // Exit early if we're not actually moving the view
             // 如果我们没有实际移动视图，尽早退出
@@ -981,6 +983,7 @@ public class CellLayout extends ViewGroup implements BubbleTextShadowHandler {
                     // place just yet.
                     if (!cancelled) {
                         lp.isLockedToGrid = true;
+                        LogUtils.eTag("CELLX:"+lp.cellX+" isLockedToGrid:"+lp.isLockedToGrid);
                         child.requestLayout();
                     }
                     if (mReorderAnimators.containsKey(lp)) {
@@ -2882,4 +2885,79 @@ public class CellLayout extends ViewGroup implements BubbleTextShadowHandler {
     public boolean isRegionVacant(int x, int y, int spanX, int spanY) {
         return mOccupied.isRegionVacant(x, y, spanX, spanY);
     }
+
+
+    public void removeViewInHotseat(CellInfo dragInfo){
+        if (mContainerType == CellLayout.HOTSEAT && dragInfo.cell!=null){
+            int childCount = mShortcutsAndWidgets.getChildCount();
+            int cellX = dragInfo.cellX;
+            int index = mShortcutsAndWidgets.indexOfChild(dragInfo.cell);
+            if (index > -1) {
+                // 从Hotseat中移除该View
+                removeViewInLayout(dragInfo.cell);
+
+                for (int i = 0; i < childCount-1; i++) {
+                    View view = mShortcutsAndWidgets.getChildAt(i);
+                    ItemInfo info = (ItemInfo) view.getTag();
+                    CellLayout.LayoutParams lp = (LayoutParams) view.getLayoutParams();
+                    if (lp.cellX > cellX) {
+                        lp.cellX = lp.cellX - 1;
+                        info.screenId = info.screenId - 1;
+                        view.setLayoutParams(lp);
+                        mLauncher.getModelWriter().modifyItemInDatabase(info, info.container, info.screenId,
+                                lp.cellX, lp.cellY, info.spanX, info.spanY);
+                    }
+                }
+                revertTempStateInHotseat();
+            }
+        }
+    }
+
+    public void addVisualizeViewInHotseat(int[] targetCell){
+        if (mContainerType == CellLayout.HOTSEAT){
+            int childCount = mShortcutsAndWidgets.getChildCount();
+            int index = targetCell[0];
+            if (index > -1) {
+                for (int i = 0; i < childCount; i++) {
+                    View view = mShortcutsAndWidgets.getChildAt(i);
+                    ItemInfo info = (ItemInfo) view.getTag();
+                    CellLayout.LayoutParams lp = (LayoutParams) view.getLayoutParams();
+                    if (i < index){
+                        lp.cellX = i;
+                        info.screenId = i;
+                    } else {
+                        lp.cellX = lp.cellX + 1;
+                        info.screenId = info.screenId + 1;
+                    }
+                    view.setLayoutParams(lp);
+                    mLauncher.getModelWriter().modifyItemInDatabase(info, info.container, info.screenId,
+                            lp.cellX, lp.cellY, info.spanX, info.spanY);
+                }
+                revertTempStateInHotseat();
+            }
+        }
+    }
+
+    private void revertTempStateInHotseat() {
+        completeAndClearReorderPreviewAnimations();
+        if (!DESTRUCTIVE_REORDER) {
+            final int count = mShortcutsAndWidgets.getChildCount();
+            for (int i = 0; i < count; i++) {
+                View child = mShortcutsAndWidgets.getChildAt(i);
+                LayoutParams lp = (LayoutParams) child.getLayoutParams();
+                lp.tmpCellX = lp.cellX;
+                lp.tmpCellY = lp.cellY;
+                animateChildToPosition(child, lp.cellX, lp.cellY, REORDER_ANIMATION_DURATION,
+                        0, false, false);
+            }
+        }
+    }
+
+    public boolean canAddHotseat(){
+        if (mShortcutsAndWidgets.getChildCount() < mCountX)
+            return true;
+
+        return false;
+    }
+
 }

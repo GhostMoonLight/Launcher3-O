@@ -2701,7 +2701,7 @@ public class Workspace extends PagedView
                         if (parentCell != null) {
                             parentCell.removeView(cell);
                         } else if (ProviderConfig.IS_DOGFOOD_BUILD) {
-                            throw new NullPointerException("mDragInfo.cell has null parent");
+//                            throw new NullPointerException("mDragInfo.cell has null parent");
                         }
                         addInScreen(cell, container, screenId, mTargetCell[0], mTargetCell[1],
                                 info.spanX, info.spanY);
@@ -2912,10 +2912,28 @@ public class Workspace extends PagedView
     }
 
     void setCurrentDragOverlappingLayout(CellLayout layout) {
+        boolean isFirst = false;
         if (mDragOverlappingLayout != null) {
             mDragOverlappingLayout.setIsDragOverlapping(false);
+
+            // 如果上次mDragOverlappingLayout为Hotseat中的CellLayout，说明该View从Hotseat中拖拽出去了
+            if (layout!=null && mLauncher.isHotseatLayout(mDragOverlappingLayout)){
+                // 上次mDragOverlappingLayout是Hotseat中的CellLayout
+                mDragOverlappingLayout.removeViewInHotseat(mDragInfo);
+            }
+        } else {
+            isFirst = true;
         }
+
+        // 如果当前layout为Hotseat中的CellLayout，说明该View拖拽到Hoteat中了
+        if (!isFirst && mLauncher.isHotseatLayout(layout) && layout.canAddHotseat()){
+            mDragOverlappingLayout.removeView(mDragInfo.cell);
+            layout.getShortcutsAndWidgets().isAddVisualize = true;
+            layout.getShortcutsAndWidgets().addView(mDragInfo.cell);
+        }
+
         mDragOverlappingLayout = layout;
+
         if (mDragOverlappingLayout != null) {
             mDragOverlappingLayout.setIsDragOverlapping(true);
         }
@@ -3102,6 +3120,18 @@ public class Workspace extends PagedView
                     mDragViewVisualCenter[0], (int) mDragViewVisualCenter[1], item.spanX,
                     item.spanY, child, mTargetCell);
 
+
+            // Hotseat中的情况单独处理 此处是为了处理往Hotseat中拖拽的View的时候有动画
+            // 配合setCurrentDragOverlappingLayout中Hotseat中的view的拖拽，给Hotseat中View的添加和移除添加动画
+            if (mDragOverlappingLayout.getShortcutsAndWidgets().isAddVisualize
+                    && mLauncher.isHotseatLayout(mDragTargetLayout)){
+                mDragTargetLayout.visualizeDropLocation(child, mOutlineProvider,
+                        mTargetCell[0], mTargetCell[1], item.spanX, item.spanY, false, d);
+                mDragTargetLayout.addVisualizeViewInHotseat(mTargetCell);
+                mDragOverlappingLayout.getShortcutsAndWidgets().isAddVisualize = false;
+                return;
+            }
+
             if (!nearestDropOccupied) {
                 // 如果没有被占用，就在那里显示图标的轮廓框
                 mDragTargetLayout.visualizeDropLocation(child, mOutlineProvider,
@@ -3213,7 +3243,8 @@ public class Workspace extends PagedView
 
     private void manageFolderFeedback(CellLayout targetLayout,
             int[] targetCell, float distance, DragObject dragObject) {
-        if (distance > mMaxDistanceForFolderCreation) {
+        // Hotseat中不创建文件夹
+        if (distance > mMaxDistanceForFolderCreation || mLauncher.isHotseatLayout(targetLayout)) {
             return;
         }
 
