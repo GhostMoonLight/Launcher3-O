@@ -66,6 +66,10 @@ public final class FeatureFlags {
     public static final boolean SHOW_TEXT_DRAG = false;
     // 是否有左屏
     public static final boolean HAS_CUSTOM_CONTENT = false;
+    // Hotseat移除添加view是否有动画
+    public static final boolean HAS_HOTSEAT_ANIMATION = true;
+    // Hotseat中是否创建文件夹
+    public static final boolean IS_HOTSEAT_CREATE_FOLDER = false;
 
 
 

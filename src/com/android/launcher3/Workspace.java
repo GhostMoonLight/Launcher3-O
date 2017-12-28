@@ -74,6 +74,7 @@ import com.android.launcher3.folder.Folder;
 import com.android.launcher3.folder.FolderIcon;
 import com.android.launcher3.graphics.DragPreviewProvider;
 import com.android.launcher3.graphics.PreloadIconDrawable;
+import com.android.launcher3.logging.LogUtils;
 import com.android.launcher3.popup.PopupContainerWithArrow;
 import com.android.launcher3.shortcuts.ShortcutDragPreviewProvider;
 import com.android.launcher3.userevent.nano.LauncherLogProto.ContainerType;
@@ -2525,7 +2526,10 @@ public class Workspace extends PagedView
             ShortcutInfo destInfo = (ShortcutInfo) v.getTag();
             // if the drag started here, we need to remove it from the workspace
             if (!external) {
-                getParentCellLayoutForView(mDragInfo.cell).removeView(mDragInfo.cell);
+                CellLayout parent = getParentCellLayoutForView(mDragInfo.cell);
+                if (parent != null) {
+                    parent.removeView(mDragInfo.cell);
+                }
             }
 
             Rect folderLocation = new Rect();
@@ -2701,7 +2705,10 @@ public class Workspace extends PagedView
                         if (parentCell != null) {
                             parentCell.removeView(cell);
                         } else if (ProviderConfig.IS_DOGFOOD_BUILD) {
-//                            throw new NullPointerException("mDragInfo.cell has null parent");
+                            // Hotseat中有移除添加动画的时候不需要这个
+                            if (!FeatureFlags.HAS_HOTSEAT_ANIMATION) {
+                                throw new NullPointerException("mDragInfo.cell has null parent");
+                            }
                         }
                         addInScreen(cell, container, screenId, mTargetCell[0], mTargetCell[1],
                                 info.spanX, info.spanY);
@@ -2747,6 +2754,10 @@ public class Workspace extends PagedView
                     CellLayout.LayoutParams lp = (CellLayout.LayoutParams) cell.getLayoutParams();
                     mTargetCell[0] = lp.cellX;
                     mTargetCell[1] = lp.cellY;
+                    if (FeatureFlags.HAS_HOTSEAT_ANIMATION && mDragInfo.originalLayout != null) {
+                        mDragInfo.originalLayout.addVisualizeViewInHotseat(mTargetCell, mDragInfo);
+                        mDragInfo.originalLayout = null;
+                    }
                     CellLayout layout = (CellLayout) cell.getParent().getParent();
                     layout.markCellsAsOccupiedForView(cell);
                 }
@@ -2926,10 +2937,11 @@ public class Workspace extends PagedView
         }
 
         // 如果当前layout为Hotseat中的CellLayout，说明该View拖拽到Hoteat中了
-        if (!isFirst && mLauncher.isHotseatLayout(layout) && layout.canAddHotseat()){
+        if (FeatureFlags.HAS_HOTSEAT_ANIMATION && mDragInfo!=null && !isFirst
+                && mLauncher.isHotseatLayout(layout)
+                && layout.canAddHotseat()){
             mDragOverlappingLayout.removeView(mDragInfo.cell);
             layout.getShortcutsAndWidgets().isAddVisualize = true;
-            layout.getShortcutsAndWidgets().addView(mDragInfo.cell);
         }
 
         mDragOverlappingLayout = layout;
@@ -3113,6 +3125,7 @@ public class Workspace extends PagedView
             float targetCellDistance = mDragTargetLayout.getDistanceFromCell(
                     mDragViewVisualCenter[0], mDragViewVisualCenter[1], mTargetCell);
 
+            //文件夹反馈 判断是否创建或者添加到文件夹
             manageFolderFeedback(mDragTargetLayout, mTargetCell, targetCellDistance, d);
 
             // 判断最近的位置是否被占用
@@ -3125,9 +3138,9 @@ public class Workspace extends PagedView
             // 配合setCurrentDragOverlappingLayout中Hotseat中的view的拖拽，给Hotseat中View的添加和移除添加动画
             if (mDragOverlappingLayout.getShortcutsAndWidgets().isAddVisualize
                     && mLauncher.isHotseatLayout(mDragTargetLayout)){
+                mDragTargetLayout.addVisualizeViewInHotseat(mTargetCell, mDragInfo);
                 mDragTargetLayout.visualizeDropLocation(child, mOutlineProvider,
                         mTargetCell[0], mTargetCell[1], item.spanX, item.spanY, false, d);
-                mDragTargetLayout.addVisualizeViewInHotseat(mTargetCell);
                 mDragOverlappingLayout.getShortcutsAndWidgets().isAddVisualize = false;
                 return;
             }
@@ -3142,7 +3155,7 @@ public class Workspace extends PagedView
 
                 int[] resultSpan = new int[2];
 
-                // 如果没有位置，并且是排序状态，则进行排序处理
+                // 如果没有位置，则进行排序处理
                 mDragTargetLayout.performReorder((int) mDragViewVisualCenter[0],
                         (int) mDragViewVisualCenter[1], minSpanX, minSpanY, item.spanX, item.spanY,
                         child, mTargetCell, resultSpan, CellLayout.MODE_SHOW_REORDER_HINT);
@@ -3241,10 +3254,12 @@ public class Workspace extends PagedView
         return null;
     }
 
+    //文件夹反馈
     private void manageFolderFeedback(CellLayout targetLayout,
             int[] targetCell, float distance, DragObject dragObject) {
         // Hotseat中不创建文件夹
-        if (distance > mMaxDistanceForFolderCreation || mLauncher.isHotseatLayout(targetLayout)) {
+        if (distance > mMaxDistanceForFolderCreation
+                || (mLauncher.isHotseatLayout(targetLayout) && !FeatureFlags.IS_HOTSEAT_CREATE_FOLDER)) {
             return;
         }
 
@@ -3361,6 +3376,7 @@ public class Workspace extends PagedView
             }
 
             boolean resize = resultSpan[0] != spanX || resultSpan[1] != spanY;
+            // 显示图标的轮廓框
             mDragTargetLayout.visualizeDropLocation(child, mOutlineProvider,
                 mTargetCell[0], mTargetCell[1], resultSpan[0], resultSpan[1], resize, dragObject);
         }

@@ -23,6 +23,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.launcher3.CellLayout.ContainerType;
+import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.pixel.QsbBlockerView;
 
 public class ShortcutAndWidgetContainer extends ViewGroup {
@@ -139,7 +140,7 @@ public class ShortcutAndWidgetContainer extends ViewGroup {
 
     // 如果在Hotseat中调整X的坐标
     private void adjustX(CellLayout.LayoutParams lp){
-        if (mContainerType == CellLayout.HOTSEAT && lp.isLockedToGrid) {
+        if (FeatureFlags.HAS_HOTSEAT_ANIMATION && mContainerType == CellLayout.HOTSEAT && lp.isLockedToGrid) {
             int childCount = getChildCount();
             if (childCount < 5) {
                 // 把mCellWidth平分成几份
@@ -156,7 +157,7 @@ public class ShortcutAndWidgetContainer extends ViewGroup {
 
     // 如果在Hotseat中调整X的坐标
     public void adjustX(int cellX, int[] result) {
-        if (mContainerType == CellLayout.HOTSEAT) {
+        if (FeatureFlags.HAS_HOTSEAT_ANIMATION && mContainerType == CellLayout.HOTSEAT) {
             int childCount = getChildCount();
             if (childCount < 5) {
                 // 把mCellWidth平分成几份
