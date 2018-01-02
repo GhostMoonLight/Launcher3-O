@@ -2930,6 +2930,10 @@ public class CellLayout extends ViewGroup implements BubbleTextShadowHandler {
         }
     }
     private View tempDragView = null;
+    public boolean hasTempView(){
+        return tempDragView!=null;
+    }
+
     public void addVisualizeViewInHotseat(int[] targetCell, CellInfo dragInfo){
         if (FeatureFlags.HAS_HOTSEAT_ANIMATION && mContainerType == CellLayout.HOTSEAT){
             CellLayout.LayoutParams lp;
@@ -2997,5 +3001,17 @@ public class CellLayout extends ViewGroup implements BubbleTextShadowHandler {
             tempDragView = null;
         }
     }
+
+    public void printLP(){
+        LogUtils.eTag("**************************");
+        int childCount = mShortcutsAndWidgets.getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View view = mShortcutsAndWidgets.getChildAt(i);
+            ItemInfo info = (ItemInfo) view.getTag();
+            LayoutParams lp = (LayoutParams) view.getLayoutParams();
+            LogUtils.eTag("index:"+i+" cellX:"+lp.cellX);
+        }
+    }
+
 
 }

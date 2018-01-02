@@ -47,6 +47,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
@@ -443,8 +444,11 @@ public class Workspace extends PagedView
         }
 
         if (mDragInfo != null && mDragInfo.cell != null) {
-            CellLayout layout = (CellLayout) mDragInfo.cell.getParent().getParent();
-            layout.markCellsAsUnoccupiedForView(mDragInfo.cell);
+            ViewParent parent = mDragInfo.cell.getParent();
+            if (parent != null) {
+                CellLayout layout = (CellLayout)parent.getParent();
+                layout.markCellsAsUnoccupiedForView(mDragInfo.cell);
+            }
         }
 
         if (mOutlineProvider != null) {
@@ -2580,7 +2584,10 @@ public class Workspace extends PagedView
 
                 // if the drag started here, we need to remove it from the workspace
                 if (!external) {
-                    getParentCellLayoutForView(mDragInfo.cell).removeView(mDragInfo.cell);
+                    CellLayout parent = getParentCellLayoutForView(mDragInfo.cell);
+                    if (parent != null) {
+                        parent.removeView(mDragInfo.cell);
+                    }
                 }
                 return true;
             }
@@ -3133,7 +3140,6 @@ public class Workspace extends PagedView
                     mDragViewVisualCenter[0], (int) mDragViewVisualCenter[1], item.spanX,
                     item.spanY, child, mTargetCell);
 
-
             // Hotseat中的情况单独处理 此处是为了处理往Hotseat中拖拽的View的时候有动画
             // 配合setCurrentDragOverlappingLayout中Hotseat中的view的拖拽，给Hotseat中View的添加和移除添加动画
             if (mDragOverlappingLayout.getShortcutsAndWidgets().isAddVisualize
@@ -3142,6 +3148,10 @@ public class Workspace extends PagedView
                 mDragTargetLayout.visualizeDropLocation(child, mOutlineProvider,
                         mTargetCell[0], mTargetCell[1], item.spanX, item.spanY, false, d);
                 mDragOverlappingLayout.getShortcutsAndWidgets().isAddVisualize = false;
+                return;
+            }
+
+            if (mDragTargetLayout.hasTempView()){
                 return;
             }
 
@@ -3542,7 +3552,7 @@ public class Workspace extends PagedView
                 }
             }
 
-            if (touchXY != null) {
+            if (touchXY != null && !cellLayout.hasTempView()) {
                 // when dragging and dropping, just find the closest free spot
                 mTargetCell = cellLayout.performReorder((int) mDragViewVisualCenter[0],
                         (int) mDragViewVisualCenter[1], 1, 1, 1, 1,
@@ -3550,16 +3560,16 @@ public class Workspace extends PagedView
             } else {
                 cellLayout.findCellForSpan(mTargetCell, 1, 1);
             }
+
             // Add the item to DB before adding to screen ensures that the container and other
             // values of the info is properly updated.
             mLauncher.getModelWriter().addOrMoveItemInDatabase(info, container, screenId,
                     mTargetCell[0], mTargetCell[1]);
-
+            cellLayout.removeTempView();
             addInScreen(view, container, screenId, mTargetCell[0], mTargetCell[1],
                     info.spanX, info.spanY);
             cellLayout.onDropChild(view);
             cellLayout.getShortcutsAndWidgets().measureChild(view);
-            cellLayout.removeTempView();
 
             if (d.dragView != null) {
                 // We wrap the animation call in the temporary set and reset of the current
