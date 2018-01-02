@@ -74,7 +74,6 @@ import com.android.launcher3.folder.Folder;
 import com.android.launcher3.folder.FolderIcon;
 import com.android.launcher3.graphics.DragPreviewProvider;
 import com.android.launcher3.graphics.PreloadIconDrawable;
-import com.android.launcher3.logging.LogUtils;
 import com.android.launcher3.popup.PopupContainerWithArrow;
 import com.android.launcher3.shortcuts.ShortcutDragPreviewProvider;
 import com.android.launcher3.userevent.nano.LauncherLogProto.ContainerType;
@@ -2937,10 +2936,11 @@ public class Workspace extends PagedView
         }
 
         // 如果当前layout为Hotseat中的CellLayout，说明该View拖拽到Hoteat中了
-        if (FeatureFlags.HAS_HOTSEAT_ANIMATION && mDragInfo!=null && !isFirst
+        if (FeatureFlags.HAS_HOTSEAT_ANIMATION && !isFirst
                 && mLauncher.isHotseatLayout(layout)
                 && layout.canAddHotseat()){
-            mDragOverlappingLayout.removeView(mDragInfo.cell);
+            if (mDragInfo!=null)
+                mDragOverlappingLayout.removeView(mDragInfo.cell);
             layout.getShortcutsAndWidgets().isAddVisualize = true;
         }
 
@@ -3559,6 +3559,7 @@ public class Workspace extends PagedView
                     info.spanX, info.spanY);
             cellLayout.onDropChild(view);
             cellLayout.getShortcutsAndWidgets().measureChild(view);
+            cellLayout.removeTempView();
 
             if (d.dragView != null) {
                 // We wrap the animation call in the temporary set and reset of the current

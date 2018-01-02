@@ -836,7 +836,6 @@ public class CellLayout extends ViewGroup implements BubbleTextShadowHandler {
                         MeasureSpec.EXACTLY),
                 MeasureSpec.makeMeasureSpec(mCellHeight + mTouchFeedbackView.getExtraSize(),
                         MeasureSpec.EXACTLY));
-
         mShortcutsAndWidgets.measure(
                 MeasureSpec.makeMeasureSpec(newWidth, MeasureSpec.EXACTLY),
                 MeasureSpec.makeMeasureSpec(newHeight, MeasureSpec.EXACTLY));
@@ -2889,42 +2888,53 @@ public class CellLayout extends ViewGroup implements BubbleTextShadowHandler {
 
 
     public void removeViewInHotseat(CellInfo dragInfo){
-        if (FeatureFlags.HAS_HOTSEAT_ANIMATION && dragInfo!=null
-                && mContainerType == CellLayout.HOTSEAT && dragInfo.cell!=null){
+        if (FeatureFlags.HAS_HOTSEAT_ANIMATION
+                && mContainerType == CellLayout.HOTSEAT){
             int childCount = mShortcutsAndWidgets.getChildCount();
-            int cellX = dragInfo.cellX;
-            int index = mShortcutsAndWidgets.indexOfChild(dragInfo.cell);
+            View view;
+            if (dragInfo != null){
+                view = dragInfo.cell;
+            } else {
+                view = tempDragView;
+            }
+            int index = mShortcutsAndWidgets.indexOfChild(view);
             if (index > -1) {
                 // 从Hotseat中移除该View
-                CellLayout.LayoutParams lp = (LayoutParams) dragInfo.cell.getLayoutParams();
-                cellX = lp.cellX;
-                removeViewInLayout(dragInfo.cell);
-                dragInfo.originalLayout = this;
+                CellLayout.LayoutParams lp = (LayoutParams) view.getLayoutParams();
+                int cellX = lp.cellX;
 
-                for (int i = 0; i < childCount-1; i++) {
-                    View view = mShortcutsAndWidgets.getChildAt(i);
-                    ItemInfo info = (ItemInfo) view.getTag();
-                    lp = (LayoutParams) view.getLayoutParams();
+                removeViewInLayout(view);
+                tempDragView = null;
+
+                if (dragInfo != null) {
+                    dragInfo.originalLayout = this;
+                }
+
+                for (int i = 0; i < childCount - 1; i++) {
+                    View childView = mShortcutsAndWidgets.getChildAt(i);
+                    ItemInfo info = (ItemInfo) childView.getTag();
+                    lp = (LayoutParams) childView.getLayoutParams();
                     if (lp.cellX > cellX) {
+                        mOccupied.markCells(childCount - 1, 1, 1, 1, false);
                         lp.cellX = lp.cellX - 1;
                         info.screenId = info.screenId - 1;
-                        view.setLayoutParams(lp);
+                        childView.setLayoutParams(lp);
+                        mOccupied.markCells(lp.cellX, lp.cellY, lp.cellHSpan, lp.cellVSpan, true);
                         mLauncher.getModelWriter().modifyItemInDatabase(info, info.container, info.screenId,
                                 lp.cellX, lp.cellY, info.spanX, info.spanY);
                     }
-                    LogUtils.eTag("removeViewInHotseat i:"+i+" cellX:"+lp.cellX);
                 }
+
                 revertTempStateInHotseat();
             }
         }
     }
-
+    private View tempDragView = null;
     public void addVisualizeViewInHotseat(int[] targetCell, CellInfo dragInfo){
         if (FeatureFlags.HAS_HOTSEAT_ANIMATION && mContainerType == CellLayout.HOTSEAT){
             CellLayout.LayoutParams lp;
             int childCount = mShortcutsAndWidgets.getChildCount();
             int cellX = targetCell[0];
-            LogUtils.eTag("targetCell cellX:"+cellX);
             if (cellX > -1) {
                 for (int i = 0; i < childCount; i++) {
                     View view = mShortcutsAndWidgets.getChildAt(i);
@@ -2933,16 +2943,26 @@ public class CellLayout extends ViewGroup implements BubbleTextShadowHandler {
                     if (lp.cellX >= cellX){
                         lp.cellX = lp.cellX + 1;
                         info.screenId = info.screenId + 1;
+                        mOccupied.markCells(lp.cellX, lp.cellY, lp.cellHSpan, lp.cellVSpan, true);
                     }
                     view.setLayoutParams(lp);
                     mLauncher.getModelWriter().modifyItemInDatabase(info, info.container, info.screenId,
                             lp.cellX, lp.cellY, info.spanX, info.spanY);
-                    LogUtils.eTag("addVisualizeViewInHotseat i:"+i+" cellX:"+lp.cellX);
                 }
-                lp = (LayoutParams) dragInfo.cell.getLayoutParams();
-                lp.cellX = targetCell[0];
-                lp.cellY = targetCell[1];
-                mShortcutsAndWidgets.addView(dragInfo.cell, lp);
+                View view;
+                if (dragInfo != null){
+                    lp = (LayoutParams) dragInfo.cell.getLayoutParams();
+                    lp.cellX = targetCell[0];
+                    lp.cellY = targetCell[1];
+                    view = dragInfo.cell;
+                    mOccupied.markCells(lp.cellX, lp.cellY, lp.cellHSpan, lp.cellVSpan, true);
+                } else {
+                    lp = new LayoutParams(targetCell[0], targetCell[1], 1, 1);
+                    view = new BubbleTextView(getContext());
+                    tempDragView = view;
+                    mOccupied.markCells(lp.cellX, lp.cellY, lp.cellHSpan, lp.cellVSpan, false);
+                }
+                mShortcutsAndWidgets.addView(view, lp);
                 revertTempStateInHotseat();
             }
         }
@@ -2969,4 +2989,13 @@ public class CellLayout extends ViewGroup implements BubbleTextShadowHandler {
 
         return false;
     }
+
+    // 移除从其他拖拽源添加到Workspace源Hotseat中的临时View
+    public void removeTempView(){
+        if (FeatureFlags.HAS_HOTSEAT_ANIMATION && mContainerType == CellLayout.HOTSEAT){
+            mShortcutsAndWidgets.removeView(tempDragView);
+            tempDragView = null;
+        }
+    }
+
 }
