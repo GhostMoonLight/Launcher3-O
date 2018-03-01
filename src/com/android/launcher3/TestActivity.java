@@ -2,11 +2,14 @@ package com.android.launcher3;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.launcher3.ImageCache.ImageCache;
 import com.android.launcher3.download.DownloadInfo;
 import com.android.launcher3.download.DownloadManager;
 import com.android.launcher3.download.DownloadTaskInfo;
@@ -32,6 +35,10 @@ public class TestActivity extends Activity implements DownloadManager.DownloadOb
         setContentView(R.layout.layout_test);
         DownloadManager.initDownloadManager(this);
         DownloadManager.getInstance().registerObserver(this);
+
+        ImageView iv = findViewById(R.id.imageView);
+        ImageCache.getInstance(this).display(iv, Environment.getExternalStorageDirectory()+"/hand.png");
+
         btn = findViewById(R.id.btn);
         tv = findViewById(R.id.pro_tv);
 
@@ -195,5 +202,10 @@ public class TestActivity extends Activity implements DownloadManager.DownloadOb
                 DownloadManager.getInstance().cancel(di);
             }
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 }

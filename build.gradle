@@ -73,6 +73,23 @@ android {
         }
     }
 
+//项目还是是Eclipse结构，想保留原有目录结构的同时导入到AS开发，可以自己手动生成build.gradle,配置项目目录结构：
+//    android {
+//        ....
+//        sourceSets {
+//            main {
+//                manifest.srcFile 'AndroidManifest.xml'
+//                java.srcDirs = ['src']
+//                resources.srcDirs = ['src']
+//                aidl.srcDirs = ['src']
+//                renderscript.srcDirs = ['src']
+//                res.srcDirs = ['res']
+//                assets.srcDirs = ['assets']
+//                jniLibs.srcDirs = ['libs']
+//            }
+//        }
+//    }
+
     applicationVariants.all { variant ->
         if (variant.buildType.name == 'release') {
             variant.outputs.all { output ->
@@ -105,6 +122,8 @@ repositories {
 
 final String SUPPORT_LIBS_VERSION = '26.1.0'
 dependencies {
+    compile fileTree(include: '*.jar', dir: 'libs')
+
     compile "com.android.support:support-v4:${SUPPORT_LIBS_VERSION}"
     compile "com.android.support:recyclerview-v7:${SUPPORT_LIBS_VERSION}"
     compile "com.android.support:palette-v7:${SUPPORT_LIBS_VERSION}"

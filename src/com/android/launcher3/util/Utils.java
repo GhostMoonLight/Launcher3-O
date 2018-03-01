@@ -2,8 +2,12 @@ package com.android.launcher3.util;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Environment;
 
+import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Method;
 import java.text.DecimalFormat;
 
@@ -13,6 +17,9 @@ import java.text.DecimalFormat;
 
 public class Utils {
 
+    /**
+     * 获取当前进程名称
+     */
     public static String getCurProcessName(Context context) {
         ActivityManager activityManager = (ActivityManager) context.getSystemService(Context. ACTIVITY_SERVICE);
         for (ActivityManager.RunningAppProcessInfo appProcess : activityManager.getRunningAppProcesses()) {
@@ -64,5 +71,22 @@ public class Utils {
             sdcardAvailable = true;
         }
         return sdcardAvailable;
+    }
+
+    /**
+     * Bitmap转Byte
+     */
+    public static byte[] bitmap2Bytes(Bitmap bm) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bm.compress(Bitmap.CompressFormat.PNG, 100, baos);
+        return baos.toByteArray();
+    }
+
+    public static void startAppDetail(Context context, String pkg) {
+        Intent localIntent = new Intent();
+        localIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        localIntent.setAction("android.settings.APPLICATION_DETAILS_SETTINGS");
+        localIntent.setData(Uri.fromParts("package", pkg, null));
+        context.startActivity(localIntent);
     }
 }

@@ -99,8 +99,7 @@ public class IconCache {
     private IconProvider mIconProvider;
     @Thunk final UserManagerCompat mUserManager;
     private final LauncherAppsCompat mLauncherApps;
-    private final HashMap<ComponentKey, CacheEntry> mCache =
-            new HashMap<ComponentKey, CacheEntry>(INITIAL_ICON_CACHE_CAPACITY);
+    private final HashMap<ComponentKey, CacheEntry> mCache = new HashMap<>(INITIAL_ICON_CACHE_CAPACITY);
     private final int mIconDpi;
     @Thunk final IconDB mIconDb;
 

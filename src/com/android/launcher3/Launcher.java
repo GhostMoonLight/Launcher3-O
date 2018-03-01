@@ -85,9 +85,9 @@ import com.android.launcher3.DropTarget.DragObject;
 import com.android.launcher3.LauncherSettings.Favorites;
 import com.android.launcher3.accessibility.LauncherAccessibilityDelegate;
 import com.android.launcher3.allapps.AllAppsContainerView;
-import com.android.launcher3.allapps.PredictiveAppsProvider;
 import com.android.launcher3.allapps.AllAppsTransitionController;
 import com.android.launcher3.allapps.DefaultAppSearchController;
+import com.android.launcher3.allapps.PredictiveAppsProvider;
 import com.android.launcher3.anim.AnimationLayerSet;
 import com.android.launcher3.compat.AppWidgetManagerCompat;
 import com.android.launcher3.compat.LauncherAppsCompat;
@@ -127,6 +127,7 @@ import com.android.launcher3.util.MultiHashMap;
 import com.android.launcher3.util.PackageManagerHelper;
 import com.android.launcher3.util.PackageUserKey;
 import com.android.launcher3.util.PendingRequestArgs;
+import com.android.launcher3.util.PermissionUtil;
 import com.android.launcher3.util.TestingUtils;
 import com.android.launcher3.util.Thunk;
 import com.android.launcher3.util.ViewOnDrawExecutor;
@@ -444,6 +445,7 @@ public class Launcher extends BaseActivity
         mDefaultKeySsb = new SpannableStringBuilder();
         Selection.setSelection(mDefaultKeySsb, 0);
 
+        // com.google.android.googlequicksearchbox是否可用
         if (PackageManagerHelper.isAppEnabled(getPackageManager(), "com.google.android.googlequicksearchbox")) {
             mLauncherTab = new LauncherTab(this);
         }
@@ -866,8 +868,7 @@ public class Launcher extends BaseActivity
 
     /** @Override for MNC */
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                                           int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         PendingRequestArgs pendingArgs = mPendingRequestArgs;
         if (requestCode == REQUEST_PERMISSION_CALL_PHONE && pendingArgs != null
                 && pendingArgs.getRequestCode() == REQUEST_PERMISSION_CALL_PHONE) {
@@ -1101,6 +1102,8 @@ public class Launcher extends BaseActivity
         }
 
         tryAndUpdatePredictedApps();
+
+        PermissionUtil.checkPermissionAll(this);
     }
 
     @Override
@@ -4368,4 +4371,5 @@ public class Launcher extends BaseActivity
             }
         }
     }
+
 }

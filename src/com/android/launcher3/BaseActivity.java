@@ -19,6 +19,7 @@ package com.android.launcher3;
 import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.support.annotation.NonNull;
 import android.view.View.AccessibilityDelegate;
 
 import com.android.launcher3.logging.UserEventDispatcher;
@@ -53,5 +54,10 @@ public abstract class BaseActivity extends Activity {
             return (BaseActivity) context;
         }
         return ((BaseActivity) ((ContextWrapper) context).getBaseContext());
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 }

@@ -45,6 +45,7 @@ public class DownloadManager {
 	private static DownloadManager instance;
 	private static Context mContext;
 
+	// 初始化DownloadManager
 	public static void initDownloadManager(Context context){
         mContext = context.getApplicationContext();
         getInstance();
@@ -93,7 +94,7 @@ public class DownloadManager {
 		return mDownloadMap;
 	}
 	//添加下载任务
-	public void addDownloadInfo(DownloadTaskInfo info){
+	private void addDownloadInfo(DownloadTaskInfo info){
 		DownloadTaskInfo i = mDownloadMap.get(info.getId());
 		if (i == null) {
 			mDownloadMap.put(info.getId(), info);
@@ -119,7 +120,7 @@ public class DownloadManager {
 	}
 
 	/** 当下载进度发送改变的时候回调 */
-	public void notifyDownloadProgressed(DownloadTaskInfo info) {
+	private void notifyDownloadProgressed(DownloadTaskInfo info) {
         if (info.isInvalid) return; // 如果该任务无效就不回调
 		synchronized (mObservers) {
             for (DownloadObserver observer : mObservers) {

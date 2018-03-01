@@ -65,6 +65,12 @@ public class PackageManagerHelper {
     }
 
     public static boolean isAppEnabled(PackageManager pm, String packageName, int flags) {
+
+        // 不启动com.google.android.googlequicksearchbox该软件的功能
+        if ("com.google.android.googlequicksearchbox".equals(packageName)){
+            return false;
+        }
+
         try {
             ApplicationInfo info = pm.getApplicationInfo(packageName, flags);
             return info != null && info.enabled;
