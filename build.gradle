@@ -13,6 +13,16 @@ buildscript {
     }
 }
 
+//gradle 命令
+//   ./gradlew -v 版本号
+//   ./gradlew clean 清除项目目录下的build文件夹
+//   ./gradlew build 检查依赖并编译打包
+//   ./gradlew build  编译并打debug、release包
+//   ./gradlew assembleDebug  编译并打Debug包
+//   ./gradlew assembleRelease 编译并打Release的包
+//   ./gradlew installRelease 编译打Release的包并安装到手机上
+// 如果出现Permission denied   执行命令chmod +x gradlew 修改权限
+
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.protobuf'
 
